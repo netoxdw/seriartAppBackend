@@ -179,6 +179,37 @@ class PedidoItemAnillo(models.Model):
         pedido.calcular_total()
 
 
+class PedidoItemExtra(models.Model):
+    pedido = models.ForeignKey(
+        Pedido,
+        on_delete=models.CASCADE,
+        related_name="items_extra"
+    )
+    nombre = models.CharField(max_length=100)
+    descripcion = models.TextField(blank=True, null=True)
+    cantidad = models.PositiveIntegerField(default=1)
+    precio_unitario = models.DecimalField(max_digits=10, decimal_places=2)
+    subtotal = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        editable=False
+    )
+
+    class Meta:
+        verbose_name = "Item Extra"
+        verbose_name_plural = "Items Extra"
+
+    def __str__(self):
+        return f"{self.nombre} - {self.cantidad} x {self.precio_unitario}"
+
+    def save(self, *args, **kwargs):
+        # Calcular subtotal
+        self.subtotal = self.cantidad * self.precio_unitario
+        super().save(*args, **kwargs)
+
+        # Recalcular total del pedido
+        self.pedido.calcular_total()
+
 class Pago(models.Model):
     pedido = models.ForeignKey(
         Pedido,

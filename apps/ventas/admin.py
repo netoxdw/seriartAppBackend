@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Pedido, PedidoItemBase, PedidoItemAnillo, Pago
+from .models import Pedido, PedidoItemBase, PedidoItemAnillo, PedidoItemExtra, Pago
 
 
 class PedidoItemBaseInline(admin.TabularInline):
@@ -65,6 +65,19 @@ class PedidoItemAnilloInline(admin.TabularInline):
     get_metal.short_description = "Metal"
 
 
+class PedidoItemExtraInline(admin.TabularInline):
+    model = PedidoItemExtra
+    extra = 1
+    fields = (
+        "nombre",
+        "descripcion",
+        "cantidad",
+        "precio_unitario",
+        "subtotal",
+    )
+    readonly_fields = ("subtotal",)
+
+
 class PagoInline(admin.TabularInline):
     model = Pago
     extra = 1
@@ -93,7 +106,7 @@ class PedidoAdmin(admin.ModelAdmin):
         "mostrar_saldo_pendiente",
         "mostrar_estado_pago",
     )
-    inlines = [PedidoItemBaseInline, PedidoItemAnilloInline, PagoInline]
+    inlines = [PedidoItemBaseInline, PedidoItemAnilloInline, PedidoItemExtraInline, PagoInline]
 
     def mostrar_total_pagado(self, obj):
         return obj.total_pagado
@@ -171,6 +184,25 @@ class PedidoItemAnilloAdmin(admin.ModelAdmin):
     def mostrar_metal(self, obj):
         return obj.anillo.metal
     mostrar_metal.short_description = "Metal"
+
+
+@admin.register(PedidoItemExtra)
+class PedidoItemExtraAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "pedido",
+        "nombre",
+        "cantidad",
+        "precio_unitario",
+        "subtotal",
+    )
+    search_fields = (
+        "nombre",
+        "pedido__alumno__nombre",
+    )
+    list_filter = ("pedido",)
+    readonly_fields = ("subtotal",)
+    ordering = ("-id",)
 
 
 @admin.register(Pago)
