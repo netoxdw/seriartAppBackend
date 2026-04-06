@@ -1,5 +1,8 @@
 from decimal import Decimal
 from django.db import models
+from django.core.exceptions import ValidationError
+from django.utils import timezone
+
 
 from apps.alumnos.models import Alumno
 from apps.catalogo.models import (
@@ -22,7 +25,30 @@ class Pedido(models.Model):
         decimal_places=2,
         default=0
     )
+    
+    ESTADO_CHOICES = [
+        ("pendiente", "Pendiente"),
+        ("listo", "Listo para entregar"),
+        ("entregado", "Entregado"),
+    ]
 
+    estado = models.CharField(
+        max_length=20,
+        choices=ESTADO_CHOICES,
+        default="pendiente"
+    )
+    recibido_por = models.CharField(
+        max_length=150,
+        blank=True,
+        null=True,
+        help_text="Nombre de la persona que recibe el pedido"
+    )
+
+    fecha_entrega = models.DateTimeField(
+        blank=True,
+        null=True
+    )
+    
     class Meta:
         ordering = ["-id"]
         verbose_name = "Pedido"
@@ -36,6 +62,13 @@ class Pedido(models.Model):
         total_anillos = sum(item.subtotal for item in self.items_anillo.all())
         self.total = total_bases + total_anillos
         self.save(update_fields=["total"])
+
+    def clean(self):
+        if self.estado == "entregado":
+            if not self.recibido_por:
+             raise ValidationError("Debes indicar quién recibió el pedido")
+        if not self.fecha_entrega:
+            self.fecha_entrega = timezone.now()
 
     @property
     def total_pagado(self):
@@ -208,6 +241,28 @@ class PedidoItemExtra(models.Model):
 
         # Recalcular total del pedido
         self.pedido.calcular_total()
+
+
+class Observacion(models.Model):
+    pedido = models.ForeignKey(
+        Pedido,
+        on_delete=models.CASCADE,
+        related_name="observaciones"
+    )
+    texto = models.TextField(
+        max_length=1000,
+        help_text="Detalle u observación del pedido"
+    )
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-fecha"]
+        verbose_name = "Observación"
+        verbose_name_plural = "Observaciones"
+
+    def __str__(self):
+        return f"Pedido #{self.pedido.id} - {self.fecha.strftime('%Y-%m-%d %H:%M')}"
+
 
 class Pago(models.Model):
     pedido = models.ForeignKey(

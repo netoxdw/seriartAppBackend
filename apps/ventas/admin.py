@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Pedido, PedidoItemBase, PedidoItemAnillo, PedidoItemExtra, Pago
+from .models import Pedido, PedidoItemBase, PedidoItemAnillo, PedidoItemExtra, Observacion, Pago
 
 
 class PedidoItemBaseInline(admin.TabularInline):
@@ -9,6 +9,8 @@ class PedidoItemBaseInline(admin.TabularInline):
         "get_tamano",
         "get_seccion",
         "modelo",
+        "placa",
+        "color_placa",
         "cantidad",
         "precio_unitario",
         "subtotal",
@@ -78,6 +80,13 @@ class PedidoItemExtraInline(admin.TabularInline):
     readonly_fields = ("subtotal",)
 
 
+class ObservacionInline(admin.TabularInline):
+    model = Observacion
+    extra = 1
+    fields = ("texto", "fecha")
+    readonly_fields = ("fecha",)
+
+
 class PagoInline(admin.TabularInline):
     model = Pago
     extra = 1
@@ -106,7 +115,7 @@ class PedidoAdmin(admin.ModelAdmin):
         "mostrar_saldo_pendiente",
         "mostrar_estado_pago",
     )
-    inlines = [PedidoItemBaseInline, PedidoItemAnilloInline, PedidoItemExtraInline, PagoInline]
+    inlines = [PedidoItemBaseInline, PedidoItemAnilloInline, PedidoItemExtraInline, ObservacionInline, PagoInline]
 
     def mostrar_total_pagado(self, obj):
         return obj.total_pagado
