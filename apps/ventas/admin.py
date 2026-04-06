@@ -100,6 +100,8 @@ class PedidoAdmin(admin.ModelAdmin):
         "alumno",
         "fecha",
         "total",
+        "estado",
+        "fecha_entrega",
         "mostrar_total_pagado",
         "mostrar_saldo_pendiente",
         "mostrar_estado_pago",
@@ -108,7 +110,7 @@ class PedidoAdmin(admin.ModelAdmin):
         "alumno__nombre",
         "alumno__telefono",
     )
-    list_filter = ("fecha",)
+    list_filter = ("fecha", "estado")
     readonly_fields = (
         "total",
         "mostrar_total_pagado",
