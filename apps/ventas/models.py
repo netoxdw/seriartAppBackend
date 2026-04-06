@@ -59,61 +59,60 @@ class Pedido(models.Model):
 
 
 class PedidoItemBase(models.Model):
+
+    PLACA_CHOICES = [
+        ("mediterranea", "Mediterránea"),
+        ("4_piezas", "4 piezas"),
+        ("extendida", "Extendida"),
+        ("corte_plano", "Corte plano"),
+        ("palermo", "Palermo"),
+        ("circulo", "Círculo"),
+        ("corazon", "Corazón"),
+        ("estrella", "Estrella"),
+        ("columnas", "Columnas"),
+        ("pergamino", "Pergamino"),
+    ]
+
     pedido = models.ForeignKey(
         Pedido,
         on_delete=models.CASCADE,
         related_name="items_base"
     )
+
     modelo = models.ForeignKey(
         Modelo,
         on_delete=models.CASCADE,
         related_name="items_pedido_base"
     )
+
+    placa = models.CharField(
+        max_length=20,
+        choices=PLACA_CHOICES,
+        blank=True,
+        null=True
+    )
+
+    color_placa = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True
+    )
+
     cantidad = models.PositiveIntegerField(default=1)
+
     precio_unitario = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         editable=False,
         default=0
     )
+
     subtotal = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         editable=False,
         default=0
     )
-
-    class Meta:
-        ordering = ["id"]
-        verbose_name = "Item base del pedido"
-        verbose_name_plural = "Items base del pedido"
-
-    def __str__(self):
-        return (
-            f"{self.cantidad} - "
-            f"{self.modelo.tamano_producto} - "
-            f"{self.modelo.seccion} - "
-            f"{self.modelo.nombre}"
-        )
-
-    def save(self, *args, **kwargs):
-        generacion = self.pedido.alumno.grupo.generacion
-
-        precio_obj = PrecioBaseGeneracion.objects.get(
-            modelo=self.modelo,
-            generacion=generacion
-        )
-
-        self.precio_unitario = precio_obj.precio
-        self.subtotal = self.cantidad * self.precio_unitario
-
-        super().save(*args, **kwargs)
-        self.pedido.calcular_total()
-
-    def delete(self, *args, **kwargs):
-        pedido = self.pedido
-        super().delete(*args, **kwargs)
-        pedido.calcular_total()
 
 
 class PedidoItemAnillo(models.Model):
