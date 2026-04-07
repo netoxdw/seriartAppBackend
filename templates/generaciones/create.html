@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Nueva Generación</h2>
+
+<form method="post">
+    {% csrf_token %}
+    
+    <div class="mb-3">
+        <label>Nombre</label>
+        {{ form.nombre }}
+    </div>
+
+    <div class="mb-3">
+        <label>Año</label>
+        {{ form.anio }}
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        Guardar
+    </button>
+
+    <a href="{% url 'home' %}" class="btn btn-secondary">
+        Cancelar
+    </a>
+</form>
+
+{% endblock %}

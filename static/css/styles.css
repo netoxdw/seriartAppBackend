@@ -1,0 +1,75 @@
+body {
+    background-color: #d7d8d9;
+}
+
+/* HEADER */
+.header {
+    /* background: linear-gradient(135deg, #1f3c88, #3a7bd5); */
+    display: flex;
+    flex-direction: row;
+    background: #1f3c88;
+    color: white;
+    padding: 15px 25px;
+    font-size: 22px;
+    font-weight:600;
+}
+
+/* SIDEBAR */
+.sidebar {
+    background-color: white;
+    height: 100vh;
+    padding: 20px;
+    border-right: 1px solid #ddd;
+}
+
+.menu-item {
+    margin: 15px 0;
+}
+
+.menu-item a {
+    color: #333;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.menu-item a:hover {
+    color: #3a7bd5;
+}
+
+/* CONTENT */
+.content {
+    padding: 25px;
+}
+
+/* CARDS */
+.card-custom {
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    border: none;
+}
+
+/* BOTONES */
+.btn-primary {
+    background-color: #3a7bd5;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #2f5fb3;
+}
+
+.btn-success {
+    background-color: #00c853;
+    border: none;
+}
+
+.btn-success:hover {
+    background-color: #00a844;
+}
+
+/* TABLAS */
+.table {
+    background-color: white;
+    border-radius: 10px;
+    overflow: hidden;
+}
