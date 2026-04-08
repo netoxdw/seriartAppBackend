@@ -23,5 +23,13 @@ class Alumno(models.Model):
         related_name="alumnos"
     )
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["nombre", "grupo"],
+                name="alumno_unico_por_grupo"
+            )
+        ]
+
     def __str__(self):
         return f"{self.nombre} - {self.grupo.escuela.nombre} {self.grupo.nombre} {self.grupo.generacion}"

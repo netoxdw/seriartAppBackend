@@ -34,7 +34,7 @@
         <tbody>
             {% for grupo in grupos %}
             <tr>
-                <td>{{ grupo.nombre }}</td>
+                <td><a href="{% url 'grupo_detail' grupo.id %}">{{ grupo.nombre }}</a></td>
                 <td>{{ grupo.num_alumnos }}</td>
                 <td>{{ grupo.fecha_fotografia }}</td>
                 <td>{{ grupo.hora_fotografia }}</td>
