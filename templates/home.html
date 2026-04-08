@@ -16,12 +16,19 @@
         <thead>
             <tr>
                 <th>Año</th>
+                <th>Numero de escuelas</th>
             </tr>
         </thead>
         <tbody>
             {% for g in generaciones %}
             <tr>
-                <td>{{ g.anio }}</td>
+                <td>
+                    <a href="{% url 'generacion_detail' g.id %}">
+                        {{ g.anio }}
+                    </a>
+                </td>
+                <td>{{ g.num_escuelas }} escuelas</td>
+
             </tr>
             {% endfor %}
         </tbody>

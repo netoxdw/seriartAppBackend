@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card card-custom p-4">
+
+    <h4>Agregar Escuela a Generación {{ view.generacion.anio }}</h4>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <h6>Seleccionar existente</h6>
+        {{ form.escuela_existente }}
+
+        <hr>
+
+        <h6>O crear nueva</h6>
+
+        <div class="mb-2">
+            <label>Nombre</label>
+            {{ form.nombre }}
+        </div>
+
+        <div class="mb-2">
+            <label>Dirección</label>
+            {{ form.direccion }}
+        </div>
+
+        <div class="mb-2">
+            <label>Teléfono</label>
+            {{ form.telefono }}
+        </div>
+
+        <button class="btn btn-primary mt-3">Guardar</button>
+
+        <a href="{% url 'generacion_detail' view.generacion.id %}" class="btn btn-secondary mt-3">
+            Cancelar
+        </a>
+
+    </form>
+
+</div>
+
+{% endblock %}
