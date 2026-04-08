@@ -1,4 +1,4 @@
-from django.views.generic import DetailView, CreateView
+from django.views.generic import DetailView, CreateView, UpdateView
 from django.db.models import Count
 from apps.escuelas.models import Grupo
 from django.urls import reverse
@@ -34,3 +34,15 @@ class AlumnoCreateView(CreateView):
 
     def get_success_url(self):
         return reverse("grupo_detail", kwargs={"pk": self.kwargs["grupo_id"]})
+    
+
+class AlumnoUpdateView(UpdateView):
+    model = Alumno
+    fields = ["nombre", "telefono", "folio_fotos"]
+    template_name = "alumnos/alumno_form.html"
+
+    def get_success_url(self):
+        return reverse(
+            "grupo_detail",
+            kwargs={"pk": self.object.grupo.id}
+        )

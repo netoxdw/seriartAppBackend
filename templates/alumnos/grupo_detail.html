@@ -9,12 +9,12 @@
         <h5> {{ grupo.escuela }} - {{ grupo.generacion.anio }} </h5>
 
         <h4>
-            Grupo {{ grupo.nombre }} 
+            Grupo {{ grupo.nombre }}
             <span class="badge bg-primary">
                 {{ total_alumnos }} alumnos
             </span>
         </h4>
-        
+
 
         <div>
             <a href="{% url 'alumno_create' grupo.id %}" class="btn btn-success">
@@ -33,6 +33,7 @@
                 <th>Nombre</th>
                 <th>Teléfono</th>
                 <th>Folio</th>
+                <th>Acciones</th>
             </tr>
         </thead>
 
@@ -42,10 +43,11 @@
                 <td>{{ alumno.nombre }}</td>
                 <td>{{ alumno.telefono }}</td>
                 <td>{{ alumno.folio_fotos }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="3">No hay alumnos registrados</td>
+                <td>
+                    <a href="{% url 'alumno_update' alumno.id %}" class="btn btn-sm btn-warning">
+                        Editar
+                    </a>
+                </td>
             </tr>
             {% endfor %}
         </tbody>

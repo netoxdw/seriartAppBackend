@@ -13,7 +13,7 @@
 
         <button class="btn btn-primary">Guardar</button>
 
-        <a href="{% url 'grupo_detail' view.kwargs.grupo_id %}" class="btn btn-secondary">
+        <a href="{% url 'grupo_detail' view.kwargs.grupo_id|default:object.grupo.id %}" class="btn btn-secondary">
             Cancelar
         </a>
 
