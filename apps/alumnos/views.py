@@ -3,6 +3,7 @@ from django.db.models import Count
 from apps.escuelas.models import Grupo
 from django.urls import reverse
 from .models import Alumno
+from .forms import AlumnoForm
 
 
 class GrupoDetailView(DetailView):
@@ -23,10 +24,16 @@ class GrupoDetailView(DetailView):
         return context
     
 
+
 class AlumnoCreateView(CreateView):
     model = Alumno
-    fields = ["nombre", "telefono", "folio_fotos"]
+    form_class = AlumnoForm
     template_name = "alumnos/alumno_form.html"
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["grupo_id"] = self.kwargs["grupo_id"]
+        return kwargs
 
     def form_valid(self, form):
         form.instance.grupo_id = self.kwargs["grupo_id"]
@@ -38,8 +45,13 @@ class AlumnoCreateView(CreateView):
 
 class AlumnoUpdateView(UpdateView):
     model = Alumno
-    fields = ["nombre", "telefono", "folio_fotos"]
+    form_class = AlumnoForm
     template_name = "alumnos/alumno_form.html"
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["grupo_id"] = self.object.grupo_id  # 👈 CLAVE
+        return kwargs
 
     def get_success_url(self):
         return reverse(

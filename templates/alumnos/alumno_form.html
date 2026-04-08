@@ -4,16 +4,45 @@
 
 <div class="card card-custom p-4">
 
-    <h4>Nuevo Alumno</h4>
+    <h4>
+        {% if object %}
+        Editar Alumno
+        {% else %}
+        Nuevo Alumno
+        {% endif %}
+    </h4>
 
     <form method="post">
         {% csrf_token %}
 
-        {{ form.as_p }}
+        <!-- 🔹 Nombre -->
+        <div class="mb-3">
+            <label>Nombre</label>
+            {{ form.nombre }}
+            <div class="text-danger">
+                {{ form.nombre.errors }}
+            </div>
+        </div>
+
+        <!-- 🔹 Teléfono -->
+        <div class="mb-3">
+            <label>Teléfono</label>
+            {{ form.telefono }}
+        </div>
+
+        <!-- 🔹 Folio -->
+        <div class="mb-3">
+            <label>Folio de fotos</label>
+            {{ form.folio_fotos }}
+        </div>
 
         <button class="btn btn-primary">Guardar</button>
 
-        <a href="{% url 'grupo_detail' view.kwargs.grupo_id|default:object.grupo.id %}" class="btn btn-secondary">
+        <a href="{% if object %}
+            {% url 'grupo_detail' object.grupo.id %}
+         {% else %}
+            {% url 'grupo_detail' view.kwargs.grupo_id %}
+         {% endif %}" class="btn btn-secondary">
             Cancelar
         </a>
 
