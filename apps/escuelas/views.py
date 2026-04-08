@@ -2,6 +2,8 @@ from django.views.generic import DetailView, FormView, CreateView
 from django.urls import reverse
 from django import forms
 from .models import Generacion, Escuela, Grupo
+from django.db.models import Count
+
 
 
 
@@ -70,12 +72,13 @@ class EscuelaDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        generacion_id = self.kwargs.get("generacion_id")
-        generacion = Generacion.objects.get(id=generacion_id)
+        generacion = Generacion.objects.get(id=self.kwargs["generacion_id"])
 
         grupos = Grupo.objects.filter(
             escuela=self.object,
             generacion=generacion
+        ).annotate(
+            num_alumnos=Count("alumnos", distinct=True)
         )
 
         context["generacion"] = generacion

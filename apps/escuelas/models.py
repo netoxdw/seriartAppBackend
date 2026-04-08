@@ -66,9 +66,6 @@ class Grupo(models.Model):
                 name="grupo_unico_por_escuela_generacion"
             )
         ]
-
-    def __str__(self):
-        return f"{self.nombre} - {self.escuela.nombre} ({self.generacion.anio})"
     
     def clean(self):
         if self.escuela_id and self.generacion_id:
@@ -80,3 +77,9 @@ class Grupo(models.Model):
                 raise ValidationError(
                     "Este grupo ya existe en esta escuela y generación."
                 )
+    
+    def __str__(self):
+        escuela = self.escuela.nombre if self.escuela_id else "Sin escuela"
+        generacion = self.generacion.anio if self.generacion_id else "Sin generación"
+
+        return f"{self.nombre} - {escuela} ({generacion})"

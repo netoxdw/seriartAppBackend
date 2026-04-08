@@ -24,9 +24,10 @@
         <thead>
             <tr>
                 <th>Grupo</th>
-                <th>Fecha fotografía</th>
-                <th>Hora fotografía</th>
-                <th>Lugar fotografía</th>
+                <th>Alumnos</th>
+                <th>Fecha Foto</th>
+                <th>Hora Foto</th>
+                <th>Lugar Foto</th>
             </tr>
         </thead>
 
@@ -34,13 +35,10 @@
             {% for grupo in grupos %}
             <tr>
                 <td>{{ grupo.nombre }}</td>
+                <td>{{ grupo.num_alumnos }}</td>
                 <td>{{ grupo.fecha_fotografia }}</td>
                 <td>{{ grupo.hora_fotografia }}</td>
                 <td>{{ grupo.lugar_fotografia }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="4">No hay grupos registrados</td>
             </tr>
             {% endfor %}
         </tbody>
