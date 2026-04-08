@@ -30,7 +30,7 @@
         <tbody>
             {% for escuela in escuelas %}
             <tr>
-                <td>{{ escuela.nombre }}</td>
+                <td><a href="{% url 'escuela_detail' generacion.id escuela.id %}">{{ escuela.nombre }}</a></td>
                 <td>{{ escuela.direccion }}</td>
                 <td>{{ escuela.telefono }}</td>
             </tr>

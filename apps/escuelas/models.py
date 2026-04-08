@@ -1,5 +1,6 @@
 # Create your models here.
 from django.db import models
+from django.core.exceptions import ValidationError
 
 
 class Generacion(models.Model):
@@ -61,10 +62,21 @@ class Grupo(models.Model):
         ordering = ["escuela", "nombre"]
         constraints = [
             models.UniqueConstraint(
-                fields=["nombre", "escuela"],
-                name="grupo_unico_por_escuela"
+                fields=["nombre", "escuela", "generacion"],
+                name="grupo_unico_por_escuela_generacion"
             )
         ]
 
     def __str__(self):
         return f"{self.nombre} - {self.escuela.nombre} ({self.generacion.anio})"
+    
+    def clean(self):
+        if self.escuela_id and self.generacion_id:
+            if Grupo.objects.filter(
+                nombre=self.nombre,
+                escuela_id=self.escuela_id,
+                generacion_id=self.generacion_id
+            ).exclude(id=self.id).exists():
+                raise ValidationError(
+                    "Este grupo ya existe en esta escuela y generación."
+                )

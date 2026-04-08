@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% if form.non_field_errors %}
+<div class="alert alert-danger">
+    {{ form.non_field_errors }}
+</div>
+{% endif %}
+
+<div class="card card-custom p-4">
+
+    <h4>Nuevo Grupo</h4>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label>Nombre</label>
+            {{ form.nombre }}
+            <div class="text-danger">
+                {{ form.nombre.errors }}
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label>Fecha de fotografía</label>
+            {{ form.fecha_fotografia }}
+        </div>
+
+        <div class="mb-3">
+            <label>Hora de fotografía</label>
+            {{ form.hora_fotografia }}
+        </div>
+
+        <div class="mb-3">
+            <label>Lugar</label>
+            {{ form.lugar_fotografia }}
+        </div>
+
+        <button class="btn btn-primary">Guardar</button>
+    </form>
+
+</div>
+
+{% endblock %}
