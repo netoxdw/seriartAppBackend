@@ -39,6 +39,14 @@
         </div>
 
         <button class="btn btn-primary">Guardar</button>
+
+        <a href="{% if object %}
+            {% url 'escuela_detail' object.generacion.id object.escuela.id %}
+         {% else %}
+            {% url 'escuela_detail' view.kwargs.generacion_id view.kwargs.escuela_id %}
+         {% endif %}" class="btn btn-secondary">
+            Cancelar
+        </a>
     </form>
 
 </div>

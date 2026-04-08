@@ -28,6 +28,7 @@
                 <th>Fecha Foto</th>
                 <th>Hora Foto</th>
                 <th>Lugar Foto</th>
+                <th>Acciones</th>
             </tr>
         </thead>
 
@@ -39,6 +40,11 @@
                 <td>{{ grupo.fecha_fotografia }}</td>
                 <td>{{ grupo.hora_fotografia }}</td>
                 <td>{{ grupo.lugar_fotografia }}</td>
+                <td>
+                    <a href="{% url 'grupo_update' grupo.id %}" class="btn btn-sm btn-warning">
+                        Editar
+                    </a>
+                </td>
             </tr>
             {% endfor %}
         </tbody>

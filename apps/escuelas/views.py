@@ -105,3 +105,24 @@ class GrupoCreateView(CreateView):
                 "pk": self.kwargs["escuela_id"]
             }
         )
+    
+
+class GrupoUpdateView(UpdateView):
+    model = Grupo
+    form_class = GrupoForm
+    template_name = "escuelas/grupo_form.html"
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["escuela"] = self.object.escuela_id
+        kwargs["generacion"] = self.object.generacion_id
+        return kwargs
+
+    def get_success_url(self):
+        return reverse(
+            "escuela_detail",
+            kwargs={
+                "generacion_id": self.object.generacion.id,
+                "pk": self.object.escuela.id
+            }
+        )
