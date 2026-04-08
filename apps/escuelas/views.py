@@ -79,7 +79,7 @@ class EscuelaDetailView(DetailView):
             generacion=generacion
         ).annotate(
             num_alumnos=Count("alumnos", distinct=True)
-        )
+        ).order_by("nombre")
 
         context["generacion"] = generacion
         context["grupos"] = grupos
