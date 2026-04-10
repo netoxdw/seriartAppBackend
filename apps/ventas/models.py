@@ -2,8 +2,6 @@ from decimal import Decimal
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils import timezone
-
-
 from apps.alumnos.models import Alumno
 from apps.catalogo.models import (
     Modelo,
@@ -146,6 +144,25 @@ class PedidoItemBase(models.Model):
         editable=False,
         default=0
     )
+
+    def save(self, *args, **kwargs):
+        generacion = self.pedido.alumno.grupo.generacion
+
+        precio_obj = PrecioBaseGeneracion.objects.get(
+        modelo=self.modelo,
+        generacion=generacion
+    )
+
+        self.precio_unitario = precio_obj.precio
+        self.subtotal = self.cantidad * self.precio_unitario
+
+        super().save(*args, **kwargs)
+        self.pedido.calcular_total()
+
+    def delete(self, *args, **kwargs):
+        pedido = self.pedido
+        super().delete(*args, **kwargs)
+        pedido.calcular_total()
 
 
 class PedidoItemAnillo(models.Model):
