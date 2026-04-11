@@ -41,7 +41,7 @@
             {% for alumno in alumnos %}
             <tr>
                 <td>
-                    <a href="{% url 'alumno_detail' alumno.id %}">
+                    <a href="{% url 'alumno_pedido' alumno.id %}">
                         {{ alumno.nombre }}
                     </a>
                 </td>

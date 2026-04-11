@@ -3,6 +3,7 @@ from django.urls import path, include
 from apps.core.views import HomeView, GeneracionCreateView
 
 urlpatterns = [
+    path('admin/', admin.site.urls),
     path('', HomeView.as_view(), name='home'),
     path('generaciones/nueva/', GeneracionCreateView.as_view(), name='generacion_create'),
     path('', include('apps.escuelas.urls')),

@@ -1,6 +1,10 @@
-from django.views.generic import CreateView, DetailView
+from django.views.generic import CreateView, DetailView, UpdateView, DeleteView
 from django.urls import reverse
-from .models import Pedido
+from django.shortcuts import redirect
+from .models import PedidoItemBase, Pedido
+from apps.alumnos.models import Alumno
+from .forms import PedidoItemBaseForm
+
 
 class PedidoCreateView(CreateView):
     model = Pedido
@@ -31,3 +35,55 @@ class PedidoDetailView(DetailView):
         context["items_extra"] = self.object.items_extra.all()
 
         return context
+
+
+class PedidoItemBaseCreateView(CreateView):
+    model = PedidoItemBase
+    form_class = PedidoItemBaseForm
+    template_name = "ventas/itembase_form.html"
+
+    def form_valid(self, form):
+        form.instance.pedido_id = self.kwargs["pedido_id"]
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse(
+            "pedido_detail",
+            kwargs={"pk": self.kwargs["pedido_id"]}
+        )
+
+def alumno_pedido_redirect(request, alumno_id):
+    alumno = Alumno.objects.get(id=alumno_id)
+
+    # Buscar pedido existente
+    pedido = Pedido.objects.filter(alumno=alumno).first()
+
+    # Si no existe, crearlo
+    if not pedido:
+        pedido = Pedido.objects.create(alumno=alumno)
+
+    return redirect("pedido_detail", pk=pedido.id)
+
+
+
+class PedidoItemBaseUpdateView(UpdateView):
+    model = PedidoItemBase
+    form_class = PedidoItemBaseForm
+    template_name = "ventas/itembase_form.html"
+
+    # def get_success_url(self):
+    #     pedido_id = self.object.pedido_id  # 👈 clave
+    #     return reverse("pedido_detail", kwargs={"pk": pedido_id})
+    def get_success_url(self):
+        return reverse("pedido_detail", kwargs={"pk": self.object.pedido_id})
+
+
+class PedidoItemBaseDeleteView(DeleteView):
+    model = PedidoItemBase
+    template_name = "ventas/itembase_confirm_delete.html"
+
+    def get_success_url(self):
+        return reverse(
+            "pedido_detail",
+            kwargs={"pk": self.object.pedido.id}
+        )

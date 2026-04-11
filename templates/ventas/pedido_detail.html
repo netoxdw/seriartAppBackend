@@ -2,26 +2,135 @@
 
 {% block content %}
 
+
+
+
 <div class="card p-4">
+    <!-- 🔙 NAVEGACIÓN -->
+    <div class="mb-3 d-flex gap-2 flex-wrap">
+        <a href="{% url 'grupo_detail' pedido.alumno.grupo.id %}" class="btn btn-outline-secondary btn-sm">
+            ← Grupo
+        </a>
+    </div>
 
-    <h4>
-        Pedido #{{ pedido.id }} - {{ pedido.alumno.nombre }}
-    </h4>
+    <!-- 📍 CONTEXTO -->
+    <div class="mb-2 text-muted small">
+        {{ pedido.alumno.grupo.generacion }}
+        / {{ pedido.alumno.grupo.escuela.nombre }}
+        / {{ pedido.alumno.grupo.nombre }}
+    </div>
 
-    <p><strong>Total:</strong> ${{ pedido.total }}</p>
-    <p><strong>Estado:</strong> {{ pedido.estado }}</p>
+    <!-- 🧑 HEADER PRINCIPAL -->
+    <div class="d-flex justify-content-between align-items-start flex-wrap">
+
+        <!-- 👤 INFO ALUMNO -->
+        <div>
+            <h4 class="mb-1">
+                Pedido: {{ pedido.alumno.nombre }}
+            </h4>
+
+            <div class="small text-muted">
+                📌 Folio: <strong>{{ pedido.alumno.folio_fotos|default:"-" }}</strong><br>
+                📞 Tel: {{ pedido.alumno.telefono|default:"-" }}
+            </div>
+
+            <!-- ✏️ EDITAR -->
+            <div class="mt-2">
+                <a href="{% url 'alumno_update' pedido.alumno.id %}" class="btn btn-warning btn-sm">
+                    ✏️ Editar datos
+                </a>
+            </div>
+        </div>
+
+        <!-- 💰 RESUMEN -->
+        <div class="text-end">
+            <div>
+                <strong>Total:</strong>
+                <span class="badge bg-success">${{ pedido.total }}</span>
+            </div>
+
+            <div>
+                <strong>Pagado:</strong> ${{ pedido.total_pagado }}
+            </div>
+
+            <div class="text-danger">
+                <strong>Resta:</strong> ${{ pedido.saldo_pendiente }}
+            </div>
+
+            <div class="mt-1">
+                <strong>Estado:</strong> {{ pedido.estado }}
+            </div>
+        </div>
+
+    </div>
 
     <hr>
 
-    <h5>Items Base</h5>
-    <ul>
-        {% for item in items_base %}
-        <li>{{ item.modelo.nombre }} - ${{ item.subtotal }}</li>
-        {% empty %}
-        <li>Sin items</li>
-        {% endfor %}
-    </ul>
+    <!-- BASES -->
 
+    <h5 class="mt-4">Items Base</h5>
+
+    <!-- 📋 TABLA -->
+    <table class="table table-sm table-bordered align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>Tamaño</th>
+                <th>Sección</th>
+                <th>Modelo</th>
+                <th>Placa</th>
+                <th>Color</th>
+                <th class="text-end">Precio</th>
+                <th class="text-end">Cantidad</th>
+                <th class="text-end">Subtotal</th>
+                <th>Acciones</th> <!-- 👈 NUEVO -->
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for item in items_base %}
+            <tr>
+                <td>{{ item.modelo.tamano_producto }}</td>
+                <td>{{ item.modelo.seccion }}</td>
+                <td>{{ item.modelo.nombre }}</td>
+                <td>{{ item.get_placa_display|default:"-" }}</td>
+                <td>{{ item.color_placa|default:"-" }}</td>
+
+                <td class="text-end">${{ item.precio_unitario }}</td>
+                <td class="text-end">{{ item.cantidad }}</td>
+                <td class="text-end"><strong>${{ item.subtotal }}</strong></td>
+
+                <!-- 🚀 ACCIONES -->
+                <td class="text-center">
+                    <a href="{% url 'itembase_update' item.id %}" class="btn btn-sm btn-warning">
+                        ✏️
+                    </a>
+
+                    <a href="{% url 'itembase_delete' item.id %}" class="btn btn-sm btn-danger">
+                        🗑
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" class="text-center">
+                    Sin productos agregados
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- ➕ BOTÓN -->
+    <div class="mb-2">
+        <a href="{% url 'itembase_create' pedido.id %}" class="btn btn-primary btn-sm">
+            + Agregar Base
+        </a>
+    </div>
+
+    <br>
+    <br>
+
+    <!-- ANILLOS -->
     <h5>Anillos</h5>
     <ul>
         {% for item in items_anillo %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card p-4">
+
+    <h4>Agregar Producto</h4>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label>Modelo</label>
+            {{ form.modelo }}
+        </div>
+
+        <div class="mb-3">
+            <label>Placa</label>
+            {{ form.placa }}
+        </div>
+
+        <div class="mb-3">
+            <label>Color placa</label>
+            {{ form.color_placa }}
+        </div>
+
+        <div class="mb-3">
+            <label>Cantidad</label>
+            {{ form.cantidad }}
+        </div>
+
+        <button class="btn btn-success">Guardar</button>
+
+        <a href="{% url 'pedido_detail' object.pedido_id %}" class="btn btn-secondary">
+            Cancelar
+        </a>
+
+    </form>
+
+</div>
+
+{% endblock %}
