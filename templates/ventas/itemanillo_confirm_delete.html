@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card p-4">
+
+    <h4>Eliminar anillo</h4>
+
+    <p>¿Eliminar este producto?</p>
+
+    <strong>
+        {{ object.anillo.modelo }} - {{ object.anillo.metal }}
+    </strong>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <button class="btn btn-danger">Eliminar</button>
+
+        <a href="{% url 'pedido_detail' object.pedido_id %}" 
+           class="btn btn-secondary">
+            Cancelar
+        </a>
+    </form>
+
+</div>
+
+{% endblock %}

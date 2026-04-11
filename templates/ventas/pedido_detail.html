@@ -101,7 +101,7 @@
 
                 <!-- 🚀 ACCIONES -->
                 <td class="text-center">
-                    <a href="{% url 'itembase_update' item.id %}" class="btn btn-sm btn-warning">
+                    <a href="{% url 'itembase_update' item.id %}" class="btn-outline-warning">
                         ✏️
                     </a>
 
@@ -131,13 +131,71 @@
     <br>
 
     <!-- ANILLOS -->
-    <h5>Anillos</h5>
-    <ul>
-        {% for item in items_anillo %}
-        <li>{{ item.anillo.modelo }} - ${{ item.subtotal }}</li>
-        {% endfor %}
-    </ul>
 
+
+    <h5 class="mt-4">Anillos</h5>
+
+    <!-- ➕ BOTÓN -->
+    <div class="mb-2">
+        <a href="{% url 'itemanillo_create' pedido.id %}" class="btn btn-outline-primary btn-sm">
+            + Agregar Anillo
+        </a>
+    </div>
+
+    <!-- 📋 TABLA -->
+    <table class="table table-sm table-bordered align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>Modelo</th>
+                <th>Metal</th>
+                <th>Tamaño</th>
+                <th class="text-end">Precio</th>
+                <th class="text-end">Cantidad</th>
+                <th class="text-end">Subtotal</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for item in items_anillo %}
+            <tr>
+                <td>{{ item.anillo.modelo }}</td>
+                <td>{{ item.anillo.metal }}</td>
+                <td>{{ item.tamano_anillo }}</td>
+
+                <td class="text-end">${{ item.precio_unitario }}</td>
+                <td class="text-end">{{ item.cantidad }}</td>
+                <td class="text-end">
+                    <strong>${{ item.subtotal }}</strong>
+                </td>
+
+                <!-- 🚀 ACCIONES -->
+                <td class="text-center">
+                    <a href="{% url 'itemanillo_update' item.id %}" class="btn btn-sm btn-warning">
+                        ✏️
+                    </a>
+
+                    <a href="{% url 'itemanillo_delete' item.id %}" class="btn btn-sm btn-danger">
+                        🗑
+                    </a>
+                </td>
+            </tr>
+
+            {% empty %}
+            <tr>
+                <td colspan="7" class="text-center">
+                    Sin anillos agregados
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <br>
+    <br>
+
+
+    <!-- EXTRAS -->
     <h5>Extras</h5>
     <ul>
         {% for item in items_extra %}

@@ -1,9 +1,9 @@
 from django.views.generic import CreateView, DetailView, UpdateView, DeleteView
 from django.urls import reverse
 from django.shortcuts import redirect
-from .models import PedidoItemBase, Pedido
+from .models import PedidoItemBase, Pedido, PedidoItemAnillo
 from apps.alumnos.models import Alumno
-from .forms import PedidoItemBaseForm
+from .form import PedidoItemBaseForm, PedidoItemAnilloForm
 
 
 class PedidoCreateView(CreateView):
@@ -86,4 +86,44 @@ class PedidoItemBaseDeleteView(DeleteView):
         return reverse(
             "pedido_detail",
             kwargs={"pk": self.object.pedido.id}
+        )
+    
+# Anillos ########################################################################333
+
+
+class PedidoItemAnilloCreateView(CreateView):
+    model = PedidoItemAnillo
+    form_class = PedidoItemAnilloForm
+    template_name = "ventas/itemanillo_form.html"
+
+    def form_valid(self, form):
+        form.instance.pedido_id = self.kwargs["pedido_id"]
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse(
+            "pedido_detail",
+            kwargs={"pk": self.kwargs["pedido_id"]}
+        )
+    
+class PedidoItemAnilloUpdateView(UpdateView):
+    model = PedidoItemAnillo
+    form_class = PedidoItemAnilloForm
+    template_name = "ventas/itemanillo_form.html"
+
+    def get_success_url(self):
+        return reverse(
+            "pedido_detail",
+            kwargs={"pk": self.object.pedido_id}
+        )
+
+
+class PedidoItemAnilloDeleteView(DeleteView):
+    model = PedidoItemAnillo
+    template_name = "ventas/itemanillo_confirm_delete.html"
+
+    def get_success_url(self):
+        return reverse(
+            "pedido_detail",
+            kwargs={"pk": self.object.pedido_id}
         )
