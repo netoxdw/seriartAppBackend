@@ -58,3 +58,20 @@ class AlumnoUpdateView(UpdateView):
             "grupo_detail",
             kwargs={"pk": self.object.grupo.id}
         )
+    
+
+
+class AlumnoDetailView(DetailView):
+    model = Alumno
+    template_name = "alumnos/alumno_detail.html"
+    context_object_name = "alumno"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        pedidos = self.object.pedidos.all()
+
+        context["pedidos"] = pedidos
+        context["total_pedidos"] = pedidos.count()
+
+        return context

@@ -40,7 +40,11 @@
         <tbody>
             {% for alumno in alumnos %}
             <tr>
-                <td>{{ alumno.nombre }}</td>
+                <td>
+                    <a href="{% url 'alumno_detail' alumno.id %}">
+                        {{ alumno.nombre }}
+                    </a>
+                </td>
                 <td>{{ alumno.telefono }}</td>
                 <td>{{ alumno.folio_fotos }}</td>
                 <td>

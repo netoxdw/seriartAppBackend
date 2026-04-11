@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card p-4">
+
+    <h4>
+        Pedido #{{ pedido.id }} - {{ pedido.alumno.nombre }}
+    </h4>
+
+    <p><strong>Total:</strong> ${{ pedido.total }}</p>
+    <p><strong>Estado:</strong> {{ pedido.estado }}</p>
+
+    <hr>
+
+    <h5>Items Base</h5>
+    <ul>
+        {% for item in items_base %}
+        <li>{{ item.modelo.nombre }} - ${{ item.subtotal }}</li>
+        {% empty %}
+        <li>Sin items</li>
+        {% endfor %}
+    </ul>
+
+    <h5>Anillos</h5>
+    <ul>
+        {% for item in items_anillo %}
+        <li>{{ item.anillo.modelo }} - ${{ item.subtotal }}</li>
+        {% endfor %}
+    </ul>
+
+    <h5>Extras</h5>
+    <ul>
+        {% for item in items_extra %}
+        <li>{{ item.nombre }} - ${{ item.subtotal }}</li>
+        {% endfor %}
+    </ul>
+
+</div>
+
+{% endblock %}

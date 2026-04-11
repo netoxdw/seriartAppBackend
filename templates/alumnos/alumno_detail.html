@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card p-4">
+
+    <div class="d-flex justify-content-between mb-3">
+        <h4>
+            {{ alumno.nombre }}
+            <span class="badge bg-primary">
+                {{ total_pedidos }} pedidos
+            </span>
+        </h4>
+
+        <a href="{% url 'pedido_create' alumno.id %}" class="btn btn-success">
+            + Nuevo Pedido
+        </a>
+    </div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Fecha</th>
+                <th>Total</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for pedido in pedidos %}
+            <tr>
+                <td>
+                    <a href="{% url 'pedido_detail' pedido.id %}">
+                        #{{ pedido.id }}
+                    </a>
+                </td>
+                <td>{{ pedido.fecha }}</td>
+                <td>${{ pedido.total }}</td>
+                <td>{{ pedido.estado }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4">Sin pedidos</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+{% endblock %}
