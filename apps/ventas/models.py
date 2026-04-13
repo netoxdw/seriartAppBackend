@@ -56,9 +56,11 @@ class Pedido(models.Model):
         return f"Pedido {self.id} - {self.alumno}"
 
     def calcular_total(self):
-        total_bases = sum(item.subtotal for item in self.items_base.all())
-        total_anillos = sum(item.subtotal for item in self.items_anillo.all())
-        self.total = total_bases + total_anillos
+        total_bases = sum(item.subtotal or 0 for item in self.items_base.all())
+        total_anillos = sum(item.subtotal or 0 for item in self.items_anillo.all())
+        total_extras = sum(item.subtotal or 0 for item in self.items_extra.all())
+
+        self.total = total_bases + total_anillos + total_extras
         self.save(update_fields=["total"])
 
     def clean(self):
@@ -252,13 +254,19 @@ class PedidoItemExtra(models.Model):
         return f"{self.nombre} - {self.cantidad} x {self.precio_unitario}"
 
     def save(self, *args, **kwargs):
-        # Calcular subtotal
+        # 🔥 Calcular subtotal
         self.subtotal = self.cantidad * self.precio_unitario
         super().save(*args, **kwargs)
 
-        # Recalcular total del pedido
+        # 🔥 Recalcular total del pedido
         self.pedido.calcular_total()
 
+    def delete(self, *args, **kwargs):
+        pedido = self.pedido  # 🔥 guardar referencia antes de borrar
+        super().delete(*args, **kwargs)
+
+        # 🔥 Recalcular total después de eliminar
+        pedido.calcular_total()
 
 class Observacion(models.Model):
     pedido = models.ForeignKey(
