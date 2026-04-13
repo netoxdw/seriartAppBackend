@@ -2,8 +2,8 @@ from django.views.generic import CreateView, DetailView, UpdateView, DeleteView
 from django.urls import reverse
 from django.shortcuts import redirect
 from apps.alumnos.models import Alumno
-from .models import PedidoItemBase, Pedido, PedidoItemAnillo, PedidoItemExtra, Observacion
-from .form import PedidoItemBaseForm, PedidoItemAnilloForm, PedidoItemExtraForm, ObservacionForm
+from .models import PedidoItemBase, Pedido, PedidoItemAnillo, PedidoItemExtra, Observacion, Pago
+from .form import PedidoItemBaseForm, PedidoItemAnilloForm, PedidoItemExtraForm, ObservacionForm, PagoForm
 
 
 class PedidoCreateView(CreateView):
@@ -235,3 +235,30 @@ class ObservacionDeleteView(DeleteView):
     def get_success_url(self):
         return reverse("pedido_detail", kwargs={"pk": self.object.pedido_id})
 
+
+# Pago #####################################################################################
+
+class PagoCreateView(CreateView):
+    model = Pago
+    form_class = PagoForm
+    template_name = "ventas/pago_form.html"
+
+    def form_valid(self, form):
+        form.instance.pedido_id = self.kwargs["pedido_id"]
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["pedido_id"] = self.kwargs["pedido_id"]
+        return context
+
+    def get_success_url(self):
+        return reverse("pedido_detail", kwargs={"pk": self.kwargs["pedido_id"]})
+
+
+class PagoDeleteView(DeleteView):
+    model = Pago
+    template_name = "ventas/pago_confirm_delete.html"
+
+    def get_success_url(self):
+        return reverse("pedido_detail", kwargs={"pk": self.object.pedido_id})

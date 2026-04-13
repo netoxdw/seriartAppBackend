@@ -289,7 +289,7 @@
         {% endfor %}
     </ul>
 
-<br>
+    <br>
     <div class="mb-2">
         <a href="{% url 'observacion_create' pedido.id %}" class="btn btn-outline-dark btn-sm">
             + Agregar Observación
@@ -299,6 +299,60 @@
     <br>
     <br>
 
+    <!-- Pagos -->
+
+    <h5 class="mt-4">Pagos</h5>
+
+    <div class="mb-2">
+        <a href="{% url 'pago_create' pedido.id %}" class="btn btn-success btn-sm">
+            + Registrar Pago
+        </a>
+    </div>
+
+    <table class="table table-sm table-bordered align-middle">
+        <thead class="table-light">
+            <tr>
+                <th class="text-end">Monto</th>
+                <th>Fecha</th>
+                <th>Folio</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for pago in pedido.pagos.all %}
+            <tr>
+                <!-- 💰 MONTO (LO MÁS IMPORTANTE) -->
+                <td class="text-end fw-bold text-success">
+                    ${{ pago.monto }}
+                </td>
+
+                <!-- 📅 FECHA -->
+                <td>
+                    {{ pago.fecha_pago|date:"d/m/Y" }}
+                </td>
+
+                <!-- 🧾 FOLIO -->
+                <td>
+                    {{ pago.folio_nota|default:"-" }}
+                </td>
+
+                <!-- ⚙️ ACCIONES -->
+                <td class="text-center">
+                    <a href="{% url 'pago_delete' pago.id %}" class="btn btn-sm btn-danger">
+                        🗑
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center">
+                    Sin pagos registrados
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
 </div>
 

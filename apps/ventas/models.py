@@ -10,6 +10,7 @@ from apps.catalogo.models import (
     PrecioAnilloGeneracion,
 )
 
+# PEDIDO
 
 class Pedido(models.Model):
     alumno = models.ForeignKey(
@@ -91,6 +92,8 @@ class Pedido(models.Model):
         return "Pagado"
 
 
+# BASES
+
 class PedidoItemBase(models.Model):
 
     PLACA_CHOICES = [
@@ -166,6 +169,7 @@ class PedidoItemBase(models.Model):
         super().delete(*args, **kwargs)
         pedido.calcular_total()
 
+# ANILLO
 
 class PedidoItemAnillo(models.Model):
     pedido = models.ForeignKey(
@@ -229,6 +233,7 @@ class PedidoItemAnillo(models.Model):
         super().delete(*args, **kwargs)
         pedido.calcular_total()
 
+# EXTRA
 
 class PedidoItemExtra(models.Model):
     pedido = models.ForeignKey(
@@ -268,6 +273,9 @@ class PedidoItemExtra(models.Model):
         # 🔥 Recalcular total después de eliminar
         pedido.calcular_total()
 
+
+# OBSERVACION
+
 class Observacion(models.Model):
     pedido = models.ForeignKey(
         Pedido,
@@ -288,6 +296,7 @@ class Observacion(models.Model):
     def __str__(self):
         return f"Pedido #{self.pedido.id} - {self.fecha.strftime('%Y-%m-%d %H:%M')}"
 
+# PAGOS
 
 class Pago(models.Model):
     pedido = models.ForeignKey(
@@ -326,3 +335,12 @@ class Pago(models.Model):
 
         if self.monto <= 0:
             raise ValidationError("El monto del pago debe ser mayor a cero.")
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.pedido.calcular_total()  # 🔥 clave
+
+    def delete(self, *args, **kwargs):
+        pedido = self.pedido
+        super().delete(*args, **kwargs)
+        pedido.calcular_total()  # 🔥 clave

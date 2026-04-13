@@ -1,6 +1,6 @@
 from django import forms
 from apps.catalogo.models import Modelo
-from .models import PedidoItemBase, PedidoItemAnillo, PedidoItemExtra, Observacion
+from .models import PedidoItemBase, PedidoItemAnillo, PedidoItemExtra, Observacion, Pago
 
 
 class PedidoItemBaseForm(forms.ModelForm):
@@ -56,4 +56,18 @@ class ObservacionForm(forms.ModelForm):
                 "rows": 3,
                 "placeholder": "Escribe una observación..."
             }),
+        }
+
+# PAGO
+
+class PagoForm(forms.ModelForm):
+
+    class Meta:
+        model = Pago
+        fields = ["fecha_pago", "monto", "folio_nota"]
+
+        widgets = {
+            "fecha_pago": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
+            "monto": forms.NumberInput(attrs={"class": "form-control"}),
+            "folio_nota": forms.TextInput(attrs={"class": "form-control"}),
         }
