@@ -1,9 +1,9 @@
 from django.views.generic import CreateView, DetailView, UpdateView, DeleteView
 from django.urls import reverse
 from django.shortcuts import redirect
-from .models import PedidoItemBase, Pedido, PedidoItemAnillo
 from apps.alumnos.models import Alumno
-from .form import PedidoItemBaseForm, PedidoItemAnilloForm
+from .models import PedidoItemBase, Pedido, PedidoItemAnillo, PedidoItemExtra
+from .form import PedidoItemBaseForm, PedidoItemAnilloForm, PedidoItemExtraForm
 
 
 class PedidoCreateView(CreateView):
@@ -145,3 +145,47 @@ class PedidoItemAnilloDeleteView(DeleteView):
             "pedido_detail",
             kwargs={"pk": self.object.pedido_id}
         )
+    
+# EXTRAS #################################################################
+
+# ➕ CREATE
+class PedidoItemExtraCreateView(CreateView):
+    model = PedidoItemExtra
+    form_class = PedidoItemExtraForm
+    template_name = "ventas/itemextra_form.html"
+
+    def form_valid(self, form):
+        form.instance.pedido_id = self.kwargs["pedido_id"]
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["pedido_id"] = self.kwargs["pedido_id"]
+        return context
+
+    def get_success_url(self):
+        return reverse("pedido_detail", kwargs={"pk": self.kwargs["pedido_id"]})
+
+
+# ✏️ UPDATE
+class PedidoItemExtraUpdateView(UpdateView):
+    model = PedidoItemExtra
+    form_class = PedidoItemExtraForm
+    template_name = "ventas/itemextra_form.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["pedido_id"] = self.object.pedido_id
+        return context
+
+    def get_success_url(self):
+        return reverse("pedido_detail", kwargs={"pk": self.object.pedido_id})
+
+
+# 🗑 DELETE
+class PedidoItemExtraDeleteView(DeleteView):
+    model = PedidoItemExtra
+    template_name = "ventas/itemextra_confirm_delete.html"
+
+    def get_success_url(self):
+        return reverse("pedido_detail", kwargs={"pk": self.object.pedido_id})
