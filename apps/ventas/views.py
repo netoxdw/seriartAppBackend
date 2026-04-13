@@ -37,6 +37,9 @@ class PedidoDetailView(DetailView):
         return context
 
 
+
+# ############## itembase
+
 class PedidoItemBaseCreateView(CreateView):
     model = PedidoItemBase
     form_class = PedidoItemBaseForm
@@ -46,41 +49,53 @@ class PedidoItemBaseCreateView(CreateView):
         form.instance.pedido_id = self.kwargs["pedido_id"]
         return super().form_valid(form)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["pedido_id"] = self.kwargs["pedido_id"]  # 🔥 clave
+        return context
+
     def get_success_url(self):
         return reverse(
             "pedido_detail",
             kwargs={"pk": self.kwargs["pedido_id"]}
         )
 
+
+# 🔁 REDIRECT ALUMNO → PEDIDO
+
 def alumno_pedido_redirect(request, alumno_id):
     alumno = Alumno.objects.get(id=alumno_id)
 
-    # Buscar pedido existente
     pedido = Pedido.objects.filter(alumno=alumno).first()
 
-    # Si no existe, crearlo
     if not pedido:
         pedido = Pedido.objects.create(alumno=alumno)
 
     return redirect("pedido_detail", pk=pedido.id)
 
 
+# ✏️ UPDATE
 
 class PedidoItemBaseUpdateView(UpdateView):
     model = PedidoItemBase
     form_class = PedidoItemBaseForm
     template_name = "ventas/itembase_form.html"
 
-    # def get_success_url(self):
-    #     pedido_id = self.object.pedido_id  # 👈 clave
-    #     return reverse("pedido_detail", kwargs={"pk": pedido_id})
-    def get_success_url(self):
-        return reverse("pedido_detail", kwargs={"pk": self.object.pedido_id})
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["pedido_id"] = self.object.pedido_id  # 🔥 clave
+        return context
 
+    def get_success_url(self):
+        return reverse(
+            "pedido_detail",
+            kwargs={"pk": self.object.pedido_id}
+        )
 
 class PedidoItemBaseDeleteView(DeleteView):
     model = PedidoItemBase
     template_name = "ventas/itembase_confirm_delete.html"
+
 
     def get_success_url(self):
         return reverse(
@@ -89,7 +104,6 @@ class PedidoItemBaseDeleteView(DeleteView):
         )
     
 # Anillos ########################################################################333
-
 
 class PedidoItemAnilloCreateView(CreateView):
     model = PedidoItemAnillo
@@ -100,22 +114,26 @@ class PedidoItemAnilloCreateView(CreateView):
         form.instance.pedido_id = self.kwargs["pedido_id"]
         return super().form_valid(form)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["pedido_id"] = self.kwargs["pedido_id"]  # 🔥 clave
+        return context
+
     def get_success_url(self):
-        return reverse(
-            "pedido_detail",
-            kwargs={"pk": self.kwargs["pedido_id"]}
-        )
+        return reverse("pedido_detail", kwargs={"pk": self.kwargs["pedido_id"]})
     
 class PedidoItemAnilloUpdateView(UpdateView):
     model = PedidoItemAnillo
     form_class = PedidoItemAnilloForm
     template_name = "ventas/itemanillo_form.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["pedido_id"] = self.object.pedido_id  # 🔥 clave
+        return context
+
     def get_success_url(self):
-        return reverse(
-            "pedido_detail",
-            kwargs={"pk": self.object.pedido_id}
-        )
+        return reverse("pedido_detail", kwargs={"pk": self.object.pedido_id})
 
 
 class PedidoItemAnilloDeleteView(DeleteView):
