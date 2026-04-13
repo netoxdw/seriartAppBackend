@@ -11,7 +11,10 @@ from .views import (
     PedidoItemAnilloDeleteView,
     PedidoItemExtraCreateView,
     PedidoItemExtraUpdateView,
-    PedidoItemExtraDeleteView
+    PedidoItemExtraDeleteView,
+    ObservacionCreateView,
+    ObservacionUpdateView,
+    ObservacionDeleteView
     )
 
 urlpatterns = [
@@ -31,4 +34,8 @@ urlpatterns = [
     path('pedidos/<int:pedido_id>/add-extra/', PedidoItemExtraCreateView.as_view(), name='itemextra_create'),
     path('itemextra/<int:pk>/editar/', PedidoItemExtraUpdateView.as_view(), name='itemextra_update'),
     path('itemextra/<int:pk>/eliminar/', PedidoItemExtraDeleteView.as_view(), name='itemextra_delete'),
+
+    path('pedidos/<int:pedido_id>/add-observacion/', ObservacionCreateView.as_view(), name='observacion_create'),
+    path('observacion/<int:pk>/editar/', ObservacionUpdateView.as_view(), name='observacion_update'),
+    path('observacion/<int:pk>/eliminar/', ObservacionDeleteView.as_view(), name='observacion_delete'),
 ]

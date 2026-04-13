@@ -1,6 +1,6 @@
 from django import forms
 from apps.catalogo.models import Modelo
-from .models import PedidoItemBase, PedidoItemAnillo, PedidoItemExtra
+from .models import PedidoItemBase, PedidoItemAnillo, PedidoItemExtra, Observacion
 
 
 class PedidoItemBaseForm(forms.ModelForm):
@@ -41,4 +41,19 @@ class PedidoItemExtraForm(forms.ModelForm):
             "descripcion": forms.Textarea(attrs={"class": "form-control", "rows": 2}),
             "cantidad": forms.NumberInput(attrs={"class": "form-control"}),
             "precio_unitario": forms.NumberInput(attrs={"class": "form-control"}),
+        }
+
+
+class ObservacionForm(forms.ModelForm):
+
+    class Meta:
+        model = Observacion
+        fields = ["texto"]
+
+        widgets = {
+            "texto": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 3,
+                "placeholder": "Escribe una observación..."
+            }),
         }

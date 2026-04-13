@@ -2,8 +2,8 @@ from django.views.generic import CreateView, DetailView, UpdateView, DeleteView
 from django.urls import reverse
 from django.shortcuts import redirect
 from apps.alumnos.models import Alumno
-from .models import PedidoItemBase, Pedido, PedidoItemAnillo, PedidoItemExtra
-from .form import PedidoItemBaseForm, PedidoItemAnilloForm, PedidoItemExtraForm
+from .models import PedidoItemBase, Pedido, PedidoItemAnillo, PedidoItemExtra, Observacion
+from .form import PedidoItemBaseForm, PedidoItemAnilloForm, PedidoItemExtraForm, ObservacionForm
 
 
 class PedidoCreateView(CreateView):
@@ -189,3 +189,49 @@ class PedidoItemExtraDeleteView(DeleteView):
 
     def get_success_url(self):
         return reverse("pedido_detail", kwargs={"pk": self.object.pedido_id})
+    
+
+# Observacion ######################################################################
+
+# ➕ CREATE
+class ObservacionCreateView(CreateView):
+    model = Observacion
+    form_class = ObservacionForm
+    template_name = "ventas/observacion_form.html"
+
+    def form_valid(self, form):
+        form.instance.pedido_id = self.kwargs["pedido_id"]
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["pedido_id"] = self.kwargs["pedido_id"]
+        return context
+
+    def get_success_url(self):
+        return reverse("pedido_detail", kwargs={"pk": self.kwargs["pedido_id"]})
+
+
+# ✏️ UPDATE
+class ObservacionUpdateView(UpdateView):
+    model = Observacion
+    form_class = ObservacionForm
+    template_name = "ventas/observacion_form.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["pedido_id"] = self.object.pedido_id
+        return context
+
+    def get_success_url(self):
+        return reverse("pedido_detail", kwargs={"pk": self.object.pedido_id})
+
+
+# 🗑 DELETE
+class ObservacionDeleteView(DeleteView):
+    model = Observacion
+    template_name = "ventas/observacion_confirm_delete.html"
+
+    def get_success_url(self):
+        return reverse("pedido_detail", kwargs={"pk": self.object.pedido_id})
+
