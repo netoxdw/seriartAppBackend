@@ -7,15 +7,24 @@ class PedidoItemBaseForm(forms.ModelForm):
 
     class Meta:
         model = PedidoItemBase
-        fields = ["modelo", "placa", "color_placa", "cantidad"]
+        fields = ["modelo", "cantidad", "placa", "color_placa"]
 
-        widgets = {
-            "modelo": forms.Select(attrs={"class": "form-control"}),
-            "placa": forms.Select(attrs={"class": "form-control"}),
-            "color_placa": forms.TextInput(attrs={"class": "form-control"}),
-            "cantidad": forms.NumberInput(attrs={"class": "form-control"}),
-        }
+    def __init__(self, *args, **kwargs):
+        pedido = kwargs.pop("pedido", None)
+        super().__init__(*args, **kwargs)
 
+        from apps.catalogo.models import PrecioBaseGeneracion
+
+        if pedido:
+            generacion = pedido.alumno.grupo.generacion
+
+            modelos_ids = PrecioBaseGeneracion.objects.filter(
+                generacion=generacion
+            ).values_list("modelo_id", flat=True)
+
+            self.fields["modelo"].queryset = Modelo.objects.filter(
+                id__in=modelos_ids
+            )
 
 class PedidoItemAnilloForm(forms.ModelForm):
 
@@ -23,11 +32,22 @@ class PedidoItemAnilloForm(forms.ModelForm):
         model = PedidoItemAnillo
         fields = ["anillo", "tamano_anillo", "cantidad"]
 
-        widgets = {
-            "anillo": forms.Select(attrs={"class": "form-control"}),
-            "tamano_anillo": forms.NumberInput(attrs={"class": "form-control"}),
-            "cantidad": forms.NumberInput(attrs={"class": "form-control"}),
-        }
+    def __init__(self, *args, **kwargs):
+        pedido = kwargs.pop("pedido", None)
+        super().__init__(*args, **kwargs)
+
+        from apps.catalogo.models import PrecioAnilloGeneracion
+
+        if pedido:
+            generacion = pedido.alumno.grupo.generacion
+
+            anillos_ids = PrecioAnilloGeneracion.objects.filter(
+                generacion=generacion
+            ).values_list("anillo_id", flat=True)
+
+            self.fields["anillo"].queryset = Anillo.objects.filter(
+                id__in=anillos_ids
+            )
 
 
 class PedidoItemExtraForm(forms.ModelForm):

@@ -59,6 +59,16 @@ class PedidoItemBaseCreateView(CreateView):
             "pedido_detail",
             kwargs={"pk": self.kwargs["pedido_id"]}
         )
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["pedido"] = Pedido.objects.get(id=self.kwargs["pedido_id"])
+        return kwargs
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["pedido"] = Pedido.objects.get(id=self.kwargs["pedido_id"])
+        return kwargs
 
 
 # 🔁 REDIRECT ALUMNO → PEDIDO
@@ -91,6 +101,11 @@ class PedidoItemBaseUpdateView(UpdateView):
             "pedido_detail",
             kwargs={"pk": self.object.pedido_id}
         )
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["pedido"] = self.object.pedido
+        return kwargs
 
 class PedidoItemBaseDeleteView(DeleteView):
     model = PedidoItemBase
@@ -118,6 +133,11 @@ class PedidoItemAnilloCreateView(CreateView):
         context = super().get_context_data(**kwargs)
         context["pedido_id"] = self.kwargs["pedido_id"]  # 🔥 clave
         return context
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["pedido"] = Pedido.objects.get(id=self.kwargs["pedido_id"])
+        return kwargs
 
     def get_success_url(self):
         return reverse("pedido_detail", kwargs={"pk": self.kwargs["pedido_id"]})
@@ -134,6 +154,11 @@ class PedidoItemAnilloUpdateView(UpdateView):
 
     def get_success_url(self):
         return reverse("pedido_detail", kwargs={"pk": self.object.pedido_id})
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["pedido"] = self.object.pedido
+        return kwargs
 
 
 class PedidoItemAnilloDeleteView(DeleteView):
