@@ -1,6 +1,7 @@
 from django.views.generic import DetailView, CreateView, UpdateView
 from django.db.models import Count
 from apps.escuelas.models import Grupo
+from apps.ventas.models import Pedido
 from django.urls import reverse
 from .models import Alumno
 from .forms import AlumnoForm
@@ -24,6 +25,8 @@ class GrupoDetailView(DetailView):
         return context
     
 
+from django.shortcuts import redirect
+
 
 class AlumnoCreateView(CreateView):
     model = Alumno
@@ -36,11 +39,17 @@ class AlumnoCreateView(CreateView):
         return kwargs
 
     def form_valid(self, form):
+        # 🔥 asignar grupo
         form.instance.grupo_id = self.kwargs["grupo_id"]
-        return super().form_valid(form)
 
-    def get_success_url(self):
-        return reverse("grupo_detail", kwargs={"pk": self.kwargs["grupo_id"]})
+        # 🔥 guardar alumno SIN usar super()
+        self.object = form.save()
+
+        # 🔥 crear pedido
+        pedido, created = Pedido.objects.get_or_create(alumno=self.object)
+
+        # 🔥 redirigir manualmente
+        return redirect("pedido_detail", pk=pedido.id)
     
 
 class AlumnoUpdateView(UpdateView):
