@@ -1,5 +1,5 @@
 from django import forms
-from apps.catalogo.models import Modelo
+from apps.catalogo.models import Modelo, Anillo
 from .models import PedidoItemBase, PedidoItemAnillo, PedidoItemExtra, Observacion, Pago
 
 
