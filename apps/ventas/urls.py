@@ -1,4 +1,5 @@
 from django.urls import path
+from . import views
 from .views import (
     PedidoCreateView,
     PedidoDetailView,
@@ -43,4 +44,8 @@ urlpatterns = [
 
     path('pedidos/<int:pedido_id>/add-pago/', PagoCreateView.as_view(), name='pago_create'),
     path('pago/<int:pk>/eliminar/', PagoDeleteView.as_view(), name='pago_delete'),
+
+    # apps/ventas/urls.py
+    path("ajax/secciones/", views.cargar_secciones, name="ajax_secciones"),
+    path("ajax/modelos/", views.cargar_modelos, name="ajax_modelos"),
 ]

@@ -4,7 +4,14 @@ from django.shortcuts import redirect
 from apps.alumnos.models import Alumno
 from .models import PedidoItemBase, Pedido, PedidoItemAnillo, PedidoItemExtra, Observacion, Pago
 from .form import PedidoItemBaseForm, PedidoItemAnilloForm, PedidoItemExtraForm, ObservacionForm, PagoForm
+from django.http import JsonResponse
+from apps.catalogo.models import PrecioBaseGeneracion
 
+
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+
+from apps.catalogo.models import PrecioBaseGeneracion
 
 class PedidoCreateView(CreateView):
     model = Pedido
@@ -40,6 +47,12 @@ class PedidoDetailView(DetailView):
 
 # ############## itembase
 
+
+
+# ==============================
+# 🧾 CREAR ITEM BASE
+# ==============================
+
 class PedidoItemBaseCreateView(CreateView):
     model = PedidoItemBase
     form_class = PedidoItemBaseForm
@@ -49,9 +62,36 @@ class PedidoItemBaseCreateView(CreateView):
         form.instance.pedido_id = self.kwargs["pedido_id"]
         return super().form_valid(form)
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["pedido"] = get_object_or_404(Pedido, id=self.kwargs["pedido_id"])
+        return kwargs
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["pedido_id"] = self.kwargs["pedido_id"]  # 🔥 clave
+
+        pedido = get_object_or_404(Pedido, id=self.kwargs["pedido_id"])
+        context["pedido"] = pedido
+        context["pedido_id"] = pedido.id
+
+        # 🔥 OBTENER TAMAÑOS DISPONIBLES
+        generacion = pedido.alumno.grupo.generacion
+
+        precios = PrecioBaseGeneracion.objects.filter(
+            generacion=generacion
+        ).select_related("modelo__tamano_producto")
+
+        tamanos_dict = {}
+
+        for p in precios:
+            t = p.modelo.tamano_producto
+            tamanos_dict[t.id] = t.nombre
+
+        context["tamanos"] = [
+            {"id": k, "nombre": v}
+            for k, v in tamanos_dict.items()
+        ]
+
         return context
 
     def get_success_url(self):
@@ -59,17 +99,66 @@ class PedidoItemBaseCreateView(CreateView):
             "pedido_detail",
             kwargs={"pk": self.kwargs["pedido_id"]}
         )
-    
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs["pedido"] = Pedido.objects.get(id=self.kwargs["pedido_id"])
-        return kwargs
-    
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs["pedido"] = Pedido.objects.get(id=self.kwargs["pedido_id"])
-        return kwargs
 
+
+# ==============================
+# ⚡ AJAX → CARGAR SECCIONES
+# ==============================
+
+def cargar_secciones(request):
+    tamano_id = request.GET.get("tamano")
+    generacion_id = request.GET.get("generacion")
+
+    if not tamano_id or not generacion_id:
+        return JsonResponse([], safe=False)
+
+    precios = PrecioBaseGeneracion.objects.filter(
+        generacion_id=generacion_id,
+        modelo__tamano_producto_id=tamano_id
+    ).select_related("modelo__seccion")
+
+    # 🔥 evitar duplicados
+    secciones_dict = {}
+
+    for p in precios:
+        s = p.modelo.seccion
+        secciones_dict[s.id] = s.nombre
+
+    data = [
+        {"id": k, "nombre": v}
+        for k, v in secciones_dict.items()
+    ]
+
+    return JsonResponse(data, safe=False)
+
+
+# ==============================
+# ⚡ AJAX → CARGAR MODELOS
+# ==============================
+
+def cargar_modelos(request):
+    tamano_id = request.GET.get("tamano")
+    seccion_id = request.GET.get("seccion")
+    generacion_id = request.GET.get("generacion")
+
+    if not tamano_id or not seccion_id or not generacion_id:
+        return JsonResponse([], safe=False)
+
+    precios = PrecioBaseGeneracion.objects.filter(
+        generacion_id=generacion_id,
+        modelo__tamano_producto_id=tamano_id,
+        modelo__seccion_id=seccion_id
+    ).select_related("modelo")
+
+    data = [
+        {
+            "id": p.modelo.id,
+            "nombre": p.modelo.nombre
+        }
+        for p in precios
+    ]
+
+    return JsonResponse(data, safe=False)
 
 # 🔁 REDIRECT ALUMNO → PEDIDO
 

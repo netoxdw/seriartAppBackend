@@ -10,6 +10,21 @@
         {% csrf_token %}
 
         <div class="mb-3">
+            <label>Tamaño</label>
+            <select id="tamano" class="form-select">
+                <option value="">---------</option>
+                {% for t in tamanos %}
+                <option value="{{ t.id }}">{{ t.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label>Sección</label>
+            <select id="seccion" class="form-select"></select>
+        </div>
+
+        <div class="mb-3">
             <label>Modelo</label>
             {{ form.modelo }}
         </div>
@@ -38,5 +53,44 @@
     </form>
 
 </div>
+
+<script>
+    const generacion = "{{ pedido.alumno.grupo.generacion.id }}";
+
+    const tamano = document.getElementById("tamano");
+    const seccion = document.getElementById("seccion");
+    const modelo = document.getElementById("id_modelo");
+
+    // 🔥 tamaño → secciones
+    tamano.addEventListener("change", function () {
+
+        fetch(`/ajax/secciones/?tamano=${this.value}&generacion=${generacion}`)
+            .then(res => res.json())
+            .then(data => {
+
+                seccion.innerHTML = '<option value="">---------</option>';
+                modelo.innerHTML = '<option value="">---------</option>';
+
+                data.forEach(item => {
+                    seccion.innerHTML += `<option value="${item.id}">${item.nombre}</option>`;
+                });
+            });
+    });
+
+    // 🔥 sección → modelos
+    seccion.addEventListener("change", function () {
+
+        fetch(`/ajax/modelos/?tamano=${tamano.value}&seccion=${this.value}&generacion=${generacion}`)
+            .then(res => res.json())
+            .then(data => {
+
+                modelo.innerHTML = '<option value="">---------</option>';
+
+                data.forEach(item => {
+                    modelo.innerHTML += `<option value="${item.id}">${item.nombre}</option>`;
+                });
+            });
+    });
+</script>
 
 {% endblock %}

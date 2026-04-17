@@ -1,19 +1,18 @@
 from django import forms
-from apps.catalogo.models import Modelo, Anillo
+from apps.catalogo.models import Modelo, Anillo, PrecioBaseGeneracion
 from .models import PedidoItemBase, PedidoItemAnillo, PedidoItemExtra, Observacion, Pago
 
+# apps/ventas/forms.py
 
 class PedidoItemBaseForm(forms.ModelForm):
 
     class Meta:
         model = PedidoItemBase
-        fields = ["modelo", "cantidad", "placa", "color_placa"]
+        fields = ["modelo", "placa", "color_placa", "cantidad"]
 
     def __init__(self, *args, **kwargs):
         pedido = kwargs.pop("pedido", None)
         super().__init__(*args, **kwargs)
-
-        from apps.catalogo.models import PrecioBaseGeneracion
 
         if pedido:
             generacion = pedido.alumno.grupo.generacion
@@ -25,6 +24,12 @@ class PedidoItemBaseForm(forms.ModelForm):
             self.fields["modelo"].queryset = Modelo.objects.filter(
                 id__in=modelos_ids
             )
+        else:
+            self.fields["modelo"].queryset = Modelo.objects.none()
+
+
+
+
 
 class PedidoItemAnilloForm(forms.ModelForm):
 
