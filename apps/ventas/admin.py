@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Pedido, PedidoItemBase, PedidoItemAnillo, PedidoItemExtra, Observacion, Pago
+from .models import Pedido, PedidoItemBase, PedidoItemAnillo, PedidoItemExtra, Observacion, Pago, PedidoDescuento
 
 
 class PedidoItemBaseInline(admin.TabularInline):
@@ -232,3 +232,11 @@ class PagoAdmin(admin.ModelAdmin):
         "folio_nota",
     )
     readonly_fields = ("fecha_registro",)
+
+# DESCUENTO
+
+# apps/ventas/admin.py
+
+@admin.register(PedidoDescuento)
+class PedidoDescuentoAdmin(admin.ModelAdmin):
+    list_display = ("pedido", "monto", "motivo", "fecha")

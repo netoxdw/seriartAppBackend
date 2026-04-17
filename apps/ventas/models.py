@@ -57,11 +57,17 @@ class Pedido(models.Model):
         return f"Pedido {self.id} - {self.alumno}"
 
     def calcular_total(self):
-        total_bases = sum(item.subtotal or 0 for item in self.items_base.all())
-        total_anillos = sum(item.subtotal or 0 for item in self.items_anillo.all())
-        total_extras = sum(item.subtotal or 0 for item in self.items_extra.all())
+        total_bases = sum(item.subtotal for item in self.items_base.all())
+        total_anillos = sum(item.subtotal for item in self.items_anillo.all())
+        total_extras = sum(item.subtotal for item in self.items_extra.all())
+        total_descuentos = sum(d.monto for d in self.descuentos.all())
 
-        self.total = total_bases + total_anillos + total_extras
+        self.total = total_bases + total_anillos + total_extras - total_descuentos
+
+        # 🔥 evitar negativos
+        if self.total < 0:
+            self.total = 0
+
         self.save(update_fields=["total"])
 
     def clean(self):
@@ -344,3 +350,43 @@ class Pago(models.Model):
         pedido = self.pedido
         super().delete(*args, **kwargs)
         pedido.calcular_total()  # 🔥 clave
+
+# DESCUENTO
+
+class PedidoDescuento(models.Model):
+    pedido = models.ForeignKey(
+        Pedido,
+        on_delete=models.CASCADE,
+        related_name="descuentos"
+    )
+    monto = models.DecimalField(
+        max_digits=10,
+        decimal_places=2
+    )
+    motivo = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True
+    )
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-id"]
+        verbose_name = "Descuento"
+        verbose_name_plural = "Descuentos"
+
+    def __str__(self):
+        return f"Descuento ${self.monto} - Pedido {self.pedido.id}"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.pedido.calcular_total()
+
+    def clean(self):
+        if self.monto <= 0:
+            raise ValidationError("El descuento debe ser mayor a cero.")
+
+    def delete(self, *args, **kwargs):
+        pedido = self.pedido
+        super().delete(*args, **kwargs)
+        pedido.calcular_total()
