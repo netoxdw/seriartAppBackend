@@ -17,7 +17,10 @@ from .views import (
     ObservacionUpdateView,
     ObservacionDeleteView,
     PagoCreateView,
-    PagoDeleteView
+    PagoDeleteView,
+    PedidoDescuentoCreateView,
+    PedidoDescuentoUpdateView,
+    PedidoDescuentoDeleteView,
     )
 
 urlpatterns = [
@@ -48,4 +51,8 @@ urlpatterns = [
     # apps/ventas/urls.py
     path("ajax/secciones/", views.cargar_secciones, name="ajax_secciones"),
     path("ajax/modelos/", views.cargar_modelos, name="ajax_modelos"),
+
+    path("pedidos/<int:pedido_id>/add-descuento/", PedidoDescuentoCreateView.as_view(), name="descuento_create"),
+    path("descuento/<int:pk>/editar/", PedidoDescuentoUpdateView.as_view(), name="descuento_update"),
+    path("descuento/<int:pk>/eliminar/", PedidoDescuentoDeleteView.as_view(), name="descuento_delete"),
 ]

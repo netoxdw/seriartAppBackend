@@ -44,22 +44,44 @@
 
         <!-- 💰 RESUMEN -->
         <div class="text-end">
+
+            <!-- 🧾 SUBTOTAL -->
+            <div>
+                <strong>Subtotal:</strong>
+                ${{ subtotal }}
+            </div>
+
+            <!-- 💸 DESCUENTOS -->
+            <div class="text-danger">
+                <strong>Descuentos:</strong>
+                - ${{ total_descuentos }}
+            </div>
+
+            <hr class="my-2">
+
+            <!-- 💰 TOTAL FINAL -->
             <div>
                 <strong>Total:</strong>
                 <span class="badge bg-success">${{ pedido.total }}</span>
             </div>
 
+            <!-- 💳 PAGADO -->
             <div>
-                <strong>Pagado:</strong> ${{ pedido.total_pagado }}
+                <strong>Pagado:</strong>
+                ${{ pedido.total_pagado }}
             </div>
 
+            <!-- ⚠️ RESTANTE -->
             <div class="text-danger">
-                <strong>Resta:</strong> ${{ pedido.saldo_pendiente }}
+                <strong>Resta:</strong>
+                ${{ pedido.saldo_pendiente }}
             </div>
 
+            <!-- 📦 ESTADO -->
             <div class="mt-1">
                 <strong>Estado:</strong> {{ pedido.estado }}
             </div>
+
         </div>
 
     </div>
@@ -348,6 +370,65 @@
             <tr>
                 <td colspan="4" class="text-center">
                     Sin pagos registrados
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- 💸 DESCUENTOS -->
+
+    <h5 class="mt-4">Descuentos</h5>
+
+    <div class="mb-2">
+        <a href="{% url 'descuento_create' pedido.id %}" class="btn btn-warning btn-sm">
+            + Agregar Descuento
+        </a>
+    </div>
+
+    <table class="table table-sm table-bordered align-middle">
+        <thead class="table-light">
+            <tr>
+                <th class="text-end">Monto</th>
+                <th>Motivo</th>
+                <th>Fecha</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for d in descuentos %}
+            <tr>
+                <!-- 💸 MONTO -->
+                <td class="text-end fw-bold text-danger">
+                    - ${{ d.monto }}
+                </td>
+
+                <!-- 📝 MOTIVO -->
+                <td>
+                    {{ d.motivo|default:"-" }}
+                </td>
+
+                <!-- 📅 FECHA -->
+                <td>
+                    {{ d.fecha|date:"d/m/Y" }}
+                </td>
+
+                <!-- ⚙️ ACCIONES -->
+                <td class="text-center">
+                    <a href="{% url 'descuento_update' d.id %}" class="btn btn-sm btn-warning">
+                        ✏️
+                    </a>
+                    <a href="{% url 'descuento_delete' d.id %}" class="btn btn-sm btn-danger">
+                        🗑
+                    </a>
+                </td>
+            </tr>
+
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center">
+                    Sin descuentos registrados
                 </td>
             </tr>
             {% endfor %}

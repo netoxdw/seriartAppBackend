@@ -1,17 +1,17 @@
 from django.views.generic import CreateView, DetailView, UpdateView, DeleteView
 from django.urls import reverse
 from django.shortcuts import redirect
-from apps.alumnos.models import Alumno
-from .models import PedidoItemBase, Pedido, PedidoItemAnillo, PedidoItemExtra, Observacion, Pago
-from .form import PedidoItemBaseForm, PedidoItemAnilloForm, PedidoItemExtraForm, ObservacionForm, PagoForm
-from django.http import JsonResponse
-from apps.catalogo.models import PrecioBaseGeneracion
-
-
-from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
 
+
+from apps.alumnos.models import Alumno
+from .models import PedidoItemBase, Pedido, PedidoItemAnillo, PedidoItemExtra, Observacion, Pago, PedidoDescuento
+from .form import PedidoItemBaseForm, PedidoItemAnilloForm, PedidoItemExtraForm, ObservacionForm, PagoForm, PedidoDescuentoForm
+from django.http import JsonResponse
 from apps.catalogo.models import PrecioBaseGeneracion
+
+
 
 class PedidoCreateView(CreateView):
     model = Pedido
@@ -37,12 +37,24 @@ class PedidoDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context["items_base"] = self.object.items_base.all()
-        context["items_anillo"] = self.object.items_anillo.all()
-        context["items_extra"] = self.object.items_extra.all()
+        pedido = self.object
+
+        # 🧾 ITEMS
+        context["items_base"] = pedido.items_base.all()
+        context["items_anillo"] = pedido.items_anillo.all()
+        context["items_extra"] = pedido.items_extra.all()
+
+        # 💸 DESCUENTOS
+        descuentos = pedido.descuentos.all()
+        total_descuentos = sum(d.monto for d in descuentos)
+
+        context["descuentos"] = descuentos
+        context["total_descuentos"] = total_descuentos
+
+        # 🔥 CLAVE (AQUÍ ESTABA EL PROBLEMA)
+        context["subtotal"] = pedido.total + total_descuentos
 
         return context
-
 
 
 # ############## itembase
@@ -373,6 +385,54 @@ class PagoCreateView(CreateView):
 class PagoDeleteView(DeleteView):
     model = Pago
     template_name = "ventas/pago_confirm_delete.html"
+
+    def get_success_url(self):
+        return reverse("pedido_detail", kwargs={"pk": self.object.pedido_id})
+    
+
+# DESCUENTO ###############################################################################3
+
+
+# ✅ CREAR
+class PedidoDescuentoCreateView(CreateView):
+    model = PedidoDescuento
+    form_class = PedidoDescuentoForm
+    template_name = "ventas/descuento_form.html"
+
+    def form_valid(self, form):
+        form.instance.pedido = get_object_or_404(
+            Pedido, id=self.kwargs["pedido_id"]
+        )
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse("pedido_detail", kwargs={"pk": self.kwargs["pedido_id"]})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["pedido_id"] = self.kwargs["pedido_id"]
+        return context
+
+
+# ✏️ EDITAR
+class PedidoDescuentoUpdateView(UpdateView):
+    model = PedidoDescuento
+    form_class = PedidoDescuentoForm
+    template_name = "ventas/descuento_form.html"
+
+    def get_success_url(self):
+        return reverse("pedido_detail", kwargs={"pk": self.object.pedido_id})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["pedido_id"] = self.object.pedido_id
+        return context
+
+
+# 🗑️ ELIMINAR
+class PedidoDescuentoDeleteView(DeleteView):
+    model = PedidoDescuento
+    template_name = "ventas/descuento_confirm_delete.html"
 
     def get_success_url(self):
         return reverse("pedido_detail", kwargs={"pk": self.object.pedido_id})

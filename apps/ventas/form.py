@@ -1,6 +1,6 @@
 from django import forms
 from apps.catalogo.models import Modelo, Anillo, PrecioBaseGeneracion
-from .models import PedidoItemBase, PedidoItemAnillo, PedidoItemExtra, Observacion, Pago
+from .models import PedidoItemBase, PedidoItemAnillo, PedidoItemExtra, Observacion, Pago, PedidoDescuento
 
 # apps/ventas/forms.py
 
@@ -95,4 +95,16 @@ class PagoForm(forms.ModelForm):
             "fecha_pago": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
             "monto": forms.NumberInput(attrs={"class": "form-control"}),
             "folio_nota": forms.TextInput(attrs={"class": "form-control"}),
+        }
+
+
+
+class PedidoDescuentoForm(forms.ModelForm):
+    class Meta:
+        model = PedidoDescuento
+        fields = ["monto", "motivo"]
+
+        widgets = {
+            "monto": forms.NumberInput(attrs={"class": "form-control"}),
+            "motivo": forms.TextInput(attrs={"class": "form-control"}),
         }
