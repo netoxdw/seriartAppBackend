@@ -54,6 +54,14 @@ class PedidoDetailView(DetailView):
         # 🔥 CLAVE (AQUÍ ESTABA EL PROBLEMA)
         context["subtotal"] = pedido.total + total_descuentos
 
+        # 💳 PORCENTAJE PAGADO
+        if pedido.total > 0:
+            porcentaje_pagado = (pedido.total_pagado / pedido.total) * 100
+        else:
+            porcentaje_pagado = 0
+
+        context["porcentaje_pagado"] = round(porcentaje_pagado, 2)
+
         return context
 
 

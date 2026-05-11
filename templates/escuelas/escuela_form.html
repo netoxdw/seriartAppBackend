@@ -2,42 +2,164 @@
 
 {% block content %}
 
-<div class="card card-custom p-4">
+<div class="form-wrapper">
 
-    <h4>Agregar Escuela a Generación {{ view.generacion.anio }}</h4>
+    <div class="row justify-content-center">
 
-    <form method="post">
-        {% csrf_token %}
+        <div class="col-12 col-lg-9 col-xl-8">
 
-        <h6>Seleccionar existente</h6>
-        {{ form.escuela_existente }}
+            <div class="form-container">
 
-        <hr>
+                <!-- HEADER -->
+                <div class="form-header">
 
-        <h6>O crear nueva</h6>
+                    <div class="form-icon">
 
-        <div class="mb-2">
-            <label>Nombre</label>
-            {{ form.nombre }}
+                        <i class="bi bi-building-add"></i>
+
+                    </div>
+
+                    <div>
+
+                        <h2 class="form-title">
+                            Agregar Escuela
+                        </h2>
+
+                        <p class="form-subtitle mb-0">
+
+                            Generación {{ view.generacion.anio }}
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <!-- FORM -->
+                <form method="post">
+
+                    {% csrf_token %}
+
+                    <!-- OPTION 1 -->
+                    <div class="selection-card mb-4">
+
+                        <div class="selection-header">
+
+                            <div class="selection-badge">
+                                Opción 1
+                            </div>
+
+                            <h5 class="selection-title">
+                                Seleccionar escuela existente
+                            </h5>
+
+                        </div>
+
+                        <div class="mt-3">
+
+                            {{ form.escuela_existente }}
+
+                            <div class="input-help">
+
+                                Selecciona una escuela ya registrada
+                                en el sistema.
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- DIVIDER -->
+                    <div class="divider-container">
+
+                        <div class="divider-line"></div>
+
+                        <div class="divider-text">
+                            O
+                        </div>
+
+                        <div class="divider-line"></div>
+
+                    </div>
+
+                    <!-- OPTION 2 -->
+                    <div class="selection-card">
+
+                        <div class="selection-header">
+
+                            <div class="selection-badge secondary">
+                                Opción 2
+                            </div>
+
+                            <h5 class="selection-title">
+                                Crear nueva escuela
+                            </h5>
+
+                        </div>
+
+                        <!-- NOMBRE -->
+                        <div class="mb-4 mt-4">
+
+                            <label class="custom-label">
+                                Nombre
+                            </label>
+
+                            {{ form.nombre }}
+
+                        </div>
+
+                        <!-- DIRECCION -->
+                        <div class="mb-4">
+
+                            <label class="custom-label">
+                                Dirección
+                            </label>
+
+                            {{ form.direccion }}
+
+                        </div>
+
+                        <!-- TELEFONO -->
+                        <div class="mb-2">
+
+                            <label class="custom-label">
+                                Teléfono
+                            </label>
+
+                            {{ form.telefono }}
+
+                        </div>
+
+                    </div>
+
+                    <!-- ACTIONS -->
+                    <div class="form-actions">
+
+                        <a href="{% url 'generacion_detail' view.generacion.id %}"
+                           class="btn btn-light custom-cancel-btn">
+
+                            Cancelar
+
+                        </a>
+
+                        <button type="submit"
+                                class="btn btn-primary custom-submit-btn">
+
+                            <i class="bi bi-check-lg"></i>
+                            Guardar escuela
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
         </div>
 
-        <div class="mb-2">
-            <label>Dirección</label>
-            {{ form.direccion }}
-        </div>
-
-        <div class="mb-2">
-            <label>Teléfono</label>
-            {{ form.telefono }}
-        </div>
-
-        <button class="btn btn-primary mt-3">Guardar</button>
-
-        <a href="{% url 'generacion_detail' view.generacion.id %}" class="btn btn-secondary mt-3">
-            Cancelar
-        </a>
-
-    </form>
+    </div>
 
 </div>
 

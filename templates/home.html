@@ -2,37 +2,156 @@
 
 {% block content %}
 
-<div class="card card-custom p-4">
+<!-- PAGE HEADER -->
+<div class="dashboard-header mb-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4>Generaciones</h4>
+    <div>
+        <h2 class="dashboard-title">
+            Generaciones
+        </h2>
 
-        <a href="{% url 'generacion_create' %}" class="btn btn-success">
-            + Nueva Generación
-        </a>
+        <p class="dashboard-subtitle mb-0">
+            Administra las generaciones registradas en el sistema
+        </p>
     </div>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Año</th>
-                <th>Numero de escuelas</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for g in generaciones %}
-            <tr>
-                <td>
-                    <a href="{% url 'generacion_detail' g.id %}">
-                        {{ g.anio }}
-                    </a>
-                </td>
-                <td>{{ g.num_escuelas }} escuelas</td>
+    <a href="{% url 'generacion_create' %}"
+       class="btn btn-primary dashboard-btn">
 
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+        <i class="bi bi-plus-lg"></i>
+        Nueva Generación
+
+    </a>
+
+</div>
+
+<!-- CARD -->
+<div class="home-card">
+
+    <!-- TABLE RESPONSIVE -->
+    <div class="table-responsive">
+
+        <table class="table align-middle home-table">
+
+            <thead>
+                <tr>
+                    <th>
+                        Generación
+                    </th>
+
+                    <th>
+                        Escuelas
+                    </th>
+
+                    <th class="text-end">
+                        Acción
+                    </th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for g in generaciones %}
+
+                <tr>
+
+                    <!-- GENERACION -->
+                    <td>
+
+                        <div class="d-flex align-items-center gap-3">
+
+                            <div class="table-icon">
+
+                                <i class="bi bi-mortarboard-fill"></i>
+
+                            </div>
+
+                            <div>
+
+                                <a href="{% url 'generacion_detail' g.id %}"
+                                   class="table-title">
+
+                                    Generación {{ g.anio }}
+
+                                </a>
+
+                                <div class="table-subtitle">
+                                    Registro académico
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </td>
+
+                    <!-- ESCUELAS -->
+                    <td>
+
+                        <span class="badge bg-primary-subtle text-primary badge-custom">
+
+                            {{ g.num_escuelas }} escuelas
+
+                        </span>
+
+                    </td>
+
+                    <!-- ACTION -->
+                    <td class="text-end">
+
+                        <a href="{% url 'generacion_detail' g.id %}"
+                           class="btn btn-light btn-sm action-btn">
+
+                            Ver detalle
+
+                        </a>
+
+                    </td>
+
+                </tr>
+
+                {% empty %}
+
+                <tr>
+
+                    <td colspan="3">
+
+                        <div class="empty-state">
+
+                            <div class="empty-icon">
+
+                                <i class="bi bi-folder2-open"></i>
+
+                            </div>
+
+                            <h5>
+                                No hay generaciones registradas
+                            </h5>
+
+                            <p>
+                                Comienza creando una nueva generación.
+                            </p>
+
+                            <a href="{% url 'generacion_create' %}"
+                               class="btn btn-primary">
+
+                                Crear generación
+
+                            </a>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
 
 </div>
 

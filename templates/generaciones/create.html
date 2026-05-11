@@ -2,28 +2,101 @@
 
 {% block content %}
 
-<h2>Nueva Generación</h2>
+<div class="form-wrapper">
 
-<form method="post">
-    {% csrf_token %}
-    
-    <div class="mb-3">
-        <label>Nombre</label>
-        {{ form.nombre }}
+    <div class="row justify-content-center">
+
+        <div class="col-12 col-md-10 col-lg-8 col-xl-6">
+
+            <!-- FORM CARD -->
+            <div class="form-container">
+
+                <!-- HEADER -->
+                <div class="form-header">
+
+                    <div class="form-icon">
+
+                        <i class="bi bi-calendar-plus"></i>
+
+                    </div>
+
+                    <div>
+
+                        <h2 class="form-title">
+                            Nueva Generación
+                        </h2>
+
+                        <p class="form-subtitle mb-0">
+                            Registra una nueva generación escolar
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <!-- FORM -->
+                <form method="post">
+
+                    {% csrf_token %}
+
+                    <!-- NOMBRE -->
+                    <div class="mb-4">
+
+                        <label class="custom-label">
+                            Nombre
+                        </label>
+
+                        {{ form.nombre }}
+
+                        <div class="input-help">
+                            Ejemplo: Generación Ingeniería 2025
+                        </div>
+
+                    </div>
+
+                    <!-- AÑO -->
+                    <div class="mb-4">
+
+                        <label class="custom-label">
+                            Año
+                        </label>
+
+                        {{ form.anio }}
+
+                        <div class="input-help">
+                            Año correspondiente a la generación
+                        </div>
+
+                    </div>
+
+                    <!-- ACTIONS -->
+                    <div class="form-actions">
+
+                        <a href="{% url 'home' %}"
+                           class="btn btn-light custom-cancel-btn">
+
+                            Cancelar
+
+                        </a>
+
+                        <button type="submit"
+                                class="btn btn-primary custom-submit-btn">
+
+                            <i class="bi bi-check-lg"></i>
+                            Guardar generación
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
     </div>
 
-    <div class="mb-3">
-        <label>Año</label>
-        {{ form.anio }}
-    </div>
-
-    <button type="submit" class="btn btn-primary">
-        Guardar
-    </button>
-
-    <a href="{% url 'home' %}" class="btn btn-secondary">
-        Cancelar
-    </a>
-</form>
+</div>
 
 {% endblock %}

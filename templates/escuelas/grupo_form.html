@@ -2,52 +2,184 @@
 
 {% block content %}
 
-{% if form.non_field_errors %}
-<div class="alert alert-danger">
-    {{ form.non_field_errors }}
-</div>
-{% endif %}
+<div class="form-wrapper">
 
-<div class="card card-custom p-4">
+    <div class="row justify-content-center">
 
-    <h4>Nuevo Grupo</h4>
+        <div class="col-12 col-lg-8 col-xl-7">
 
-    <form method="post">
-        {% csrf_token %}
+            <!-- ALERT -->
+            {% if form.non_field_errors %}
 
-        <div class="mb-3">
-            <label>Nombre</label>
-            {{ form.nombre }}
-            <div class="text-danger">
-                {{ form.nombre.errors }}
+            <div class="alert custom-alert-danger mb-4">
+
+                <div class="d-flex align-items-start gap-3">
+
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+
+                    <div>
+
+                        <strong>
+                            Ocurrió un error
+                        </strong>
+
+                        <div>
+                            {{ form.non_field_errors }}
+                        </div>
+
+                    </div>
+
+                </div>
+
             </div>
+
+            {% endif %}
+
+            <!-- FORM CARD -->
+            <div class="form-container">
+
+                <!-- HEADER -->
+                <div class="form-header">
+
+                    <div class="form-icon">
+
+                        <i class="bi bi-people-fill"></i>
+
+                    </div>
+
+                    <div>
+
+                        <h2 class="form-title">
+
+                            {% if object %}
+                                Editar Grupo
+                            {% else %}
+                                Nuevo Grupo
+                            {% endif %}
+
+                        </h2>
+
+                        <p class="form-subtitle mb-0">
+
+                            Configura la información del grupo
+                            y la sesión fotográfica
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <!-- FORM -->
+                <form method="post">
+
+                    {% csrf_token %}
+
+                    <!-- NOMBRE -->
+                    <div class="mb-4">
+
+                        <label class="custom-label">
+
+                            Nombre del grupo
+
+                        </label>
+
+                        {{ form.nombre }}
+
+                        {% if form.nombre.errors %}
+
+                        <div class="field-error">
+
+                            {{ form.nombre.errors }}
+
+                        </div>
+
+                        {% endif %}
+
+                    </div>
+
+                    <!-- FECHA -->
+                    <div class="mb-4">
+
+                        <label class="custom-label">
+
+                            Fecha de fotografía
+
+                        </label>
+
+                        {{ form.fecha_fotografia }}
+
+                        <div class="input-help">
+
+                            Fecha programada para la sesión fotográfica
+
+                        </div>
+
+                    </div>
+
+                    <!-- HORA -->
+                    <div class="mb-4">
+
+                        <label class="custom-label">
+
+                            Hora de fotografía
+
+                        </label>
+
+                        {{ form.hora_fotografia }}
+
+                    </div>
+
+                    <!-- LUGAR -->
+                    <div class="mb-2">
+
+                        <label class="custom-label">
+
+                            Lugar de fotografía
+
+                        </label>
+
+                        {{ form.lugar_fotografia }}
+
+                    </div>
+
+                    <!-- ACTIONS -->
+                    <div class="form-actions">
+
+                        <a href="{% if object %}
+                                    {% url 'escuela_detail' object.generacion.id object.escuela.id %}
+                                 {% else %}
+                                    {% url 'escuela_detail' view.kwargs.generacion_id view.kwargs.escuela_id %}
+                                 {% endif %}"
+
+                           class="btn btn-light custom-cancel-btn">
+
+                            Cancelar
+
+                        </a>
+
+                        <button type="submit"
+                                class="btn btn-primary custom-submit-btn">
+
+                            <i class="bi bi-check-lg"></i>
+
+                            {% if object %}
+                                Guardar cambios
+                            {% else %}
+                                Guardar grupo
+                            {% endif %}
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
         </div>
 
-        <div class="mb-3">
-            <label>Fecha de fotografía</label>
-            {{ form.fecha_fotografia }}
-        </div>
-
-        <div class="mb-3">
-            <label>Hora de fotografía</label>
-            {{ form.hora_fotografia }}
-        </div>
-
-        <div class="mb-3">
-            <label>Lugar</label>
-            {{ form.lugar_fotografia }}
-        </div>
-
-        <button class="btn btn-primary">Guardar</button>
-
-        <a href="{% if object %}
-            {% url 'escuela_detail' object.generacion.id object.escuela.id %}
-         {% else %}
-            {% url 'escuela_detail' view.kwargs.generacion_id view.kwargs.escuela_id %}
-         {% endif %}" class="btn btn-secondary">
-            Cancelar
-        </a>
-    </form>
+    </div>
 
 </div>
 

@@ -25,61 +25,97 @@
 
         <!-- 👤 INFO ALUMNO -->
         <div>
+
             <h4 class="mb-1">
                 Pedido: {{ pedido.alumno.nombre }}
             </h4>
 
-            <div class="small text-muted">
+            <div class="small text-muted mb-2">
                 📌 Folio: <strong>{{ pedido.alumno.folio_fotos|default:"-" }}</strong><br>
                 📞 Tel: {{ pedido.alumno.telefono|default:"-" }}
             </div>
 
-            <!-- ✏️ EDITAR -->
-            <div class="mt-2">
+            <!-- ⚡ ACCIONES -->
+            <div class="d-flex flex-wrap gap-2 mt-2">
+
                 <a href="{% url 'alumno_update' pedido.alumno.id %}" class="btn btn-warning btn-sm">
                     ✏️ Editar datos
                 </a>
+
+                <a href="{% url 'itembase_create' pedido.id %}" class="btn btn-primary btn-sm">
+                    + Base
+                </a>
+
+                <a href="{% url 'itemanillo_create' pedido.id %}" class="btn btn-dark btn-sm">
+                    + Anillo
+                </a>
+
+                <a href="{% url 'pago_create' pedido.id %}" class="btn btn-success btn-sm">
+                    + Pago
+                </a>
+
             </div>
+
         </div>
 
-        <!-- 💰 RESUMEN -->
-        <div class="text-end">
 
-            <!-- 🧾 SUBTOTAL -->
-            <div>
-                <strong>Subtotal:</strong>
-                ${{ subtotal }}
+        <!-- 💰 RESUMEN -->
+        <div class="card p-3 shadow-sm">
+
+            <!-- 🧾 SUBTOTAL + DESCUENTO -->
+            <div class="d-flex justify-content-between mb-1">
+                <span class="text-muted">Subtotal</span>
+                <span>${{ subtotal }}</span>
             </div>
 
-            <!-- 💸 DESCUENTOS -->
-            <div class="text-danger">
-                <strong>Descuentos:</strong>
-                - ${{ total_descuentos }}
+            <div class="d-flex justify-content-between mb-2 text-danger">
+                <span>Descuentos</span>
+                <span>- ${{ total_descuentos }}</span>
             </div>
 
             <hr class="my-2">
 
-            <!-- 💰 TOTAL FINAL -->
-            <div>
-                <strong>Total:</strong>
-                <span class="badge bg-success">${{ pedido.total }}</span>
+            <!-- 💰 TOTAL DESTACADO -->
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <strong>Total</strong>
+                <span class="badge bg-success fs-6 px-3 py-2">
+                    ${{ pedido.total }}
+                </span>
             </div>
 
-            <!-- 💳 PAGADO -->
-            <div>
-                <strong>Pagado:</strong>
-                ${{ pedido.total_pagado }}
+            <!-- 💳 PAGOS -->
+            <div class="d-flex justify-content-between mb-1">
+                <span class="text-muted">Pagado</span>
+                <span class="text-success fw-semibold">
+                    ${{ pedido.total_pagado }}
+                </span>
             </div>
 
-            <!-- ⚠️ RESTANTE -->
-            <div class="text-danger">
-                <strong>Resta:</strong>
-                ${{ pedido.saldo_pendiente }}
+            <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted">Resta</span>
+                <span class="text-danger fw-semibold">
+                    ${{ pedido.saldo_pendiente }}
+                </span>
             </div>
 
-            <!-- 📦 ESTADO -->
-            <div class="mt-1">
-                <strong>Estado:</strong> {{ pedido.estado }}
+            <!-- 📊 PROGRESO -->
+            <div class="mt-2">
+                <div class="d-flex justify-content-between mb-1">
+                    <small class="text-muted">Progreso de pago</small>
+                    <small class="fw-semibold">{{ porcentaje_pagado }}%</small>
+                </div>
+
+                <div class="progress" style="height: 10px;">
+                    <div class="progress-bar 
+                {% if porcentaje_pagado == 100 %}
+                    bg-primary
+                {% elif porcentaje_pagado > 50 %}
+                    bg-success
+                {% else %}
+                    bg-warning
+                {% endif %}" role="progressbar" style="width: {{ porcentaje_pagado }}%;">
+                    </div>
+                </div>
             </div>
 
         </div>

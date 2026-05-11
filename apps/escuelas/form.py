@@ -2,6 +2,26 @@
 from .models import Generacion, Escuela, Grupo
 from django import forms
 
+
+class GeneracionForm(forms.ModelForm):
+
+    class Meta:
+        model = Generacion
+        fields = ['nombre', 'anio']
+
+        widgets = {
+
+            'nombre': forms.TextInput(attrs={
+                'placeholder': 'Ejemplo: Ingeniería 2025'
+            }),
+
+            'anio': forms.NumberInput(attrs={
+                'placeholder': '2025'
+            }),
+
+        }
+
+
 class EscuelaForm(forms.Form):
     escuela_existente = forms.ModelChoiceField(
         queryset=Escuela.objects.all(),

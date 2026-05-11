@@ -2,51 +2,157 @@
 
 {% block content %}
 
-<div class="card card-custom p-4">
+<div class="form-wrapper">
 
-    <h4>
-        {% if object %}
-        Editar Alumno
-        {% else %}
-        Nuevo Alumno
-        {% endif %}
-    </h4>
+    <div class="row justify-content-center">
 
-    <form method="post">
-        {% csrf_token %}
+        <div class="col-12 col-lg-8 col-xl-7">
 
-        <!-- 🔹 Nombre -->
-        <div class="mb-3">
-            <label>Nombre</label>
-            {{ form.nombre }}
-            <div class="text-danger">
-                {{ form.nombre.errors }}
+            <!-- FORM CARD -->
+            <div class="form-container">
+
+                <!-- HEADER -->
+                <div class="form-header">
+
+                    <div class="form-icon">
+
+                        <i class="bi bi-person-fill-add"></i>
+
+                    </div>
+
+                    <div>
+
+                        <h2 class="form-title">
+
+                            {% if object %}
+                                Editar Alumno
+                            {% else %}
+                                Nuevo Alumno
+                            {% endif %}
+
+                        </h2>
+
+                        <p class="form-subtitle mb-0">
+
+                            Registra la información del alumno
+                            y su folio fotográfico
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <!-- FORM -->
+                <form method="post">
+
+                    {% csrf_token %}
+
+                    <!-- NOMBRE -->
+                    <div class="mb-4">
+
+                        <label class="custom-label">
+
+                            Nombre completo
+
+                        </label>
+
+                        {{ form.nombre }}
+
+                        {% if form.nombre.errors %}
+
+                        <div class="field-error">
+
+                            {{ form.nombre.errors }}
+
+                        </div>
+
+                        {% endif %}
+
+                        <div class="input-help">
+
+                            Nombre completo del alumno
+
+                        </div>
+
+                    </div>
+
+                    <!-- TELEFONO -->
+                    <div class="mb-4">
+
+                        <label class="custom-label">
+
+                            Teléfono
+
+                        </label>
+
+                        {{ form.telefono }}
+
+                        <div class="input-help">
+
+                            Número de contacto del alumno
+                            o tutor
+
+                        </div>
+
+                    </div>
+
+                    <!-- FOLIO -->
+                    <div class="mb-2">
+
+                        <label class="custom-label">
+
+                            Folio fotográfico
+
+                        </label>
+
+                        {{ form.folio_fotos }}
+
+                        <div class="input-help">
+
+                            Identificador único de fotografías
+
+                        </div>
+
+                    </div>
+
+                    <!-- ACTIONS -->
+                    <div class="form-actions">
+
+                        <a href="{% if object %}
+                                    {% url 'grupo_detail' object.grupo.id %}
+                                 {% else %}
+                                    {% url 'grupo_detail' view.kwargs.grupo_id %}
+                                 {% endif %}"
+
+                           class="btn btn-light custom-cancel-btn">
+
+                            Cancelar
+
+                        </a>
+
+                        <button type="submit"
+                                class="btn btn-primary custom-submit-btn">
+
+                            <i class="bi bi-check-lg"></i>
+
+                            {% if object %}
+                                Guardar cambios
+                            {% else %}
+                                Guardar alumno
+                            {% endif %}
+
+                        </button>
+
+                    </div>
+
+                </form>
+
             </div>
+
         </div>
 
-        <!-- 🔹 Teléfono -->
-        <div class="mb-3">
-            <label>Teléfono</label>
-            {{ form.telefono }}
-        </div>
-
-        <!-- 🔹 Folio -->
-        <div class="mb-3">
-            <label>Folio de fotos</label>
-            {{ form.folio_fotos }}
-        </div>
-
-        <button class="btn btn-primary">Guardar</button>
-
-        <a href="{% if object %}
-            {% url 'grupo_detail' object.grupo.id %}
-         {% else %}
-            {% url 'grupo_detail' view.kwargs.grupo_id %}
-         {% endif %}" class="btn btn-secondary">
-            Cancelar
-        </a>
-
-    </form>
+    </div>
 
 </div>
 
