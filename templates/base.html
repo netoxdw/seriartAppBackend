@@ -36,12 +36,16 @@
             <div class="d-flex align-items-center justify-content-between py-3">
 
                 <!-- MOBILE BUTTON -->
+                {% if user.is_authenticated %}
+
                 <button class="btn btn-menu d-md-none" type="button" data-bs-toggle="offcanvas"
                     data-bs-target="#mobileSidebar">
 
                     <i class="bi bi-list"></i>
 
                 </button>
+
+                {% endif %}
 
                 <!-- LOGO -->
                 <div class="logo-container d-flex align-items-center gap-2">
@@ -69,12 +73,32 @@
                         Paquetes de Graduación
                     </span>
 
+                    {% if user.is_authenticated %}
+
+                    <span class="header-text">
+                        <i class="bi bi-person-circle"></i>
+                        {{ user.username }}
+                    </span>
+
+                    <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+
+                        <button class="btn btn-outline-dark btn-sm">
+
+                            <i class="bi bi-box-arrow-right"></i>
+                            Salir
+
+                        </button>
+
+                    </form>
+
+                    {% endif %}
+
                 </div>
 
             </div>
 
         </div>
-
     </header>
 
     <!-- LAYOUT -->
@@ -83,6 +107,7 @@
         <div class="row">
 
             <!-- SIDEBAR -->
+            {% if user.is_authenticated %}
             <aside class="col-md-3 col-lg-2 d-none d-md-block sidebar">
 
                 <div class="sidebar-content">
@@ -105,7 +130,7 @@
                     <!-- MENU -->
                     <nav class="sidebar-nav">
 
-                        <a href="#" class="sidebar-link active">
+                        <a href="{% url 'home' %}" class="sidebar-link active">
                             <i class="bi bi-calendar2-week"></i>
                             <span>Generaciones</span>
                         </a>
@@ -140,9 +165,17 @@
                 </div>
 
             </aside>
+            {% endif %}
 
             <!-- CONTENT -->
-            <main class="col-12 col-md-9 col-lg-10 content-area">
+            <main class="
+                {% if user.is_authenticated %}
+                    col-12 col-md-9 col-lg-10
+                {% else %}
+                    col-12
+                {% endif %}
+                content-area
+                ">
 
                 {% block content %}
                 {% endblock %}
@@ -154,6 +187,7 @@
     </div>
 
     <!-- MOBILE SIDEBAR -->
+    {% if user.is_authenticated %}
     <div class="offcanvas offcanvas-start sidebar-mobile" tabindex="-1" id="mobileSidebar">
 
         <div class="offcanvas-header border-bottom">
@@ -222,6 +256,7 @@
         </div>
 
     </div>
+    {% endif %}
 
     <!-- FOOTER -->
     <footer class="footer">

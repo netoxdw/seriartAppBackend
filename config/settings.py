@@ -101,3 +101,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'login'
+
+# =========================
+# SESSION CONFIG
+# =========================
+
+# 24 horas
+SESSION_COOKIE_AGE = 86400
+
+# mantener sesión al cerrar navegador
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+# renovar expiración en cada request
+SESSION_SAVE_EVERY_REQUEST = True
