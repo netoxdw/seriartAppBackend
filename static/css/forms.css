@@ -997,3 +997,91 @@
 
     font-size: 15px;
 }
+
+/* ========================================
+   DISCOUNT FORM
+======================================== */
+
+.discount-form-container {
+
+    border-top:
+        4px solid #d97706;
+}
+
+/* ========================================
+   ICON
+======================================== */
+
+.discount-form-icon {
+
+    background:
+        linear-gradient(
+            135deg,
+            #d97706,
+            #f59e0b
+        );
+
+    box-shadow:
+        0 12px 30px rgba(217,119,6,0.25);
+}
+
+/* ========================================
+   INFO CARD
+======================================== */
+
+.discount-info-card {
+
+    background:
+        linear-gradient(
+            135deg,
+            #fffbeb,
+            #ffffff
+        );
+}
+
+/* ========================================
+   DISCOUNT DELETE
+======================================== */
+
+.discount-delete-container {
+
+    border-top:
+        4px solid #d97706;
+}
+
+/* ========================================
+   ICON
+======================================== */
+
+.discount-delete-icon {
+
+    background:
+        linear-gradient(
+            135deg,
+            #d97706,
+            #f59e0b
+        );
+
+    box-shadow:
+        0 12px 30px rgba(217,119,6,0.25);
+}
+
+/* ========================================
+   PRODUCT ICON
+======================================== */
+
+.discount-product-icon {
+
+    background: #fef3c7;
+
+    color: #b45309;
+}
+
+/* ========================================
+   PRICE
+======================================== */
+
+.discount-price-text {
+
+    color: #b45309;
+}

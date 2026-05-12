@@ -1,23 +1,179 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+
+<link rel="stylesheet"
+      href="{% static 'css/forms.css' %}?{% now 'U' %}">
+
+{% endblock %}
 
 {% block content %}
 
-<div class="card p-4 text-center">
+<div class="form-wrapper">
 
-    <h4>¿Eliminar descuento?</h4>
+    <div class="row justify-content-center">
 
-    <p>
-        ${{ object.monto }} - {{ object.motivo }}
-    </p>
+        <div class="col-12 col-lg-7 col-xl-6">
 
-    <form method="post">
-        {% csrf_token %}
-        <button class="btn btn-danger">Eliminar</button>
-    </form>
+            <!-- DELETE CARD -->
+            <div class="delete-container discount-delete-container">
 
-    <a href="{% url 'pedido_detail' object.pedido_id %}" class="btn btn-secondary mt-2">
-        Cancelar
-    </a>
+                <!-- ICON -->
+                <div class="delete-icon-wrapper">
+
+                    <div class="delete-icon discount-delete-icon">
+
+                        <i class="bi bi-percent"></i>
+
+                    </div>
+
+                </div>
+
+                <!-- TITLE -->
+                <h2 class="delete-title">
+
+                    Eliminar descuento
+
+                </h2>
+
+                <!-- SUBTITLE -->
+                <p class="delete-subtitle">
+
+                    Esta acción eliminará el ajuste
+                    financiero aplicado al pedido.
+
+                </p>
+
+                <!-- DISCOUNT CARD -->
+                <div class="delete-product-card">
+
+                    <!-- HEADER -->
+                    <div class="d-flex align-items-center gap-3 mb-3">
+
+                        <div class="delete-product-icon discount-product-icon">
+
+                            <i class="bi bi-percent"></i>
+
+                        </div>
+
+                        <div>
+
+                            <div class="delete-product-title">
+
+                                Descuento aplicado
+
+                            </div>
+
+                            <div class="delete-product-subtitle">
+
+                                Ajuste financiero
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- DETAILS -->
+                    <div class="delete-product-details">
+
+                        <!-- MONTO -->
+                        <div class="delete-detail-item">
+
+                            <span class="delete-detail-label">
+
+                                Monto
+
+                            </span>
+
+                            <span class="delete-detail-value discount-price-text">
+
+                                - ${{ object.monto }}
+
+                            </span>
+
+                        </div>
+
+                        <!-- FECHA -->
+                        <div class="delete-detail-item">
+
+                            <span class="delete-detail-label">
+
+                                Fecha
+
+                            </span>
+
+                            <span class="delete-detail-value">
+
+                                {{ object.fecha|date:"d/m/Y" }}
+
+                            </span>
+
+                        </div>
+
+                        <!-- MOTIVO -->
+                        <div class="delete-detail-item">
+
+                            <span class="delete-detail-label">
+
+                                Motivo
+
+                            </span>
+
+                            <span class="delete-detail-value">
+
+                                {{ object.motivo|default:"-" }}
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- WARNING -->
+                <div class="delete-warning-box">
+
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+
+                    El total del pedido será recalculado automáticamente.
+
+                </div>
+
+                <!-- FORM -->
+                <form method="post">
+
+                    {% csrf_token %}
+
+                    <div class="form-actions justify-content-center mt-4">
+
+                        <a href="{% url 'pedido_detail' object.pedido_id %}"
+                           class="btn btn-light custom-cancel-btn">
+
+                            Cancelar
+
+                        </a>
+
+                        <button type="submit"
+                                class="btn btn-danger custom-submit-btn">
+
+                            <i class="bi bi-trash"></i>
+
+                            Eliminar descuento
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
 
 </div>
 

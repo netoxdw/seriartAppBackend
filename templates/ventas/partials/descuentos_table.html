@@ -1,0 +1,229 @@
+<!-- ========================================
+     DESCUENTOS
+======================================== -->
+
+<div class="table-section-card mb-4">
+
+    <!-- HEADER -->
+    <div class="table-section-header">
+
+        <div>
+
+            <h4 class="section-title mb-1">
+
+                Descuentos
+
+            </h4>
+
+            <p class="section-subtitle mb-0">
+
+                Ajustes y descuentos aplicados
+                al pedido
+
+            </p>
+
+        </div>
+
+        <!-- ACTION -->
+        <a href="{% url 'descuento_create' pedido.id %}"
+           class="btn btn-warning custom-table-btn">
+
+            <i class="bi bi-percent"></i>
+
+            Agregar descuento
+
+        </a>
+
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-responsive">
+
+        <table class="table align-middle modern-table">
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Descuento
+                    </th>
+
+                    <th>
+                        Motivo
+                    </th>
+
+                    <th>
+                        Fecha
+                    </th>
+
+                    <th class="text-end">
+                        Monto
+                    </th>
+
+                    <th class="text-end">
+                        Acción
+                    </th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for d in descuentos %}
+
+                <tr>
+
+                    <!-- DISCOUNT -->
+                    <td>
+
+                        <div class="d-flex align-items-center gap-3">
+
+                            <div class="table-product-icon discount-icon">
+
+                                <i class="bi bi-percent"></i>
+
+                            </div>
+
+                            <div>
+
+                                <div class="table-product-title">
+
+                                    Descuento aplicado
+
+                                </div>
+
+                                <div class="table-product-subtitle">
+
+                                    Ajuste financiero
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </td>
+
+                    <!-- MOTIVO -->
+                    <td>
+
+                        {% if d.motivo %}
+
+                        <div class="discount-reason">
+
+                            {{ d.motivo }}
+
+                        </div>
+
+                        {% else %}
+
+                        <span class="payment-empty">
+
+                            Sin motivo
+
+                        </span>
+
+                        {% endif %}
+
+                    </td>
+
+                    <!-- FECHA -->
+                    <td>
+
+                        <div class="payment-date">
+
+                            {{ d.fecha|date:"d/m/Y" }}
+
+                        </div>
+
+                    </td>
+
+                    <!-- MONTO -->
+                    <td class="text-end">
+
+                        <div class="discount-amount">
+
+                            - ${{ d.monto }}
+
+                        </div>
+
+                    </td>
+
+                    <!-- ACTIONS -->
+                    <td>
+
+                        <div class="table-actions">
+
+                            <!-- EDIT -->
+                            <a href="{% url 'descuento_update' d.id %}"
+                               class="table-action-btn warning">
+
+                                <i class="bi bi-pencil"></i>
+
+                            </a>
+
+                            <!-- DELETE -->
+                            <a href="{% url 'descuento_delete' d.id %}"
+                               class="table-action-btn danger">
+
+                                <i class="bi bi-trash"></i>
+
+                            </a>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                {% empty %}
+
+                <tr>
+
+                    <td colspan="5">
+
+                        <div class="empty-table-state">
+
+                            <div class="empty-table-icon discount-empty-icon">
+
+                                <i class="bi bi-percent"></i>
+
+                            </div>
+
+                            <h5>
+
+                                No hay descuentos registrados
+
+                            </h5>
+
+                            <p>
+
+                                Agrega descuentos o ajustes
+                                al pedido.
+
+                            </p>
+
+                            <a href="{% url 'descuento_create' pedido.id %}"
+                               class="btn btn-warning">
+
+                                Agregar descuento
+
+                            </a>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>

@@ -1,32 +1,154 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+
+<link rel="stylesheet"
+      href="{% static 'css/forms.css' %}?{% now 'U' %}">
+
+{% endblock %}
 
 {% block content %}
 
-<div class="card p-4">
+<div class="form-wrapper">
 
-    <h4>
-        {% if object %}Editar Descuento{% else %}Nuevo Descuento{% endif %}
-    </h4>
+    <div class="row justify-content-center">
 
-    <form method="post">
-        {% csrf_token %}
+        <div class="col-12 col-lg-7 col-xl-6">
 
-        <div class="mb-3">
-            <label>Monto</label>
-            {{ form.monto }}
+            <!-- FORM CONTAINER -->
+            <div class="form-container discount-form-container">
+
+                <!-- HEADER -->
+                <div class="form-header">
+
+                    <div class="form-icon discount-form-icon">
+
+                        <i class="bi bi-percent"></i>
+
+                    </div>
+
+                    <div>
+
+                        <h2 class="form-title">
+
+                            {% if object %}
+
+                            Editar descuento
+
+                            {% else %}
+
+                            Nuevo descuento
+
+                            {% endif %}
+
+                        </h2>
+
+                        <p class="form-subtitle mb-0">
+
+                            Registra ajustes y descuentos
+                            aplicados al pedido
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <!-- INFO CARD -->
+                <div class="selection-card discount-info-card mb-4">
+
+                    <div class="selection-header">
+
+                        <span class="selection-badge secondary">
+
+                            Pedido
+
+                        </span>
+
+                        <h5 class="selection-title">
+
+                            {{ pedido.alumno.nombre }}
+
+                        </h5>
+
+                    </div>
+
+                </div>
+
+                <!-- FORM -->
+                <form method="post">
+
+                    {% csrf_token %}
+
+                    <!-- MONTO -->
+                    <div class="mb-4">
+
+                        <label class="custom-label">
+
+                            Monto del descuento
+
+                        </label>
+
+                        {{ form.monto }}
+
+                        <div class="input-help">
+
+                            Cantidad que será descontada
+                            del total del pedido
+
+                        </div>
+
+                    </div>
+
+                    <!-- MOTIVO -->
+                    <div class="mb-4">
+
+                        <label class="custom-label">
+
+                            Motivo
+
+                        </label>
+
+                        {{ form.motivo }}
+
+                        <div class="input-help">
+
+                            Explica el motivo
+                            del descuento aplicado
+
+                        </div>
+
+                    </div>
+
+                    <!-- ACTIONS -->
+                    <div class="form-actions">
+
+                        <a href="{% url 'pedido_detail' pedido_id %}"
+                           class="btn btn-light custom-cancel-btn">
+
+                            Cancelar
+
+                        </a>
+
+                        <button type="submit"
+                                class="btn btn-warning custom-submit-btn">
+
+                            <i class="bi bi-check-lg"></i>
+
+                            Guardar descuento
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
         </div>
 
-        <div class="mb-3">
-            <label>Motivo</label>
-            {{ form.motivo }}
-        </div>
-
-        <button class="btn btn-success">Guardar</button>
-
-        <a href="{% url 'pedido_detail' pedido_id %}" class="btn btn-secondary">
-            Cancelar
-        </a>
-    </form>
+    </div>
 
 </div>
 
