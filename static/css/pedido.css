@@ -1174,3 +1174,54 @@
 
     color: #15803d;
 }
+
+/* ========================================
+   EXTRAS
+======================================== */
+
+/* ICON */
+
+.extra-icon {
+
+    background: #e2e8f0;
+
+    color: #475569;
+}
+
+/* DESCRIPTION */
+
+.extra-description {
+
+    color: var(--text);
+
+    font-size: 14px;
+
+    max-width: 260px;
+
+    line-height: 1.5;
+}
+
+/* BADGE */
+
+.extra-badge {
+
+    background: #e2e8f0;
+
+    color: #334155;
+}
+
+/* SUBTOTAL */
+
+.extra-subtotal {
+
+    color: #334155;
+}
+
+/* EMPTY */
+
+.extra-empty-icon {
+
+    background: #e2e8f0;
+
+    color: #475569;
+}

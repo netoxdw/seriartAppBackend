@@ -1,41 +1,186 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+
+<link rel="stylesheet"
+      href="{% static 'css/forms.css' %}?{% now 'U' %}">
+
+{% endblock %}
 
 {% block content %}
 
-<div class="card p-4">
+<div class="form-wrapper">
 
-    <h4>Agregar Extra</h4>
+    <div class="row justify-content-center">
 
-    <form method="post">
-        {% csrf_token %}
+        <div class="col-12 col-lg-8 col-xl-7">
 
-        <div class="mb-3">
-            <label>Nombre</label>
-            {{ form.nombre }}
+            <!-- FORM CONTAINER -->
+            <div class="form-container extra-form-container">
+
+                <!-- HEADER -->
+                <div class="form-header">
+
+                    <div class="form-icon extra-form-icon">
+
+                        <i class="bi bi-stars"></i>
+
+                    </div>
+
+                    <div>
+
+                        <h2 class="form-title">
+
+                            Agregar Extra
+
+                        </h2>
+
+                        <p class="form-subtitle mb-0">
+
+                            Registra productos o servicios
+                            adicionales del pedido
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <!-- INFO CARD -->
+                <div class="selection-card extra-info-card mb-4">
+
+                    <div class="selection-header">
+
+                        <span class="selection-badge">
+
+                            Pedido
+
+                        </span>
+
+                        <h5 class="selection-title">
+
+                            {{ pedido.alumno.nombre }}
+
+                        </h5>
+
+                    </div>
+
+                </div>
+
+                <!-- FORM -->
+                <form method="post">
+
+                    {% csrf_token %}
+
+                    <!-- NOMBRE -->
+                    <div class="mb-4">
+
+                        <label class="custom-label">
+
+                            Nombre del extra
+
+                        </label>
+
+                        {{ form.nombre }}
+
+                        <div class="input-help">
+
+                            Ejemplo:
+                            fotografías extra,
+                            marco especial,
+                            paquete digital, etc.
+
+                        </div>
+
+                    </div>
+
+                    <!-- DESCRIPCION -->
+                    <div class="mb-4">
+
+                        <label class="custom-label">
+
+                            Descripción
+
+                        </label>
+
+                        {{ form.descripcion }}
+
+                        <div class="input-help">
+
+                            Información adicional del producto
+
+                        </div>
+
+                    </div>
+
+                    <!-- ROW -->
+                    <div class="row">
+
+                        <!-- CANTIDAD -->
+                        <div class="col-12 col-md-6">
+
+                            <div class="mb-4">
+
+                                <label class="custom-label">
+
+                                    Cantidad
+
+                                </label>
+
+                                {{ form.cantidad }}
+
+                            </div>
+
+                        </div>
+
+                        <!-- PRECIO -->
+                        <div class="col-12 col-md-6">
+
+                            <div class="mb-4">
+
+                                <label class="custom-label">
+
+                                    Precio unitario
+
+                                </label>
+
+                                {{ form.precio_unitario }}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- ACTIONS -->
+                    <div class="form-actions">
+
+                        <a href="{% url 'pedido_detail' pedido_id %}"
+                           class="btn btn-light custom-cancel-btn">
+
+                            Cancelar
+
+                        </a>
+
+                        <button type="submit"
+                                class="btn btn-secondary custom-submit-btn">
+
+                            <i class="bi bi-check-lg"></i>
+
+                            Guardar extra
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
         </div>
 
-        <div class="mb-3">
-            <label>Descripción</label>
-            {{ form.descripcion }}
-        </div>
-
-        <div class="mb-3">
-            <label>Cantidad</label>
-            {{ form.cantidad }}
-        </div>
-
-        <div class="mb-3">
-            <label>Precio unitario</label>
-            {{ form.precio_unitario }}
-        </div>
-
-        <button class="btn btn-success">Guardar</button>
-
-        <a href="{% url 'pedido_detail' pedido_id %}" class="btn btn-secondary">
-            Cancelar
-        </a>
-
-    </form>
+    </div>
 
 </div>
 

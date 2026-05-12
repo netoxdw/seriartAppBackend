@@ -1,0 +1,244 @@
+<!-- ========================================
+     ITEMS EXTRA
+======================================== -->
+
+<div class="table-section-card mb-4">
+
+    <!-- HEADER -->
+    <div class="table-section-header">
+
+        <div>
+
+            <h4 class="section-title mb-1">
+
+                Extras
+
+            </h4>
+
+            <p class="section-subtitle mb-0">
+
+                Productos y servicios adicionales
+                del pedido
+
+            </p>
+
+        </div>
+
+        <!-- ACTION -->
+        <a href="{% url 'itemextra_create' pedido.id %}"
+           class="btn btn-secondary custom-table-btn">
+
+            <i class="bi bi-plus-circle"></i>
+
+            Agregar extra
+
+        </a>
+
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-responsive">
+
+        <table class="table align-middle modern-table">
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Extra
+                    </th>
+
+                    <th>
+                        Descripción
+                    </th>
+
+                    <th class="text-end">
+                        Precio
+                    </th>
+
+                    <th class="text-end">
+                        Cantidad
+                    </th>
+
+                    <th class="text-end">
+                        Subtotal
+                    </th>
+
+                    <th class="text-end">
+                        Acción
+                    </th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for item in items_extra %}
+
+                <tr>
+
+                    <!-- PRODUCT -->
+                    <td>
+
+                        <div class="d-flex align-items-center gap-3">
+
+                            <div class="table-product-icon extra-icon">
+
+                                <i class="bi bi-stars"></i>
+
+                            </div>
+
+                            <div>
+
+                                <div class="table-product-title">
+
+                                    {{ item.nombre }}
+
+                                </div>
+
+                                <div class="table-product-subtitle">
+
+                                    Producto adicional
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </td>
+
+                    <!-- DESCRIPTION -->
+                    <td>
+
+                        {% if item.descripcion %}
+
+                        <div class="extra-description">
+
+                            {{ item.descripcion }}
+
+                        </div>
+
+                        {% else %}
+
+                        <span class="payment-empty">
+
+                            Sin descripción
+
+                        </span>
+
+                        {% endif %}
+
+                    </td>
+
+                    <!-- PRICE -->
+                    <td class="text-end">
+
+                        <span class="money-value">
+
+                            ${{ item.precio_unitario }}
+
+                        </span>
+
+                    </td>
+
+                    <!-- QUANTITY -->
+                    <td class="text-end">
+
+                        <span class="quantity-badge extra-badge">
+
+                            {{ item.cantidad }}
+
+                        </span>
+
+                    </td>
+
+                    <!-- SUBTOTAL -->
+                    <td class="text-end">
+
+                        <span class="subtotal-value extra-subtotal">
+
+                            ${{ item.subtotal }}
+
+                        </span>
+
+                    </td>
+
+                    <!-- ACTIONS -->
+                    <td>
+
+                        <div class="table-actions">
+
+                            <!-- EDIT -->
+                            <a href="{% url 'itemextra_update' item.id %}"
+                               class="table-action-btn warning">
+
+                                <i class="bi bi-pencil"></i>
+
+                            </a>
+
+                            <!-- DELETE -->
+                            <a href="{% url 'itemextra_delete' item.id %}"
+                               class="table-action-btn danger">
+
+                                <i class="bi bi-trash"></i>
+
+                            </a>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                {% empty %}
+
+                <tr>
+
+                    <td colspan="6">
+
+                        <div class="empty-table-state">
+
+                            <div class="empty-table-icon extra-empty-icon">
+
+                                <i class="bi bi-stars"></i>
+
+                            </div>
+
+                            <h5>
+
+                                No hay extras registrados
+
+                            </h5>
+
+                            <p>
+
+                                Agrega productos o servicios
+                                adicionales al pedido.
+
+                            </p>
+
+                            <a href="{% url 'itemextra_create' pedido.id %}"
+                               class="btn btn-secondary">
+
+                                Agregar extra
+
+                            </a>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
