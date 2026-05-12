@@ -1,27 +1,167 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+
+<link rel="stylesheet"
+      href="{% static 'css/forms.css' %}?{% now 'U' %}">
+
+{% endblock %}
 
 {% block content %}
 
-<div class="card p-4">
+<div class="form-wrapper">
 
-    <h4>Eliminar anillo</h4>
+    <div class="row justify-content-center">
 
-    <p>¿Eliminar este producto?</p>
+        <div class="col-12 col-lg-7 col-xl-6">
 
-    <strong>
-        {{ object.anillo.modelo }} - {{ object.anillo.metal }}
-    </strong>
+            <!-- DELETE CARD -->
+            <div class="delete-container ring-delete-container">
 
-    <form method="post">
-        {% csrf_token %}
+                <!-- ICON -->
+                <div class="delete-icon-wrapper">
 
-        <button class="btn btn-danger">Eliminar</button>
+                    <div class="delete-icon ring-delete-icon">
 
-        <a href="{% url 'pedido_detail' object.pedido_id %}" 
-           class="btn btn-secondary">
-            Cancelar
-        </a>
-    </form>
+                        <i class="bi bi-gem"></i>
+
+                    </div>
+
+                </div>
+
+                <!-- TITLE -->
+                <h2 class="delete-title">
+
+                    Eliminar anillo
+
+                </h2>
+
+                <!-- SUBTITLE -->
+                <p class="delete-subtitle">
+
+                    Esta acción eliminará el anillo
+                    del pedido y no podrá recuperarse.
+
+                </p>
+
+                <!-- PRODUCT CARD -->
+                <div class="delete-product-card">
+
+                    <!-- PRODUCT -->
+                    <div class="d-flex align-items-center gap-3 mb-3">
+
+                        <div class="delete-product-icon ring-product-icon">
+
+                            <i class="bi bi-gem"></i>
+
+                        </div>
+
+                        <div>
+
+                            <div class="delete-product-title">
+
+                                {{ object.anillo.modelo }}
+
+                            </div>
+
+                            <div class="delete-product-subtitle">
+
+                                {{ object.anillo.metal }}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- DETAILS -->
+                    <div class="delete-product-details">
+
+                        <div class="delete-detail-item">
+
+                            <span class="delete-detail-label">
+
+                                Metal
+
+                            </span>
+
+                            <span class="delete-detail-value">
+
+                                {{ object.anillo.metal }}
+
+                            </span>
+
+                        </div>
+
+                        <div class="delete-detail-item">
+
+                            <span class="delete-detail-label">
+
+                                Tamaño
+
+                            </span>
+
+                            <span class="delete-detail-value">
+
+                                {{ object.tamano_anillo }}
+
+                            </span>
+
+                        </div>
+
+                        <div class="delete-detail-item">
+
+                            <span class="delete-detail-label">
+
+                                Subtotal
+
+                            </span>
+
+                            <span class="delete-detail-value ring-price-text">
+
+                                ${{ object.subtotal }}
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- FORM -->
+                <form method="post">
+
+                    {% csrf_token %}
+
+                    <div class="form-actions justify-content-center mt-4">
+
+                        <a href="{% url 'pedido_detail' object.pedido_id %}"
+                           class="btn btn-light custom-cancel-btn">
+
+                            Cancelar
+
+                        </a>
+
+                        <button type="submit"
+                                class="btn btn-danger custom-submit-btn">
+
+                            <i class="bi bi-trash"></i>
+
+                            Eliminar anillo
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
 
 </div>
 

@@ -1,0 +1,258 @@
+<!-- ========================================
+     ITEMS ANILLO
+======================================== -->
+
+<div class="table-section-card mb-4">
+
+    <!-- HEADER -->
+    <div class="table-section-header">
+
+        <div>
+
+            <h4 class="section-title mb-1">
+
+                Anillos
+
+            </h4>
+
+            <p class="section-subtitle mb-0">
+
+                Anillos escolares agregados
+                al pedido
+
+            </p>
+
+        </div>
+
+        <!-- ACTION -->
+        <a href="{% url 'itemanillo_create' pedido.id %}"
+           class="btn btn-dark custom-table-btn">
+
+            <i class="bi bi-gem"></i>
+
+            Agregar anillo
+
+        </a>
+
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-responsive">
+
+        <table class="table align-middle modern-table">
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Anillo
+                    </th>
+
+                    <th>
+                        Configuración
+                    </th>
+
+                    <th class="text-end">
+                        Precio
+                    </th>
+
+                    <th class="text-end">
+                        Cantidad
+                    </th>
+
+                    <th class="text-end">
+                        Subtotal
+                    </th>
+
+                    <th class="text-end">
+                        Acción
+                    </th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for item in items_anillo %}
+
+                <tr>
+
+                    <!-- PRODUCT -->
+                    <td>
+
+                        <div class="d-flex align-items-center gap-3">
+
+                            <div class="table-product-icon ring-icon">
+
+                                <i class="bi bi-gem"></i>
+
+                            </div>
+
+                            <div>
+
+                                <div class="table-product-title">
+
+                                    {{ item.anillo.modelo }}
+
+                                </div>
+
+                                <div class="table-product-subtitle">
+
+                                    {{ item.anillo.metal }}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </td>
+
+                    <!-- CONFIG -->
+                    <td>
+
+                        <div class="config-list">
+
+                            <div class="config-item">
+
+                                <span class="config-label">
+                                    Metal:
+                                </span>
+
+                                <span class="config-value">
+
+                                    {{ item.anillo.metal }}
+
+                                </span>
+
+                            </div>
+
+                            <div class="config-item">
+
+                                <span class="config-label">
+                                    Tamaño:
+                                </span>
+
+                                <span class="config-value">
+
+                                    {{ item.tamano_anillo }}
+
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </td>
+
+                    <!-- PRECIO -->
+                    <td class="text-end">
+
+                        <span class="money-value">
+
+                            ${{ item.precio_unitario }}
+
+                        </span>
+
+                    </td>
+
+                    <!-- CANTIDAD -->
+                    <td class="text-end">
+
+                        <span class="quantity-badge ring-badge">
+
+                            {{ item.cantidad }}
+
+                        </span>
+
+                    </td>
+
+                    <!-- SUBTOTAL -->
+                    <td class="text-end">
+
+                        <span class="subtotal-value ring-subtotal">
+
+                            ${{ item.subtotal }}
+
+                        </span>
+
+                    </td>
+
+                    <!-- ACTIONS -->
+                    <td>
+
+                        <div class="table-actions">
+
+                            <!-- EDIT -->
+                            <a href="{% url 'itemanillo_update' item.id %}"
+                               class="table-action-btn warning">
+
+                                <i class="bi bi-pencil"></i>
+
+                            </a>
+
+                            <!-- DELETE -->
+                            <a href="{% url 'itemanillo_delete' item.id %}"
+                               class="table-action-btn danger">
+
+                                <i class="bi bi-trash"></i>
+
+                            </a>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                {% empty %}
+
+                <tr>
+
+                    <td colspan="6">
+
+                        <div class="empty-table-state">
+
+                            <div class="empty-table-icon ring-empty-icon">
+
+                                <i class="bi bi-gem"></i>
+
+                            </div>
+
+                            <h5>
+
+                                No hay anillos registrados
+
+                            </h5>
+
+                            <p>
+
+                                Agrega el primer anillo escolar
+                                al pedido.
+
+                            </p>
+
+                            <a href="{% url 'itemanillo_create' pedido.id %}"
+                               class="btn btn-dark">
+
+                                Agregar anillo
+
+                            </a>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>

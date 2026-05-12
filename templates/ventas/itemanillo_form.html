@@ -1,41 +1,174 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+
+<link rel="stylesheet"
+      href="{% static 'css/forms.css' %}?{% now 'U' %}">
+
+{% endblock %}
 
 {% block content %}
 
-<div class="card p-4">
+<div class="form-wrapper">
 
-    <h4>Agregar Anillo</h4>
+    <div class="row justify-content-center">
 
-    <form method="post">
-        {% csrf_token %}
+        <div class="col-12 col-lg-8 col-xl-7">
 
-        <div class="mb-3">
-            <label>Modelo</label>
-            {{ form.anillo }}
+            <!-- FORM CONTAINER -->
+            <div class="form-container ring-form-container">
+
+                <!-- HEADER -->
+                <div class="form-header">
+
+                    <div class="form-icon ring-form-icon">
+
+                        <i class="bi bi-gem"></i>
+
+                    </div>
+
+                    <div>
+
+                        <h2 class="form-title">
+
+                            Agregar Anillo
+
+                        </h2>
+
+                        <p class="form-subtitle mb-0">
+
+                            Configura el anillo escolar
+                            del pedido
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <!-- FORM -->
+                <form method="post">
+
+                    {% csrf_token %}
+
+                    <!-- MODELO -->
+                    <div class="mb-4">
+
+                        <label class="custom-label">
+
+                            Modelo de anillo
+
+                        </label>
+
+                        {{ form.anillo }}
+
+                        <div class="input-help">
+
+                            Selecciona el modelo de anillo disponible
+
+                        </div>
+
+                    </div>
+
+                    <!-- METAL -->
+                    <div class="mb-4">
+
+                        <label class="custom-label">
+
+                            Tipo de metal
+
+                        </label>
+
+                        {{ form.metal }}
+
+                        <div class="input-help">
+
+                            Material del anillo
+
+                        </div>
+
+                    </div>
+
+                    <!-- ROW -->
+                    <div class="row">
+
+                        <!-- TALLA -->
+                        <div class="col-12 col-md-6">
+
+                            <div class="mb-4">
+
+                                <label class="custom-label">
+
+                                    Tamaño
+
+                                </label>
+
+                                {{ form.tamano_anillo }}
+
+                                <div class="input-help">
+
+                                    Talla del anillo
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <!-- CANTIDAD -->
+                        <div class="col-12 col-md-6">
+
+                            <div class="mb-4">
+
+                                <label class="custom-label">
+
+                                    Cantidad
+
+                                </label>
+
+                                {{ form.cantidad }}
+
+                                <div class="input-help">
+
+                                    Número de anillos
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- ACTIONS -->
+                    <div class="form-actions">
+
+                        <a href="{% url 'pedido_detail' pedido_id %}"
+                           class="btn btn-light custom-cancel-btn">
+
+                            Cancelar
+
+                        </a>
+
+                        <button type="submit"
+                                class="btn btn-dark custom-submit-btn">
+
+                            <i class="bi bi-gem"></i>
+
+                            Guardar anillo
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
         </div>
 
-        <div class="mb-3">
-            <label>Metal</label>
-            {{ form.metal }}
-        </div>
-
-        <div class="mb-3">
-            <label>Tamaño</label>
-            {{ form.tamano_anillo }}
-        </div>
-
-        <div class="mb-3">
-            <label>Cantidad</label>
-            {{ form.cantidad }}
-        </div>
-
-        <button class="btn btn-success">Guardar</button>
-
-        <a href="{% url 'pedido_detail' pedido_id %}" class="btn btn-secondary">
-            Cancelar
-        </a>
-
-    </form>
+    </div>
 
 </div>
 

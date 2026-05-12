@@ -1067,3 +1067,34 @@
     }
 
 }
+
+
+/* ========================================
+   ANILLOS
+======================================== */
+
+.ring-icon {
+
+    background: #f3e8ff;
+
+    color: #7c3aed;
+}
+
+.ring-badge {
+
+    background: #f3e8ff;
+
+    color: #7c3aed;
+}
+
+.ring-subtotal {
+
+    color: #7c3aed;
+}
+
+.ring-empty-icon {
+
+    background: #f3e8ff;
+
+    color: #7c3aed;
+}
