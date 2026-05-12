@@ -3,6 +3,8 @@ from django.urls import reverse
 from django.shortcuts import redirect
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 
 
 from apps.alumnos.models import Alumno
@@ -13,7 +15,7 @@ from apps.catalogo.models import PrecioBaseGeneracion
 
 
 
-class PedidoCreateView(CreateView):
+class PedidoCreateView(LoginRequiredMixin, CreateView):
     model = Pedido
     fields = []
     template_name = "ventas/pedido_form.html"
@@ -29,7 +31,7 @@ class PedidoCreateView(CreateView):
         )
     
 
-class PedidoDetailView(DetailView):
+class PedidoDetailView(LoginRequiredMixin, DetailView):
 
     model = Pedido
 
@@ -120,7 +122,7 @@ class PedidoDetailView(DetailView):
 # 🧾 CREAR ITEM BASE
 # ==============================
 
-class PedidoItemBaseCreateView(CreateView):
+class PedidoItemBaseCreateView(LoginRequiredMixin, CreateView):
     model = PedidoItemBase
     form_class = PedidoItemBaseForm
     template_name = "ventas/itembase_form.html"
@@ -171,7 +173,7 @@ class PedidoItemBaseCreateView(CreateView):
 # ==============================
 # ⚡ AJAX → CARGAR SECCIONES
 # ==============================
-
+@login_required
 def cargar_secciones(request):
     tamano_id = request.GET.get("tamano")
     generacion_id = request.GET.get("generacion")
@@ -202,7 +204,7 @@ def cargar_secciones(request):
 # ==============================
 # ⚡ AJAX → CARGAR MODELOS
 # ==============================
-
+@login_required
 def cargar_modelos(request):
     tamano_id = request.GET.get("tamano")
     seccion_id = request.GET.get("seccion")
@@ -228,9 +230,12 @@ def cargar_modelos(request):
     return JsonResponse(data, safe=False)
 
 # 🔁 REDIRECT ALUMNO → PEDIDO
-
+@login_required
 def alumno_pedido_redirect(request, alumno_id):
-    alumno = Alumno.objects.get(id=alumno_id)
+    alumno = get_object_or_404(
+    Alumno,
+    id=alumno_id
+)
 
     pedido = Pedido.objects.filter(alumno=alumno).first()
 
@@ -242,7 +247,7 @@ def alumno_pedido_redirect(request, alumno_id):
 
 # ✏️ UPDATE
 
-class PedidoItemBaseUpdateView(UpdateView):
+class PedidoItemBaseUpdateView(LoginRequiredMixin, UpdateView):
     model = PedidoItemBase
     form_class = PedidoItemBaseForm
     template_name = "ventas/itembase_form.html"
@@ -263,7 +268,7 @@ class PedidoItemBaseUpdateView(UpdateView):
         kwargs["pedido"] = self.object.pedido
         return kwargs
 
-class PedidoItemBaseDeleteView(DeleteView):
+class PedidoItemBaseDeleteView(LoginRequiredMixin, DeleteView):
     model = PedidoItemBase
     template_name = "ventas/itembase_confirm_delete.html"
 
@@ -276,7 +281,7 @@ class PedidoItemBaseDeleteView(DeleteView):
     
 # Anillos ########################################################################333
 
-class PedidoItemAnilloCreateView(CreateView):
+class PedidoItemAnilloCreateView(LoginRequiredMixin, CreateView):
     model = PedidoItemAnillo
     form_class = PedidoItemAnilloForm
     template_name = "ventas/itemanillo_form.html"
@@ -298,7 +303,7 @@ class PedidoItemAnilloCreateView(CreateView):
     def get_success_url(self):
         return reverse("pedido_detail", kwargs={"pk": self.kwargs["pedido_id"]})
     
-class PedidoItemAnilloUpdateView(UpdateView):
+class PedidoItemAnilloUpdateView(LoginRequiredMixin, UpdateView):
     model = PedidoItemAnillo
     form_class = PedidoItemAnilloForm
     template_name = "ventas/itemanillo_form.html"
@@ -317,7 +322,7 @@ class PedidoItemAnilloUpdateView(UpdateView):
         return kwargs
 
 
-class PedidoItemAnilloDeleteView(DeleteView):
+class PedidoItemAnilloDeleteView(LoginRequiredMixin, DeleteView):
     model = PedidoItemAnillo
     template_name = "ventas/itemanillo_confirm_delete.html"
 
@@ -330,7 +335,7 @@ class PedidoItemAnilloDeleteView(DeleteView):
 # EXTRAS #################################################################
 
 # ➕ CREATE
-class PedidoItemExtraCreateView(CreateView):
+class PedidoItemExtraCreateView(LoginRequiredMixin, CreateView):
     model = PedidoItemExtra
     form_class = PedidoItemExtraForm
     template_name = "ventas/itemextra_form.html"
@@ -349,7 +354,7 @@ class PedidoItemExtraCreateView(CreateView):
 
 
 # ✏️ UPDATE
-class PedidoItemExtraUpdateView(UpdateView):
+class PedidoItemExtraUpdateView(LoginRequiredMixin, UpdateView):
     model = PedidoItemExtra
     form_class = PedidoItemExtraForm
     template_name = "ventas/itemextra_form.html"
@@ -364,7 +369,7 @@ class PedidoItemExtraUpdateView(UpdateView):
 
 
 # 🗑 DELETE
-class PedidoItemExtraDeleteView(DeleteView):
+class PedidoItemExtraDeleteView(LoginRequiredMixin, DeleteView):
     model = PedidoItemExtra
     template_name = "ventas/itemextra_confirm_delete.html"
 
@@ -375,7 +380,7 @@ class PedidoItemExtraDeleteView(DeleteView):
 # Observacion ######################################################################
 
 # ➕ CREATE
-class ObservacionCreateView(CreateView):
+class ObservacionCreateView(LoginRequiredMixin, CreateView):
     model = Observacion
     form_class = ObservacionForm
     template_name = "ventas/observacion_form.html"
@@ -394,7 +399,7 @@ class ObservacionCreateView(CreateView):
 
 
 # ✏️ UPDATE
-class ObservacionUpdateView(UpdateView):
+class ObservacionUpdateView(LoginRequiredMixin, UpdateView):
     model = Observacion
     form_class = ObservacionForm
     template_name = "ventas/observacion_form.html"
@@ -409,7 +414,7 @@ class ObservacionUpdateView(UpdateView):
 
 
 # 🗑 DELETE
-class ObservacionDeleteView(DeleteView):
+class ObservacionDeleteView(LoginRequiredMixin, DeleteView):
     model = Observacion
     template_name = "ventas/observacion_confirm_delete.html"
 
@@ -419,7 +424,7 @@ class ObservacionDeleteView(DeleteView):
 
 # Pago #####################################################################################
 
-class PagoCreateView(CreateView):
+class PagoCreateView(LoginRequiredMixin, CreateView):
     model = Pago
     form_class = PagoForm
     template_name = "ventas/pago_form.html"
@@ -437,7 +442,7 @@ class PagoCreateView(CreateView):
         return reverse("pedido_detail", kwargs={"pk": self.kwargs["pedido_id"]})
 
 
-class PagoDeleteView(DeleteView):
+class PagoDeleteView(LoginRequiredMixin, DeleteView):
     model = Pago
     template_name = "ventas/pago_confirm_delete.html"
 
@@ -449,7 +454,7 @@ class PagoDeleteView(DeleteView):
 
 
 # ✅ CREAR
-class PedidoDescuentoCreateView(CreateView):
+class PedidoDescuentoCreateView(LoginRequiredMixin, CreateView):
     model = PedidoDescuento
     form_class = PedidoDescuentoForm
     template_name = "ventas/descuento_form.html"
@@ -470,7 +475,7 @@ class PedidoDescuentoCreateView(CreateView):
 
 
 # ✏️ EDITAR
-class PedidoDescuentoUpdateView(UpdateView):
+class PedidoDescuentoUpdateView(LoginRequiredMixin, UpdateView):
     model = PedidoDescuento
     form_class = PedidoDescuentoForm
     template_name = "ventas/descuento_form.html"
@@ -485,7 +490,7 @@ class PedidoDescuentoUpdateView(UpdateView):
 
 
 # 🗑️ ELIMINAR
-class PedidoDescuentoDeleteView(DeleteView):
+class PedidoDescuentoDeleteView(LoginRequiredMixin, DeleteView):
     model = PedidoDescuento
     template_name = "ventas/descuento_confirm_delete.html"
 
