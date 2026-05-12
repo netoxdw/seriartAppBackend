@@ -1,0 +1,256 @@
+<!-- ========================================
+     ITEMS BASE
+======================================== -->
+
+<div class="table-section-card mb-4">
+
+    <!-- HEADER -->
+    <div class="table-section-header">
+
+        <div>
+
+            <h4 class="section-title mb-1">
+
+                Bases
+
+            </h4>
+
+            <p class="section-subtitle mb-0">
+
+                Productos principales del pedido
+
+            </p>
+
+        </div>
+
+        <!-- ACTION -->
+        <a href="{% url 'itembase_create' pedido.id %}"
+           class="btn btn-primary custom-table-btn">
+
+            <i class="bi bi-plus-lg"></i>
+
+            Agregar base
+
+        </a>
+
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-responsive">
+
+        <table class="table align-middle modern-table">
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Producto
+                    </th>
+
+                    <th>
+                        Configuración
+                    </th>
+
+                    <th class="text-end">
+                        Precio
+                    </th>
+
+                    <th class="text-end">
+                        Cantidad
+                    </th>
+
+                    <th class="text-end">
+                        Subtotal
+                    </th>
+
+                    <th class="text-end">
+                        Acción
+                    </th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for item in items_base %}
+
+                <tr>
+
+                    <!-- PRODUCTO -->
+                    <td>
+
+                        <div class="d-flex align-items-center gap-3">
+
+                            <div class="table-product-icon">
+
+                                <i class="bi bi-box-seam"></i>
+
+                            </div>
+
+                            <div>
+
+                                <div class="table-product-title">
+
+                                    {{ item.modelo.nombre }}
+
+                                </div>
+
+                                <div class="table-product-subtitle">
+
+                                    {{ item.modelo.tamano_producto }}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </td>
+
+                    <!-- CONFIG -->
+                    <td>
+
+                        <div class="config-list">
+
+                            <div class="config-item">
+
+                                <span class="config-label">
+                                    Placa:
+                                </span>
+
+                                <span class="config-value">
+
+                                    {{ item.get_placa_display|default:"-" }}
+
+                                </span>
+
+                            </div>
+
+                            <div class="config-item">
+
+                                <span class="config-label">
+                                    Color:
+                                </span>
+
+                                <span class="config-value">
+
+                                    {{ item.color_placa|default:"-" }}
+
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </td>
+
+                    <!-- PRECIO -->
+                    <td class="text-end">
+
+                        <span class="money-value">
+
+                            ${{ item.precio_unitario }}
+
+                        </span>
+
+                    </td>
+
+                    <!-- CANTIDAD -->
+                    <td class="text-end">
+
+                        <span class="quantity-badge">
+
+                            {{ item.cantidad }}
+
+                        </span>
+
+                    </td>
+
+                    <!-- SUBTOTAL -->
+                    <td class="text-end">
+
+                        <span class="subtotal-value">
+
+                            ${{ item.subtotal }}
+
+                        </span>
+
+                    </td>
+
+                    <!-- ACTIONS -->
+                    <td>
+
+                        <div class="table-actions">
+
+                            <!-- EDIT -->
+                            <a href="{% url 'itembase_update' item.id %}"
+                               class="table-action-btn warning">
+
+                                <i class="bi bi-pencil"></i>
+
+                            </a>
+
+                            <!-- DELETE -->
+                            <a href="{% url 'itembase_delete' item.id %}"
+                               class="table-action-btn danger">
+
+                                <i class="bi bi-trash"></i>
+
+                            </a>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                {% empty %}
+
+                <tr>
+
+                    <td colspan="6">
+
+                        <div class="empty-table-state">
+
+                            <div class="empty-table-icon">
+
+                                <i class="bi bi-box-seam"></i>
+
+                            </div>
+
+                            <h5>
+
+                                No hay productos base
+
+                            </h5>
+
+                            <p>
+
+                                Comienza agregando el primer producto.
+
+                            </p>
+
+                            <a href="{% url 'itembase_create' pedido.id %}"
+                               class="btn btn-primary">
+
+                                Agregar producto
+
+                            </a>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>

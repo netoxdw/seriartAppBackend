@@ -1,96 +1,347 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+
+<link rel="stylesheet"
+      href="{% static 'css/forms.css' %}?{% now 'U' %}">
+
+{% endblock %}
 
 {% block content %}
 
-<div class="card p-4">
+<div class="form-wrapper">
 
-    <h4>Agregar Producto</h4>
+    <div class="row justify-content-center">
 
-    <form method="post">
-        {% csrf_token %}
+        <div class="col-12 col-xl-8">
 
-        <div class="mb-3">
-            <label>Tamaño</label>
-            <select id="tamano" class="form-select">
-                <option value="">---------</option>
-                {% for t in tamanos %}
-                <option value="{{ t.id }}">{{ t.nombre }}</option>
-                {% endfor %}
-            </select>
+            <!-- FORM CONTAINER -->
+            <div class="form-container">
+
+                <!-- HEADER -->
+                <div class="form-header">
+
+                    <div class="form-icon">
+
+                        <i class="bi bi-box-seam"></i>
+
+                    </div>
+
+                    <div>
+
+                        <h2 class="form-title">
+
+                            Agregar Producto Base
+
+                        </h2>
+
+                        <p class="form-subtitle mb-0">
+
+                            Configura el producto principal
+                            del pedido
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <!-- FORM -->
+                <form method="post">
+
+                    {% csrf_token %}
+
+                    <!-- STEP 1 -->
+                    <div class="selection-card mb-4">
+
+                        <div class="selection-header mb-4">
+
+                            <span class="selection-badge">
+
+                                Paso 1
+
+                            </span>
+
+                            <h5 class="selection-title">
+
+                                Selecciona tamaño y sección
+
+                            </h5>
+
+                        </div>
+
+                        <!-- TAMAÑO -->
+                        <div class="mb-4">
+
+                            <label class="custom-label">
+
+                                Tamaño
+
+                            </label>
+
+                            <select id="tamano"
+                                    class="form-select">
+
+                                <option value="">
+                                    Selecciona un tamaño
+                                </option>
+
+                                {% for t in tamanos %}
+
+                                <option value="{{ t.id }}">
+
+                                    {{ t.nombre }}
+
+                                </option>
+
+                                {% endfor %}
+
+                            </select>
+
+                            <div class="input-help">
+
+                                Elige el tamaño del producto
+
+                            </div>
+
+                        </div>
+
+                        <!-- SECCION -->
+                        <div>
+
+                            <label class="custom-label">
+
+                                Sección
+
+                            </label>
+
+                            <select id="seccion"
+                                    class="form-select">
+
+                                <option value="">
+                                    Selecciona una sección
+                                </option>
+
+                            </select>
+
+                            <div class="input-help">
+
+                                Las secciones disponibles
+                                aparecerán automáticamente
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- STEP 2 -->
+                    <div class="selection-card mb-4">
+
+                        <div class="selection-header mb-4">
+
+                            <span class="selection-badge secondary">
+
+                                Paso 2
+
+                            </span>
+
+                            <h5 class="selection-title">
+
+                                Configura el producto
+
+                            </h5>
+
+                        </div>
+
+                        <!-- MODELO -->
+                        <div class="mb-4">
+
+                            <label class="custom-label">
+
+                                Modelo
+
+                            </label>
+
+                            {{ form.modelo }}
+
+                            <div class="input-help">
+
+                                Selecciona el modelo disponible
+
+                            </div>
+
+                        </div>
+
+                        <!-- ROW -->
+                        <div class="row">
+
+                            <!-- PLACA -->
+                            <div class="col-12 col-md-6">
+
+                                <div class="mb-4">
+
+                                    <label class="custom-label">
+
+                                        Tipo de placa
+
+                                    </label>
+
+                                    {{ form.placa }}
+
+                                </div>
+
+                            </div>
+
+                            <!-- COLOR -->
+                            <div class="col-12 col-md-6">
+
+                                <div class="mb-4">
+
+                                    <label class="custom-label">
+
+                                        Color de placa
+
+                                    </label>
+
+                                    {{ form.color_placa }}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <!-- CANTIDAD -->
+                        <div>
+
+                            <label class="custom-label">
+
+                                Cantidad
+
+                            </label>
+
+                            {{ form.cantidad }}
+
+                            <div class="input-help">
+
+                                Número de productos a agregar
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- ACTIONS -->
+                    <div class="form-actions">
+
+                        <a href="{% url 'pedido_detail' pedido_id %}"
+                           class="btn btn-light custom-cancel-btn">
+
+                            Cancelar
+
+                        </a>
+
+                        <button type="submit"
+                                class="btn btn-primary custom-submit-btn">
+
+                            <i class="bi bi-check-lg"></i>
+
+                            Guardar producto
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
         </div>
 
-        <div class="mb-3">
-            <label>Sección</label>
-            <select id="seccion" class="form-select"></select>
-        </div>
-
-        <div class="mb-3">
-            <label>Modelo</label>
-            {{ form.modelo }}
-        </div>
-
-        <div class="mb-3">
-            <label>Placa</label>
-            {{ form.placa }}
-        </div>
-
-        <div class="mb-3">
-            <label>Color placa</label>
-            {{ form.color_placa }}
-        </div>
-
-        <div class="mb-3">
-            <label>Cantidad</label>
-            {{ form.cantidad }}
-        </div>
-
-        <button class="btn btn-success">Guardar</button>
-
-        <a href="{% url 'pedido_detail' pedido_id %}" class="btn btn-secondary">
-            Cancelar
-        </a>
-
-    </form>
+    </div>
 
 </div>
 
+<!-- ========================================
+     AJAX
+======================================== -->
+
 <script>
+
     const generacion = "{{ pedido.alumno.grupo.generacion.id }}";
 
     const tamano = document.getElementById("tamano");
+
     const seccion = document.getElementById("seccion");
+
     const modelo = document.getElementById("id_modelo");
 
-    // 🔥 tamaño → secciones
+    // ========================================
+    // TAMAÑO → SECCIONES
+    // ========================================
+
     tamano.addEventListener("change", function () {
 
-        fetch(`/ajax/secciones/?tamano=${this.value}&generacion=${generacion}`)
-            .then(res => res.json())
-            .then(data => {
+        fetch(
+            `/ajax/secciones/?tamano=${this.value}&generacion=${generacion}`
+        )
 
-                seccion.innerHTML = '<option value="">---------</option>';
-                modelo.innerHTML = '<option value="">---------</option>';
+        .then(res => res.json())
 
-                data.forEach(item => {
-                    seccion.innerHTML += `<option value="${item.id}">${item.nombre}</option>`;
-                });
+        .then(data => {
+
+            seccion.innerHTML =
+                '<option value="">Selecciona una sección</option>';
+
+            modelo.innerHTML =
+                '<option value="">Selecciona un modelo</option>';
+
+            data.forEach(item => {
+
+                seccion.innerHTML += `
+                    <option value="${item.id}">
+                        ${item.nombre}
+                    </option>
+                `;
             });
+
+        });
+
     });
 
-    // 🔥 sección → modelos
+    // ========================================
+    // SECCIÓN → MODELOS
+    // ========================================
+
     seccion.addEventListener("change", function () {
 
-        fetch(`/ajax/modelos/?tamano=${tamano.value}&seccion=${this.value}&generacion=${generacion}`)
-            .then(res => res.json())
-            .then(data => {
+        fetch(
+            `/ajax/modelos/?tamano=${tamano.value}&seccion=${this.value}&generacion=${generacion}`
+        )
 
-                modelo.innerHTML = '<option value="">---------</option>';
+        .then(res => res.json())
 
-                data.forEach(item => {
-                    modelo.innerHTML += `<option value="${item.id}">${item.nombre}</option>`;
-                });
+        .then(data => {
+
+            modelo.innerHTML =
+                '<option value="">Selecciona un modelo</option>';
+
+            data.forEach(item => {
+
+                modelo.innerHTML += `
+                    <option value="${item.id}">
+                        ${item.nombre}
+                    </option>
+                `;
             });
+
+        });
+
     });
+
 </script>
 
 {% endblock %}
