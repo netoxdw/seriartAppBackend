@@ -1,0 +1,205 @@
+<!-- ========================================
+     PEDIDO STATS
+======================================== -->
+
+<div class="row g-3 mb-4">
+
+    <!-- SUBTOTAL -->
+    <div class="col-12 col-md-6 col-xl">
+
+        <div class="pedido-stat-card">
+
+            <div class="pedido-stat-icon primary">
+
+                <i class="bi bi-receipt"></i>
+
+            </div>
+
+            <div>
+
+                <div class="pedido-stat-label">
+                    Subtotal
+                </div>
+
+                <div class="pedido-stat-value">
+
+                    ${{ subtotal|floatformat:2 }}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- DESCUENTOS -->
+    <div class="col-12 col-md-6 col-xl">
+
+        <div class="pedido-stat-card">
+
+            <div class="pedido-stat-icon warning">
+
+                <i class="bi bi-percent"></i>
+
+            </div>
+
+            <div>
+
+                <div class="pedido-stat-label">
+                    Descuentos
+                </div>
+
+                <div class="pedido-stat-value warning-text">
+
+                    - ${{ total_descuentos|floatformat:2 }}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- TOTAL -->
+    <div class="col-12 col-md-6 col-xl">
+
+        <div class="pedido-stat-card">
+
+            <div class="pedido-stat-icon primary">
+
+                <i class="bi bi-cash-stack"></i>
+
+            </div>
+
+            <div>
+
+                <div class="pedido-stat-label">
+                    Total
+                </div>
+
+                <div class="pedido-stat-value">
+
+                    ${{ total|floatformat:2 }}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- TOTAL PAGADO -->
+    <div class="col-12 col-md-6 col-xl">
+
+        <div class="pedido-stat-card">
+
+            <div class="pedido-stat-icon success">
+
+                <i class="bi bi-check-circle-fill"></i>
+
+            </div>
+
+            <div>
+
+                <div class="pedido-stat-label">
+                    Total pagado
+                </div>
+
+                <div class="pedido-stat-value success-text">
+
+                    ${{ total_pagado|floatformat:2 }}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- SALDO -->
+    <div class="col-12 col-md-6 col-xl">
+
+        <div class="pedido-stat-card">
+
+            <div class="pedido-stat-icon danger">
+
+                <i class="bi bi-exclamation-circle-fill"></i>
+
+            </div>
+
+            <div>
+
+                <div class="pedido-stat-label">
+                    Saldo pendiente
+                </div>
+
+                <div class="pedido-stat-value danger-text">
+
+                    ${{ saldo_pendiente|floatformat:2 }}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- PROGRESO -->
+    <div class="col-12">
+
+        <div class="pedido-stat-card progress-card">
+
+            <div class="w-100">
+
+                <!-- TOP -->
+                <div class="d-flex justify-content-between mb-2">
+
+                    <div class="pedido-stat-label">
+
+                        Progreso de pago
+
+                    </div>
+
+                    <div class="progress-percent">
+
+                        {{ porcentaje_pagado }}%
+
+                    </div>
+
+                </div>
+
+                <!-- BAR -->
+                <div class="progress modern-progress">
+
+                    <div class="progress-bar progress-bar-custom"
+
+                         style="width: {{ porcentaje_pagado }}%;">
+
+                    </div>
+
+                </div>
+
+                <!-- FOOT -->
+                <div class="progress-footer mt-2">
+
+                    Pagado:
+                    ${{ total_pagado|floatformat:2 }}
+
+                    de
+
+                    ${{ total|floatformat:2 }}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

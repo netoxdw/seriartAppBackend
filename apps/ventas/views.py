@@ -30,40 +30,87 @@ class PedidoCreateView(CreateView):
     
 
 class PedidoDetailView(DetailView):
+
     model = Pedido
+
     template_name = "ventas/pedido_detail.html"
+
     context_object_name = "pedido"
 
     def get_context_data(self, **kwargs):
+
         context = super().get_context_data(**kwargs)
 
         pedido = self.object
 
-        # 🧾 ITEMS
-        context["items_base"] = pedido.items_base.all()
-        context["items_anillo"] = pedido.items_anillo.all()
-        context["items_extra"] = pedido.items_extra.all()
+        # ========================================
+        # ITEMS
+        # ========================================
 
-        # 💸 DESCUENTOS
+        items_base = pedido.items_base.all()
+
+        items_anillo = pedido.items_anillo.all()
+
+        items_extra = pedido.items_extra.all()
+
+        context["items_base"] = items_base
+        context["items_anillo"] = items_anillo
+        context["items_extra"] = items_extra
+
+        # ========================================
+        # DESCUENTOS
+        # ========================================
+
         descuentos = pedido.descuentos.all()
-        total_descuentos = sum(d.monto for d in descuentos)
+
+        total_descuentos = sum(
+            d.monto for d in descuentos
+        )
 
         context["descuentos"] = descuentos
+
         context["total_descuentos"] = total_descuentos
 
-        # 🔥 CLAVE (AQUÍ ESTABA EL PROBLEMA)
-        context["subtotal"] = pedido.total + total_descuentos
+        # ========================================
+        # TOTALES
+        # ========================================
 
-        # 💳 PORCENTAJE PAGADO
-        if pedido.total > 0:
-            porcentaje_pagado = (pedido.total_pagado / pedido.total) * 100
+        total = pedido.total
+
+        total_pagado = pedido.total_pagado
+
+        saldo_pendiente = total - total_pagado
+
+        subtotal = total + total_descuentos
+
+        context["subtotal"] = subtotal
+
+        context["total"] = total
+
+        context["total_pagado"] = total_pagado
+
+        context["saldo_pendiente"] = saldo_pendiente
+
+        # ========================================
+        # PORCENTAJE PAGADO
+        # ========================================
+
+        if total > 0:
+
+            porcentaje_pagado = (
+                total_pagado / total
+            ) * 100
+
         else:
+
             porcentaje_pagado = 0
 
-        context["porcentaje_pagado"] = round(porcentaje_pagado, 2)
+        context["porcentaje_pagado"] = round(
+            porcentaje_pagado,
+            2
+        )
 
         return context
-
 
 # ############## itembase
 

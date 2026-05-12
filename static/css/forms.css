@@ -1,0 +1,448 @@
+/* ========================================
+   FORMS CSS
+   Formularios globales reutilizables
+======================================== */
+
+/* ========================================
+   FORM WRAPPER
+======================================== */
+
+.form-wrapper {
+    padding-top: 10px;
+}
+
+/* ========================================
+   FORM CONTAINER
+======================================== */
+
+.form-container {
+
+    background: var(--card-bg);
+
+    border-radius: var(--radius-lg);
+
+    border: 1px solid var(--border);
+
+    box-shadow: var(--shadow-md);
+
+    padding: 36px;
+}
+
+/* ========================================
+   FORM HEADER
+======================================== */
+
+.form-header {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 18px;
+
+    margin-bottom: 36px;
+}
+
+/* ICON */
+
+.form-icon {
+
+    width: 72px;
+    height: 72px;
+
+    border-radius: 22px;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--primary),
+            #3b82f6
+        );
+
+    color: white;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 30px;
+
+    flex-shrink: 0;
+}
+
+/* TITLE */
+
+.form-title {
+
+    font-size: 32px;
+
+    font-weight: 700;
+
+    color: var(--text);
+
+    margin-bottom: 4px;
+}
+
+/* SUBTITLE */
+
+.form-subtitle {
+
+    color: var(--muted);
+
+    font-size: 15px;
+}
+
+/* ========================================
+   LABELS
+======================================== */
+
+.custom-label {
+
+    display: block;
+
+    margin-bottom: 10px;
+
+    font-weight: 600;
+
+    color: var(--text);
+}
+
+/* ========================================
+   DJANGO INPUTS
+======================================== */
+
+.form-container input,
+.form-container select,
+.form-container textarea {
+
+    width: 100%;
+
+    border: 1px solid #dbe3ee;
+
+    border-radius: 14px;
+
+    padding: 14px 16px;
+
+    font-size: 15px;
+
+    background: #f9fbfd;
+
+    transition: var(--transition);
+
+    outline: none;
+}
+
+/* TEXTAREA */
+
+.form-container textarea {
+
+    min-height: 120px;
+
+    resize: vertical;
+}
+
+/* ========================================
+   FOCUS
+======================================== */
+
+.form-container input:focus,
+.form-container select:focus,
+.form-container textarea:focus {
+
+    border-color: var(--primary);
+
+    background: white;
+
+    box-shadow:
+        0 0 0 4px rgba(37,99,235,0.10);
+}
+
+/* ========================================
+   PLACEHOLDER
+======================================== */
+
+.form-container input::placeholder,
+.form-container textarea::placeholder {
+
+    color: #9ca3af;
+}
+
+/* ========================================
+   DATE & TIME
+======================================== */
+
+.form-container input[type="date"],
+.form-container input[type="time"] {
+
+    appearance: none;
+}
+
+/* ========================================
+   INPUT HELP
+======================================== */
+
+.input-help {
+
+    margin-top: 8px;
+
+    color: var(--muted);
+
+    font-size: 13px;
+}
+
+/* ========================================
+   FIELD ERRORS
+======================================== */
+
+.field-error {
+
+    margin-top: 8px;
+
+    color: var(--danger);
+
+    font-size: 13px;
+
+    font-weight: 500;
+}
+
+/* ========================================
+   INVALID INPUTS
+======================================== */
+
+.form-container input.is-invalid,
+.form-container select.is-invalid,
+.form-container textarea.is-invalid {
+
+    border-color: var(--danger);
+
+    background: #fef2f2;
+}
+
+/* ========================================
+   FORM ACTIONS
+======================================== */
+
+.form-actions {
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 12px;
+
+    margin-top: 32px;
+
+    flex-wrap: wrap;
+}
+
+/* ========================================
+   SELECTION CARD
+======================================== */
+
+.selection-card {
+
+    border: 1px solid var(--border);
+
+    border-radius: 20px;
+
+    padding: 24px;
+
+    background: #fcfdff;
+}
+
+/* HEADER */
+
+.selection-header {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 14px;
+
+    flex-wrap: wrap;
+}
+
+/* BADGE */
+
+.selection-badge {
+
+    background: #dbeafe;
+
+    color: var(--primary);
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    padding: 8px 12px;
+
+    border-radius: 999px;
+}
+
+/* SECONDARY */
+
+.selection-badge.secondary {
+
+    background: #dcfce7;
+
+    color: #15803d;
+}
+
+/* TITLE */
+
+.selection-title {
+
+    margin: 0;
+
+    font-weight: 700;
+
+    color: var(--text);
+}
+
+/* ========================================
+   DIVIDER
+======================================== */
+
+.divider-container {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 14px;
+
+    margin: 30px 0;
+}
+
+.divider-line {
+
+    flex: 1;
+
+    height: 1px;
+
+    background: var(--border);
+}
+
+.divider-text {
+
+    color: var(--muted);
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    background: white;
+
+    padding: 0 10px;
+}
+
+/* ========================================
+   CHECKBOXES & RADIOS
+======================================== */
+
+.form-container input[type="checkbox"],
+.form-container input[type="radio"] {
+
+    width: auto;
+
+    margin-right: 8px;
+
+    accent-color: var(--primary);
+}
+
+/* ========================================
+   FILE INPUT
+======================================== */
+
+.form-container input[type="file"] {
+
+    padding: 12px;
+
+    background: white;
+}
+
+/* ========================================
+   SEARCH INPUT
+======================================== */
+
+.form-container input[type="search"] {
+
+    appearance: none;
+}
+
+/* ========================================
+   DISABLED
+======================================== */
+
+.form-container input:disabled,
+.form-container select:disabled,
+.form-container textarea:disabled {
+
+    background: #f3f4f6;
+
+    cursor: not-allowed;
+
+    opacity: 0.7;
+}
+
+/* ========================================
+   MOBILE
+======================================== */
+
+@media (max-width: 768px) {
+
+    .form-container {
+
+        padding: 24px;
+
+        border-radius: 20px;
+    }
+
+    .form-header {
+
+        align-items: flex-start;
+
+        gap: 14px;
+    }
+
+    .form-icon {
+
+        width: 60px;
+        height: 60px;
+
+        border-radius: 18px;
+
+        font-size: 24px;
+    }
+
+    .form-title {
+
+        font-size: 26px;
+    }
+
+    .form-actions {
+
+        flex-direction: column-reverse;
+    }
+
+    .selection-card {
+
+        padding: 20px;
+
+        border-radius: 18px;
+    }
+
+}
+
+@media (max-width: 480px) {
+
+    .form-container {
+        padding: 20px;
+    }
+
+    .form-title {
+        font-size: 24px;
+    }
+
+}

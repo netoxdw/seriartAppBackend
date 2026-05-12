@@ -1,0 +1,752 @@
+/* ========================================
+   PEDIDO HEADER
+======================================== */
+
+.pedido-header-card {
+
+    background: var(--card-bg);
+
+    border-radius: var(--radius-lg);
+
+    border: 1px solid var(--border);
+
+    box-shadow: var(--shadow-md);
+
+    padding: 28px;
+
+    margin-bottom: 24px;
+}
+
+/* ========================================
+   TOP
+======================================== */
+
+.pedido-header-top {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: flex-start;
+
+    gap: 24px;
+
+    flex-wrap: wrap;
+
+    margin-bottom: 28px;
+}
+
+/* ========================================
+   AVATAR
+======================================== */
+
+.pedido-avatar {
+
+    width: 82px;
+    height: 82px;
+
+    border-radius: 24px;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--primary),
+            #3b82f6
+        );
+
+    color: white;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 30px;
+
+    font-weight: 700;
+
+    flex-shrink: 0;
+
+    box-shadow:
+        0 10px 25px rgba(37,99,235,0.25);
+}
+
+/* ========================================
+   TITLE
+======================================== */
+
+.pedido-title {
+
+    font-size: 34px;
+
+    font-weight: 700;
+
+    color: var(--text);
+
+    margin-bottom: 6px;
+
+    line-height: 1.1;
+}
+
+/* ========================================
+   SUBTITLE
+======================================== */
+
+.pedido-subtitle {
+
+    color: var(--muted);
+
+    font-size: 15px;
+}
+
+/* ========================================
+   ACTIONS
+======================================== */
+
+.pedido-header-actions {
+
+    display: flex;
+
+    gap: 12px;
+
+    flex-wrap: wrap;
+}
+
+/* ========================================
+   ACTION BUTTONS
+======================================== */
+
+.custom-action-btn {
+
+    border-radius: 14px;
+
+    padding: 12px 18px;
+
+    font-weight: 600;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ========================================
+   INFO GRID
+======================================== */
+
+.pedido-info-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(auto-fit, minmax(220px, 1fr));
+
+    gap: 16px;
+}
+
+/* ========================================
+   INFO CARD
+======================================== */
+
+.pedido-info-card {
+
+    background: #f8fafc;
+
+    border: 1px solid #eef2f7;
+
+    border-radius: 18px;
+
+    padding: 18px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 16px;
+
+    transition: var(--transition);
+}
+
+.pedido-info-card:hover {
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 8px 20px rgba(0,0,0,0.05);
+}
+
+/* ========================================
+   INFO ICON
+======================================== */
+
+.pedido-info-icon {
+
+    width: 52px;
+    height: 52px;
+
+    border-radius: 14px;
+
+    background: #dbeafe;
+
+    color: var(--primary);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 22px;
+
+    flex-shrink: 0;
+}
+
+/* SUCCESS */
+
+.pedido-info-icon.success {
+
+    background: #dcfce7;
+
+    color: #15803d;
+}
+
+/* DARK */
+
+.pedido-info-icon.dark {
+
+    background: #e5e7eb;
+
+    color: #111827;
+}
+
+/* PRIMARY */
+
+.pedido-info-icon.primary {
+
+    background: #ede9fe;
+
+    color: #7c3aed;
+}
+
+/* ========================================
+   LABEL
+======================================== */
+
+.pedido-info-label {
+
+    font-size: 13px;
+
+    color: var(--muted);
+
+    margin-bottom: 4px;
+}
+
+/* ========================================
+   VALUE
+======================================== */
+
+.pedido-info-value {
+
+    font-weight: 700;
+
+    color: var(--text);
+
+    line-height: 1.3;
+}
+
+/* ========================================
+   MOBILE
+======================================== */
+
+@media (max-width: 992px) {
+
+    .pedido-header-top {
+
+        flex-direction: column;
+    }
+
+}
+
+@media (max-width: 768px) {
+
+    .pedido-header-card {
+
+        padding: 22px;
+
+        border-radius: 20px;
+    }
+
+    .pedido-title {
+
+        font-size: 28px;
+    }
+
+    .pedido-avatar {
+
+        width: 66px;
+        height: 66px;
+
+        border-radius: 18px;
+
+        font-size: 24px;
+    }
+
+    .pedido-header-actions {
+
+        width: 100%;
+    }
+
+    .custom-action-btn {
+
+        width: 100%;
+
+        justify-content: center;
+    }
+
+    .pedido-info-grid {
+
+        grid-template-columns: 1fr;
+    }
+
+}
+
+@media (max-width: 480px) {
+
+    .pedido-header-card {
+
+        padding: 18px;
+    }
+
+    .pedido-title {
+
+        font-size: 24px;
+    }
+
+    .pedido-info-card {
+
+        padding: 16px;
+    }
+
+}
+
+/* ========================================
+   PEDIDO STATS
+======================================== */
+
+.pedido-stat-card {
+
+    background: var(--card-bg);
+
+    border: 1px solid var(--border);
+
+    border-radius: 22px;
+
+    padding: 22px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 18px;
+
+    height: 100%;
+
+    box-shadow: var(--shadow-sm);
+
+    transition: var(--transition);
+}
+
+.pedido-stat-card:hover {
+
+    transform: translateY(-3px);
+
+    box-shadow:
+        0 10px 25px rgba(0,0,0,0.06);
+}
+
+/* ========================================
+   ICON
+======================================== */
+
+.pedido-stat-icon {
+
+    width: 64px;
+    height: 64px;
+
+    border-radius: 18px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 28px;
+
+    flex-shrink: 0;
+}
+
+/* PRIMARY */
+
+.pedido-stat-icon.primary {
+
+    background: #dbeafe;
+
+    color: var(--primary);
+}
+
+/* SUCCESS */
+
+.pedido-stat-icon.success {
+
+    background: #dcfce7;
+
+    color: #15803d;
+}
+
+/* DANGER */
+
+.pedido-stat-icon.danger {
+
+    background: #fee2e2;
+
+    color: #dc2626;
+}
+
+/* ========================================
+   LABEL
+======================================== */
+
+.pedido-stat-label {
+
+    color: var(--muted);
+
+    font-size: 14px;
+
+    margin-bottom: 6px;
+}
+
+/* ========================================
+   VALUE
+======================================== */
+
+.pedido-stat-value {
+
+    font-size: 30px;
+
+    font-weight: 700;
+
+    color: var(--text);
+
+    line-height: 1.1;
+}
+
+/* SUCCESS TEXT */
+
+.success-text {
+    color: #15803d;
+}
+
+/* DANGER TEXT */
+
+.danger-text {
+    color: #dc2626;
+}
+
+/* ========================================
+   PROGRESS CARD
+======================================== */
+
+.progress-card {
+
+    align-items: center;
+}
+
+/* ========================================
+   PROGRESS BAR
+======================================== */
+
+.modern-progress {
+
+    height: 14px;
+
+    background: #e5e7eb;
+
+    border-radius: 999px;
+
+    overflow: hidden;
+}
+
+/* BAR */
+
+.progress-bar-custom {
+
+    background:
+        linear-gradient(
+            90deg,
+            #2563eb,
+            #3b82f6
+        );
+
+    border-radius: 999px;
+}
+
+/* ========================================
+   PERCENT
+======================================== */
+
+.progress-percent {
+
+    font-weight: 700;
+
+    color: var(--primary);
+}
+
+/* ========================================
+   FOOTER
+======================================== */
+
+.progress-footer {
+
+    font-size: 13px;
+
+    color: var(--muted);
+}
+
+/* ========================================
+   MOBILE
+======================================== */
+
+@media (max-width: 768px) {
+
+    .pedido-stat-card {
+
+        padding: 20px;
+
+        border-radius: 20px;
+    }
+
+    .pedido-stat-icon {
+
+        width: 56px;
+        height: 56px;
+
+        border-radius: 16px;
+
+        font-size: 24px;
+    }
+
+    .pedido-stat-value {
+
+        font-size: 24px;
+    }
+
+}
+
+/* WARNING */
+
+.pedido-stat-icon.warning {
+
+    background: #fef3c7;
+
+    color: #b45309;
+}
+
+/* WARNING TEXT */
+
+.warning-text {
+
+    color: #b45309;
+}
+
+
+/* ========================================
+   PEDIDO ACTIONS TOOLBAR
+======================================== */
+
+.pedido-actions-toolbar {
+
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: 20px;
+
+    padding: 20px 22px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 20px;
+
+    flex-wrap: wrap;
+
+    margin-bottom: 24px;
+
+    box-shadow: var(--shadow-sm);
+}
+
+/* ========================================
+   TITLE
+======================================== */
+
+.pedido-actions-title {
+
+    font-weight: 700;
+
+    color: var(--text);
+
+    font-size: 16px;
+}
+
+/* ========================================
+   ACTIONS LIST
+======================================== */
+
+.pedido-actions-list {
+
+    display: flex;
+
+    gap: 12px;
+
+    flex-wrap: wrap;
+}
+
+/* ========================================
+   ACTION BUTTON
+======================================== */
+
+.pedido-action-btn {
+
+    height: 48px;
+
+    padding: 0 18px;
+
+    border-radius: 14px;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    font-weight: 600;
+
+    font-size: 14px;
+
+    transition: var(--transition);
+
+    text-decoration: none;
+
+    border: 1px solid transparent;
+}
+
+/* HOVER */
+
+.pedido-action-btn:hover {
+
+    transform: translateY(-2px);
+}
+
+/* ========================================
+   PRIMARY
+======================================== */
+
+.pedido-action-btn.primary {
+
+    background: #eff6ff;
+
+    color: var(--primary);
+
+    border-color: #bfdbfe;
+}
+
+.pedido-action-btn.primary:hover {
+
+    background: #dbeafe;
+}
+
+/* ========================================
+   SUCCESS
+======================================== */
+
+.pedido-action-btn.success {
+
+    background: #ecfdf5;
+
+    color: #15803d;
+
+    border-color: #bbf7d0;
+}
+
+.pedido-action-btn.success:hover {
+
+    background: #dcfce7;
+}
+
+/* ========================================
+   WARNING
+======================================== */
+
+.pedido-action-btn.warning {
+
+    background: #fffbeb;
+
+    color: #b45309;
+
+    border-color: #fde68a;
+}
+
+.pedido-action-btn.warning:hover {
+
+    background: #fef3c7;
+}
+
+/* ========================================
+   DARK
+======================================== */
+
+.pedido-action-btn.dark {
+
+    background: #111827;
+
+    color: white;
+}
+
+.pedido-action-btn.dark:hover {
+
+    background: #1f2937;
+}
+
+/* ========================================
+   ICON
+======================================== */
+
+.pedido-action-btn i {
+
+    font-size: 16px;
+}
+
+/* ========================================
+   MOBILE
+======================================== */
+
+@media (max-width: 768px) {
+
+    .pedido-actions-toolbar {
+
+        padding: 18px;
+    }
+
+    .pedido-actions-list {
+
+        width: 100%;
+    }
+
+    .pedido-action-btn {
+
+        width: 100%;
+
+        justify-content: center;
+    }
+
+}

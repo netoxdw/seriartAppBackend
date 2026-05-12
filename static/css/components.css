@@ -1,0 +1,603 @@
+/* ========================================
+   COMPONENTS CSS
+   Componentes reutilizables globales
+======================================== */
+
+/* ========================================
+   CARDS
+======================================== */
+
+.card-section {
+
+    background: var(--card-bg);
+
+    border-radius: var(--radius-lg);
+
+    border: 1px solid var(--border);
+
+    box-shadow: var(--shadow-sm);
+
+    padding: 24px;
+
+    margin-bottom: 24px;
+}
+
+/* CARD HEADER */
+
+.card-section-header {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 16px;
+
+    flex-wrap: wrap;
+
+    margin-bottom: 24px;
+}
+
+/* ========================================
+   TITLES
+======================================== */
+
+.section-title {
+
+    font-size: 22px;
+
+    font-weight: 700;
+
+    color: var(--text);
+
+    margin-bottom: 4px;
+}
+
+.section-subtitle {
+
+    color: var(--muted);
+
+    font-size: 14px;
+}
+
+/* ========================================
+   PAGE HEADER
+======================================== */
+
+.detail-page-header {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: flex-start;
+
+    gap: 24px;
+
+    flex-wrap: wrap;
+
+    margin-bottom: 24px;
+}
+
+.detail-main-title {
+
+    font-size: 34px;
+
+    font-weight: 700;
+
+    color: var(--text);
+
+    margin-bottom: 8px;
+}
+
+.detail-subtitle {
+
+    color: var(--muted);
+
+    font-size: 15px;
+}
+
+/* ========================================
+   BREADCRUMB
+======================================== */
+
+.breadcrumb-custom {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    flex-wrap: wrap;
+
+    font-size: 14px;
+}
+
+.breadcrumb-custom a {
+
+    color: var(--primary);
+
+    font-weight: 600;
+
+    transition: var(--transition);
+}
+
+.breadcrumb-custom a:hover {
+
+    color: var(--primary-hover);
+}
+
+.breadcrumb-custom span {
+
+    color: var(--muted);
+}
+
+/* ========================================
+   STATS CARDS
+======================================== */
+
+.stats-card {
+
+    background: var(--card-bg);
+
+    border-radius: var(--radius-md);
+
+    border: 1px solid var(--border);
+
+    box-shadow: var(--shadow-sm);
+
+    padding: 22px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 18px;
+
+    height: 100%;
+}
+
+/* ICON */
+
+.stats-icon {
+
+    width: 64px;
+    height: 64px;
+
+    border-radius: 18px;
+
+    background: #dbeafe;
+
+    color: var(--primary);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 28px;
+
+    flex-shrink: 0;
+}
+
+/* COLORS */
+
+.stats-icon.success {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.stats-icon.warning {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.stats-icon.danger {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.stats-icon.dark {
+    background: #e5e7eb;
+    color: #111827;
+}
+
+.stats-icon.primary {
+    background: #ede9fe;
+    color: #7c3aed;
+}
+
+/* VALUE */
+
+.stats-value {
+
+    font-size: 30px;
+
+    font-weight: 700;
+
+    color: var(--text);
+
+    line-height: 1.1;
+}
+
+/* LABEL */
+
+.stats-label {
+
+    color: var(--muted);
+
+    font-size: 14px;
+
+    margin-top: 4px;
+}
+
+/* ========================================
+   BADGES
+======================================== */
+
+.badge-custom {
+
+    padding: 8px 14px;
+
+    border-radius: 999px;
+
+    font-size: 13px;
+
+    font-weight: 700;
+}
+
+/* FOLIO */
+
+.folio-badge {
+
+    background: #eff6ff;
+
+    color: var(--primary);
+
+    padding: 8px 14px;
+
+    border-radius: 999px;
+
+    font-size: 13px;
+
+    font-weight: 700;
+}
+
+/* PHONE */
+
+.phone-badge {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    background: #f3f4f6;
+
+    color: #374151;
+
+    padding: 8px 12px;
+
+    border-radius: 10px;
+
+    font-size: 13px;
+
+    font-weight: 500;
+}
+
+/* LOCATION */
+
+.location-badge {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    background: #f3f4f6;
+
+    color: #374151;
+
+    padding: 8px 12px;
+
+    border-radius: 10px;
+
+    font-size: 13px;
+
+    font-weight: 500;
+}
+
+/* ========================================
+   TABLE ICON
+======================================== */
+
+.table-icon {
+
+    width: 50px;
+    height: 50px;
+
+    border-radius: 14px;
+
+    background: #eff6ff;
+
+    color: var(--primary);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 20px;
+
+    flex-shrink: 0;
+}
+
+/* ========================================
+   TABLE TEXT
+======================================== */
+
+.table-title {
+
+    font-weight: 700;
+
+    color: var(--text);
+
+    transition: var(--transition);
+}
+
+.table-title:hover {
+
+    color: var(--primary);
+}
+
+.table-subtitle {
+
+    color: var(--muted);
+
+    font-size: 13px;
+}
+
+/* ========================================
+   BUTTONS
+======================================== */
+
+.custom-action-btn {
+
+    border-radius: 14px;
+
+    padding: 12px 18px;
+
+    font-weight: 600;
+}
+
+.custom-submit-btn {
+
+    border-radius: 14px;
+
+    padding: 12px 20px;
+
+    font-weight: 600;
+}
+
+.custom-cancel-btn {
+
+    border-radius: 14px;
+
+    padding: 12px 20px;
+
+    font-weight: 600;
+
+    border: 1px solid var(--border);
+}
+
+.custom-back-btn {
+
+    border-radius: 14px;
+
+    padding: 12px 18px;
+
+    font-weight: 600;
+
+    border: 1px solid var(--border);
+}
+
+/* ========================================
+   QUICK ACTIONS
+======================================== */
+
+.quick-actions {
+
+    display: flex;
+
+    gap: 12px;
+
+    flex-wrap: wrap;
+
+    margin-bottom: 24px;
+}
+
+.quick-action-btn {
+
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: 14px;
+
+    padding: 14px 18px;
+
+    color: var(--text);
+
+    font-weight: 600;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    transition: var(--transition);
+}
+
+.quick-action-btn:hover {
+
+    background: #f8fafc;
+
+    transform: translateY(-2px);
+}
+
+.quick-action-btn.success {
+
+    background: #ecfdf5;
+
+    color: #15803d;
+}
+
+.quick-action-btn.warning {
+
+    background: #fffbeb;
+
+    color: #b45309;
+}
+
+.quick-action-btn.dark {
+
+    background: #111827;
+
+    color: white;
+}
+
+/* ========================================
+   EMPTY STATE
+======================================== */
+
+.empty-state {
+
+    text-align: center;
+
+    padding: 60px 20px;
+}
+
+.empty-icon {
+
+    width: 90px;
+    height: 90px;
+
+    margin: 0 auto 20px;
+
+    border-radius: 24px;
+
+    background: #eff6ff;
+
+    color: var(--primary);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 40px;
+}
+
+.empty-state h5 {
+
+    font-weight: 700;
+
+    color: var(--text);
+
+    margin-bottom: 10px;
+}
+
+.empty-state p {
+
+    color: var(--muted);
+
+    margin-bottom: 20px;
+}
+
+/* ========================================
+   ALERTS
+======================================== */
+
+.custom-alert-danger {
+
+    background: #fef2f2;
+
+    border: 1px solid #fecaca;
+
+    color: #991b1b;
+
+    border-radius: 16px;
+
+    padding: 18px 20px;
+}
+
+/* ========================================
+   PROGRESS
+======================================== */
+
+.modern-progress {
+
+    height: 12px;
+
+    border-radius: 999px;
+
+    overflow: hidden;
+}
+
+.modern-progress .progress-bar {
+
+    border-radius: 999px;
+}
+
+/* ========================================
+   MOBILE
+======================================== */
+
+@media (max-width: 768px) {
+
+    .detail-main-title {
+        font-size: 28px;
+    }
+
+    .stats-card {
+        padding: 20px;
+    }
+
+    .stats-icon {
+
+        width: 56px;
+        height: 56px;
+
+        border-radius: 16px;
+
+        font-size: 22px;
+    }
+
+    .stats-value {
+        font-size: 24px;
+    }
+
+    .table-icon {
+
+        width: 42px;
+        height: 42px;
+
+        font-size: 18px;
+    }
+
+    .quick-action-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .custom-action-btn,
+    .custom-submit-btn,
+    .custom-cancel-btn,
+    .custom-back-btn {
+
+        width: 100%;
+
+        justify-content: center;
+    }
+
+}

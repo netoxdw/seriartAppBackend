@@ -1,0 +1,198 @@
+<!-- ========================================
+     PEDIDO HEADER
+======================================== -->
+
+<div class="pedido-header-card mb-4">
+
+    <!-- TOP -->
+    <div class="pedido-header-top">
+
+        <!-- LEFT -->
+        <div>
+
+            <!-- BREADCRUMB -->
+            <div class="breadcrumb-custom mb-3">
+
+                <a href="/">
+                    Generaciones
+                </a>
+
+                <span>/</span>
+
+                <a href="{% url 'generacion_detail' pedido.alumno.grupo.generacion.id %}">
+                    {{ pedido.alumno.grupo.generacion }}
+                </a>
+
+                <span>/</span>
+
+                <a href="{% url 'escuela_detail' pedido.alumno.grupo.generacion.id pedido.alumno.grupo.escuela.id %}">
+                    {{ pedido.alumno.grupo.escuela.nombre }}
+                </a>
+
+                <span>/</span>
+
+                <a href="{% url 'grupo_detail' pedido.alumno.grupo.id %}">
+                    {{ pedido.alumno.grupo.nombre }}
+                </a>
+
+                <span>/</span>
+
+                <span>
+                    {{ pedido.alumno.nombre }}
+                </span>
+
+            </div>
+
+            <!-- STUDENT INFO -->
+            <div class="d-flex align-items-center gap-4 flex-wrap">
+
+                <!-- AVATAR -->
+                <div class="pedido-avatar">
+
+                    {{ pedido.alumno.nombre|slice:":1" }}
+
+                </div>
+
+                <!-- INFO -->
+                <div>
+
+                    <h1 class="pedido-title">
+
+                        {{ pedido.alumno.nombre }}
+
+                    </h1>
+
+                    <div class="pedido-subtitle">
+
+                        Pedido fotográfico y control de pagos
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ACTIONS -->
+        <div class="pedido-header-actions">
+
+            <a href="{% url 'grupo_detail' pedido.alumno.grupo.id %}"
+               class="btn btn-light custom-action-btn">
+
+                <i class="bi bi-arrow-left"></i>
+
+                Volver
+
+            </a>
+
+        </div>
+
+    </div>
+
+    <!-- BOTTOM INFO -->
+    <div class="pedido-info-grid">
+
+        <!-- FOLIO -->
+        <div class="pedido-info-card">
+
+            <div class="pedido-info-icon">
+
+                <i class="bi bi-upc-scan"></i>
+
+            </div>
+
+            <div>
+
+                <div class="pedido-info-label">
+                    Folio
+                </div>
+
+                <div class="pedido-info-value">
+
+                    {{ pedido.alumno.folio_fotos|default:"Sin folio" }}
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- TELEFONO -->
+        <div class="pedido-info-card">
+
+            <div class="pedido-info-icon success">
+
+                <i class="bi bi-telephone"></i>
+
+            </div>
+
+            <div>
+
+                <div class="pedido-info-label">
+                    Teléfono
+                </div>
+
+                <div class="pedido-info-value">
+
+                    {{ pedido.alumno.telefono|default:"Sin teléfono" }}
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- GRUPO -->
+        <div class="pedido-info-card">
+
+            <div class="pedido-info-icon dark">
+
+                <i class="bi bi-people"></i>
+
+            </div>
+
+            <div>
+
+                <div class="pedido-info-label">
+                    Grupo
+                </div>
+
+                <div class="pedido-info-value">
+
+                    {{ pedido.alumno.grupo.nombre }}
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ESCUELA -->
+        <div class="pedido-info-card">
+
+            <div class="pedido-info-icon primary">
+
+                <i class="bi bi-building"></i>
+
+            </div>
+
+            <div>
+
+                <div class="pedido-info-label">
+                    Escuela
+                </div>
+
+                <div class="pedido-info-value">
+
+                    {{ pedido.alumno.grupo.escuela.nombre }}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

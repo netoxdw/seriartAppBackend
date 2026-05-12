@@ -1,0 +1,59 @@
+<!-- ========================================
+     PEDIDO ACTIONS
+======================================== -->
+
+<div class="pedido-actions-toolbar mb-4">
+
+    <!-- TITLE -->
+    <div class="pedido-actions-title">
+
+        Acciones rápidas
+
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="pedido-actions-list">
+
+        <!-- EDITAR -->
+        <a href="{% url 'alumno_update' pedido.alumno.id %}"
+           class="pedido-action-btn warning">
+
+            <i class="bi bi-pencil-square"></i>
+
+            Editar alumno
+
+        </a>
+
+        <!-- BASE -->
+        <a href="{% url 'itembase_create' pedido.id %}"
+           class="pedido-action-btn primary">
+
+            <i class="bi bi-box-seam"></i>
+
+            Agregar base
+
+        </a>
+
+        <!-- ANILLO -->
+        <a href="{% url 'itemanillo_create' pedido.id %}"
+           class="pedido-action-btn dark">
+
+            <i class="bi bi-gem"></i>
+
+            Agregar anillo
+
+        </a>
+
+        <!-- PAGO -->
+        <a href="{% url 'pago_create' pedido.id %}"
+           class="pedido-action-btn success">
+
+            <i class="bi bi-cash-stack"></i>
+
+            Registrar pago
+
+        </a>
+
+    </div>
+
+</div>
