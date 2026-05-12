@@ -1,45 +1,179 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+
+<link rel="stylesheet"
+      href="{% static 'css/forms.css' %}?{% now 'U' %}">
+
+{% endblock %}
 
 {% block content %}
 
-<div class="card p-4">
+<div class="form-wrapper">
 
-    <h4 class="text-danger">⚠️ Eliminar pago</h4>
+    <div class="row justify-content-center">
 
-    <p>¿Estás seguro de eliminar este pago?</p>
+        <div class="col-12 col-lg-7 col-xl-6">
 
-    <!-- 🔍 DETALLE DEL PAGO -->
-    <div class="mb-3">
-        <ul class="list-group">
-            <li class="list-group-item">
-                <strong>Monto:</strong> ${{ object.monto }}
-            </li>
-            <li class="list-group-item">
-                <strong>Fecha:</strong> {{ object.fecha_pago|date:"d/m/Y" }}
-            </li>
-            <li class="list-group-item">
-                <strong>Folio:</strong> {{ object.folio_nota|default:"-" }}
-            </li>
-        </ul>
+            <!-- DELETE CARD -->
+            <div class="delete-container payment-delete-container">
+
+                <!-- ICON -->
+                <div class="delete-icon-wrapper">
+
+                    <div class="delete-icon payment-delete-icon">
+
+                        <i class="bi bi-cash-stack"></i>
+
+                    </div>
+
+                </div>
+
+                <!-- TITLE -->
+                <h2 class="delete-title">
+
+                    Eliminar pago
+
+                </h2>
+
+                <!-- SUBTITLE -->
+                <p class="delete-subtitle">
+
+                    Esta acción eliminará el registro
+                    financiero del pedido y no podrá recuperarse.
+
+                </p>
+
+                <!-- PAYMENT CARD -->
+                <div class="delete-product-card">
+
+                    <!-- PAYMENT -->
+                    <div class="d-flex align-items-center gap-3 mb-3">
+
+                        <div class="delete-product-icon payment-product-icon">
+
+                            <i class="bi bi-cash-stack"></i>
+
+                        </div>
+
+                        <div>
+
+                            <div class="delete-product-title">
+
+                                Pago registrado
+
+                            </div>
+
+                            <div class="delete-product-subtitle">
+
+                                Movimiento financiero
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- DETAILS -->
+                    <div class="delete-product-details">
+
+                        <!-- MONTO -->
+                        <div class="delete-detail-item">
+
+                            <span class="delete-detail-label">
+
+                                Monto
+
+                            </span>
+
+                            <span class="delete-detail-value payment-price-text">
+
+                                ${{ object.monto }}
+
+                            </span>
+
+                        </div>
+
+                        <!-- FECHA -->
+                        <div class="delete-detail-item">
+
+                            <span class="delete-detail-label">
+
+                                Fecha
+
+                            </span>
+
+                            <span class="delete-detail-value">
+
+                                {{ object.fecha_pago|date:"d/m/Y" }}
+
+                            </span>
+
+                        </div>
+
+                        <!-- FOLIO -->
+                        <div class="delete-detail-item">
+
+                            <span class="delete-detail-label">
+
+                                Folio
+
+                            </span>
+
+                            <span class="delete-detail-value">
+
+                                {{ object.folio_nota|default:"-" }}
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- WARNING -->
+                <div class="delete-warning-box">
+
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+
+                    Esta acción no se puede deshacer.
+
+                </div>
+
+                <!-- FORM -->
+                <form method="post">
+
+                    {% csrf_token %}
+
+                    <div class="form-actions justify-content-center mt-4">
+
+                        <a href="{% url 'pedido_detail' object.pedido_id %}"
+                           class="btn btn-light custom-cancel-btn">
+
+                            Cancelar
+
+                        </a>
+
+                        <button type="submit"
+                                class="btn btn-danger custom-submit-btn">
+
+                            <i class="bi bi-trash"></i>
+
+                            Eliminar pago
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
     </div>
-
-    <!-- ⚠️ MENSAJE -->
-    <div class="alert alert-warning">
-        Esta acción no se puede deshacer.
-    </div>
-
-    <!-- 🔘 BOTONES -->
-    <form method="post">
-        {% csrf_token %}
-
-        <button class="btn btn-danger">
-            🗑 Eliminar
-        </button>
-
-        <a href="{% url 'pedido_detail' object.pedido_id %}" class="btn btn-secondary">
-            Cancelar
-        </a>
-    </form>
 
 </div>
 

@@ -769,3 +769,46 @@
 
     color: #dc2626;
 }
+
+
+/* ========================================
+   PAYMENT FORM
+======================================== */
+
+.payment-form-container {
+
+    border-top:
+        4px solid #15803d;
+}
+
+/* ========================================
+   ICON
+======================================== */
+
+.payment-form-icon {
+
+    background:
+        linear-gradient(
+            135deg,
+            #15803d,
+            #22c55e
+        );
+
+    box-shadow:
+        0 12px 30px rgba(21,128,61,0.25);
+}
+
+/* ========================================
+   PAYMENT CARD
+======================================== */
+
+.payment-info-card {
+
+    background:
+        linear-gradient(
+            135deg,
+            #f0fdf4,
+            #ffffff
+        );
+}
+

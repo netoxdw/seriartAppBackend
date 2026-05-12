@@ -1098,3 +1098,79 @@
 
     color: #7c3aed;
 }
+
+/* ========================================
+   PAGOS
+======================================== */
+
+/* ICON */
+
+.payment-icon {
+
+    background: #dcfce7;
+
+    color: #15803d;
+}
+
+/* ========================================
+   DATE
+======================================== */
+
+.payment-date {
+
+    font-weight: 600;
+
+    color: var(--text);
+}
+
+/* ========================================
+   FOLIO
+======================================== */
+
+.payment-folio {
+
+    background: #f3f4f6;
+
+    color: #111827;
+
+    padding: 6px 12px;
+
+    border-radius: 999px;
+
+    font-size: 13px;
+
+    font-weight: 600;
+}
+
+/* EMPTY */
+
+.payment-empty {
+
+    color: var(--muted);
+
+    font-size: 13px;
+}
+
+/* ========================================
+   AMOUNT
+======================================== */
+
+.payment-amount {
+
+    font-size: 18px;
+
+    font-weight: 700;
+
+    color: #15803d;
+}
+
+/* ========================================
+   EMPTY ICON
+======================================== */
+
+.payment-empty-icon {
+
+    background: #dcfce7;
+
+    color: #15803d;
+}

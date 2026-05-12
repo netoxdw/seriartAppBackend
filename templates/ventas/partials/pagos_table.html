@@ -1,0 +1,220 @@
+<!-- ========================================
+     PAGOS
+======================================== -->
+
+<div class="table-section-card mb-4">
+
+    <!-- HEADER -->
+    <div class="table-section-header">
+
+        <div>
+
+            <h4 class="section-title mb-1">
+
+                Pagos
+
+            </h4>
+
+            <p class="section-subtitle mb-0">
+
+                Historial de pagos registrados
+                del pedido
+
+            </p>
+
+        </div>
+
+        <!-- ACTION -->
+        <a href="{% url 'pago_create' pedido.id %}"
+           class="btn btn-success custom-table-btn">
+
+            <i class="bi bi-cash-stack"></i>
+
+            Registrar pago
+
+        </a>
+
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-responsive">
+
+        <table class="table align-middle modern-table">
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Pago
+                    </th>
+
+                    <th>
+                        Fecha
+                    </th>
+
+                    <th>
+                        Folio
+                    </th>
+
+                    <th class="text-end">
+                        Monto
+                    </th>
+
+                    <th class="text-end">
+                        Acción
+                    </th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for pago in pedido.pagos.all %}
+
+                <tr>
+
+                    <!-- PAYMENT -->
+                    <td>
+
+                        <div class="d-flex align-items-center gap-3">
+
+                            <div class="table-product-icon payment-icon">
+
+                                <i class="bi bi-cash-stack"></i>
+
+                            </div>
+
+                            <div>
+
+                                <div class="table-product-title">
+
+                                    Pago registrado
+
+                                </div>
+
+                                <div class="table-product-subtitle">
+
+                                    Movimiento financiero
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </td>
+
+                    <!-- FECHA -->
+                    <td>
+
+                        <div class="payment-date">
+
+                            {{ pago.fecha_pago|date:"d/m/Y" }}
+
+                        </div>
+
+                    </td>
+
+                    <!-- FOLIO -->
+                    <td>
+
+                        {% if pago.folio_nota %}
+
+                        <span class="payment-folio">
+
+                            {{ pago.folio_nota }}
+
+                        </span>
+
+                        {% else %}
+
+                        <span class="payment-empty">
+
+                            Sin folio
+
+                        </span>
+
+                        {% endif %}
+
+                    </td>
+
+                    <!-- MONTO -->
+                    <td class="text-end">
+
+                        <div class="payment-amount">
+
+                            + ${{ pago.monto }}
+
+                        </div>
+
+                    </td>
+
+                    <!-- ACTION -->
+                    <td>
+
+                        <div class="table-actions">
+
+                            <a href="{% url 'pago_delete' pago.id %}"
+                               class="table-action-btn danger">
+
+                                <i class="bi bi-trash"></i>
+
+                            </a>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                {% empty %}
+
+                <tr>
+
+                    <td colspan="5">
+
+                        <div class="empty-table-state">
+
+                            <div class="empty-table-icon payment-empty-icon">
+
+                                <i class="bi bi-cash-stack"></i>
+
+                            </div>
+
+                            <h5>
+
+                                No hay pagos registrados
+
+                            </h5>
+
+                            <p>
+
+                                Registra el primer pago
+                                del pedido.
+
+                            </p>
+
+                            <a href="{% url 'pago_create' pedido.id %}"
+                               class="btn btn-success">
+
+                                Registrar pago
+
+                            </a>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>

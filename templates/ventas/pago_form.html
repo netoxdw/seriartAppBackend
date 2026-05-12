@@ -1,23 +1,187 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+
+<link rel="stylesheet"
+      href="{% static 'css/forms.css' %}?{% now 'U' %}">
+
+{% endblock %}
 
 {% block content %}
 
-<div class="card p-4">
+<div class="form-wrapper">
 
-    <h4>Registrar Pago</h4>
+    <div class="row justify-content-center">
 
-    <form method="post">
-        {% csrf_token %}
+        <div class="col-12 col-lg-7 col-xl-6">
 
-        {{ form.as_p }}
+            <!-- FORM CONTAINER -->
+            <div class="form-container payment-form-container">
 
-        <button class="btn btn-success">Guardar</button>
+                <!-- HEADER -->
+                <div class="form-header">
 
-        <a href="{% url 'pedido_detail' pedido_id %}" class="btn btn-secondary">
-            Cancelar
-        </a>
+                    <div class="form-icon payment-form-icon">
 
-    </form>
+                        <i class="bi bi-cash-stack"></i>
+
+                    </div>
+
+                    <div>
+
+                        <h2 class="form-title">
+
+                            Registrar Pago
+
+                        </h2>
+
+                        <p class="form-subtitle mb-0">
+
+                            Registra un nuevo pago
+                            del pedido
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <!-- PAYMENT INFO -->
+                <div class="selection-card payment-info-card mb-4">
+
+                    <div class="selection-header">
+
+                        <span class="selection-badge secondary">
+
+                            Pedido
+
+                        </span>
+
+                        <h5 class="selection-title">
+
+                            {{ pedido.alumno.nombre }}
+
+                        </h5>
+
+                    </div>
+
+                </div>
+
+                <!-- FORM -->
+                <form method="post">
+
+                    {% csrf_token %}
+
+                    <!-- MONTO -->
+                    <div class="mb-4">
+
+                        <label class="custom-label">
+
+                            Monto del pago
+
+                        </label>
+
+                        {{ form.monto }}
+
+                        <div class="input-help">
+
+                            Ingresa el monto recibido
+
+                        </div>
+
+                    </div>
+
+                    <!-- ROW -->
+                    <div class="row">
+
+                        <!-- FECHA -->
+                        <div class="col-12 col-md-6">
+
+                            <div class="mb-4">
+
+                                <label class="custom-label">
+
+                                    Fecha de pago
+
+                                </label>
+
+                                {{ form.fecha_pago }}
+
+                            </div>
+
+                        </div>
+
+                        <!-- FOLIO -->
+                        <div class="col-12 col-md-6">
+
+                            <div class="mb-4">
+
+                                <label class="custom-label">
+
+                                    Folio / Nota
+
+                                </label>
+
+                                {{ form.folio_nota }}
+
+                                <div class="input-help">
+
+                                    Opcional
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- OBSERVACIONES -->
+                    {% if form.observaciones %}
+
+                    <div class="mb-4">
+
+                        <label class="custom-label">
+
+                            Observaciones
+
+                        </label>
+
+                        {{ form.observaciones }}
+
+                    </div>
+
+                    {% endif %}
+
+                    <!-- ACTIONS -->
+                    <div class="form-actions">
+
+                        <a href="{% url 'pedido_detail' pedido_id %}"
+                           class="btn btn-light custom-cancel-btn">
+
+                            Cancelar
+
+                        </a>
+
+                        <button type="submit"
+                                class="btn btn-success custom-submit-btn">
+
+                            <i class="bi bi-check-lg"></i>
+
+                            Registrar pago
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
 
 </div>
 
