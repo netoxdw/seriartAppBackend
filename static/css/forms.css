@@ -852,3 +852,148 @@
             #ffffff
         );
 }
+
+/* ========================================
+   OBSERVACION FORM
+======================================== */
+
+.observacion-form-container {
+
+    border-top:
+        4px solid #111827;
+}
+
+/* ========================================
+   ICON
+======================================== */
+
+.observacion-form-icon {
+
+    background:
+        linear-gradient(
+            135deg,
+            #111827,
+            #374151
+        );
+
+    box-shadow:
+        0 12px 30px rgba(17,24,39,0.25);
+}
+
+/* ========================================
+   INFO CARD
+======================================== */
+
+.observacion-info-card {
+
+    background:
+        linear-gradient(
+            135deg,
+            #fafafa,
+            #ffffff
+        );
+}
+
+/* ========================================
+   TEXTAREA
+======================================== */
+
+.observacion-form-container textarea {
+
+    min-height: 180px;
+
+    resize: vertical;
+}
+
+/* ========================================
+   OBSERVACION DELETE
+======================================== */
+
+.observacion-delete-container {
+
+    border-top:
+        4px solid #111827;
+}
+
+/* ========================================
+   ICON
+======================================== */
+
+.observacion-delete-icon {
+
+    background:
+        linear-gradient(
+            135deg,
+            #111827,
+            #374151
+        );
+
+    box-shadow:
+        0 12px 30px rgba(17,24,39,0.25);
+}
+
+/* ========================================
+   CARD
+======================================== */
+
+.observacion-delete-card {
+
+    background: #fafafa;
+
+    border: 1px solid #f1f5f9;
+
+    border-radius: 22px;
+
+    padding: 24px;
+
+    text-align: left;
+}
+
+/* ========================================
+   HEADER
+======================================== */
+
+.observacion-delete-header {
+
+    margin-bottom: 18px;
+}
+
+/* ========================================
+   BADGE
+======================================== */
+
+.observacion-delete-badge {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    background: #f3f4f6;
+
+    color: #374151;
+
+    padding: 8px 14px;
+
+    border-radius: 999px;
+
+    font-size: 13px;
+
+    font-weight: 600;
+}
+
+/* ========================================
+   TEXT
+======================================== */
+
+.observacion-delete-text {
+
+    color: var(--text);
+
+    line-height: 1.8;
+
+    white-space: pre-line;
+
+    font-size: 15px;
+}

@@ -1,0 +1,147 @@
+<!-- ========================================
+     OBSERVACIONES
+======================================== -->
+
+<div class="table-section-card mb-4">
+
+    <!-- HEADER -->
+    <div class="table-section-header">
+
+        <div>
+
+            <h4 class="section-title mb-1">
+
+                Observaciones
+
+            </h4>
+
+            <p class="section-subtitle mb-0">
+
+                Notas y seguimiento interno
+                del pedido
+
+            </p>
+
+        </div>
+
+        <!-- ACTION -->
+        <a href="{% url 'observacion_create' pedido.id %}"
+           class="btn btn-dark custom-table-btn">
+
+            <i class="bi bi-chat-left-text"></i>
+
+            Agregar observación
+
+        </a>
+
+    </div>
+
+    <!-- LIST -->
+    <div class="observaciones-list">
+
+        {% for obs in pedido.observaciones.all %}
+
+        <!-- ITEM -->
+        <div class="observacion-item">
+
+            <!-- TIMELINE -->
+            <div class="observacion-timeline">
+
+                <div class="observacion-dot"></div>
+
+                {% if not forloop.last %}
+                <div class="observacion-line"></div>
+                {% endif %}
+
+            </div>
+
+            <!-- CONTENT -->
+            <div class="observacion-card">
+
+                <!-- TOP -->
+                <div class="observacion-top">
+
+                    <div>
+
+                        <div class="observacion-date">
+
+                            <i class="bi bi-clock-history"></i>
+
+                            {{ obs.fecha|date:"d/m/Y H:i" }}
+
+                        </div>
+
+                    </div>
+
+                    <!-- ACTIONS -->
+                    <div class="table-actions">
+
+                        <!-- EDIT -->
+                        <a href="{% url 'observacion_update' obs.id %}"
+                           class="table-action-btn warning">
+
+                            <i class="bi bi-pencil"></i>
+
+                        </a>
+
+                        <!-- DELETE -->
+                        <a href="{% url 'observacion_delete' obs.id %}"
+                           class="table-action-btn danger">
+
+                            <i class="bi bi-trash"></i>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+                <!-- TEXT -->
+                <div class="observacion-text">
+
+                    {{ obs.texto }}
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% empty %}
+
+        <!-- EMPTY -->
+        <div class="empty-table-state">
+
+            <div class="empty-table-icon observacion-empty-icon">
+
+                <i class="bi bi-chat-left-text"></i>
+
+            </div>
+
+            <h5>
+
+                No hay observaciones
+
+            </h5>
+
+            <p>
+
+                Agrega notas internas
+                para el seguimiento del pedido.
+
+            </p>
+
+            <a href="{% url 'observacion_create' pedido.id %}"
+               class="btn btn-dark">
+
+                Agregar observación
+
+            </a>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>

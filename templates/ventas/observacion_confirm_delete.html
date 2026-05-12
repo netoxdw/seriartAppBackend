@@ -1,26 +1,116 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+
+<link rel="stylesheet"
+      href="{% static 'css/forms.css' %}?{% now 'U' %}">
+
+{% endblock %}
 
 {% block content %}
 
-<div class="card p-4">
+<div class="form-wrapper">
 
-    <h4>Eliminar observación</h4>
+    <div class="row justify-content-center">
 
-    <p>¿Eliminar esta observación?</p>
+        <div class="col-12 col-lg-7 col-xl-6">
 
-    <blockquote>
-        {{ object.texto }}
-    </blockquote>
+            <!-- DELETE CARD -->
+            <div class="delete-container observacion-delete-container">
 
-    <form method="post">
-        {% csrf_token %}
+                <!-- ICON -->
+                <div class="delete-icon-wrapper">
 
-        <button class="btn btn-danger">Eliminar</button>
+                    <div class="delete-icon observacion-delete-icon">
 
-        <a href="{% url 'pedido_detail' object.pedido_id %}" class="btn btn-secondary">
-            Cancelar
-        </a>
-    </form>
+                        <i class="bi bi-chat-left-text"></i>
+
+                    </div>
+
+                </div>
+
+                <!-- TITLE -->
+                <h2 class="delete-title">
+
+                    Eliminar observación
+
+                </h2>
+
+                <!-- SUBTITLE -->
+                <p class="delete-subtitle">
+
+                    Esta acción eliminará la nota
+                    registrada en el pedido.
+
+                </p>
+
+                <!-- OBSERVACION CARD -->
+                <div class="observacion-delete-card">
+
+                    <!-- HEADER -->
+                    <div class="observacion-delete-header">
+
+                        <div class="observacion-delete-badge">
+
+                            <i class="bi bi-clock-history"></i>
+
+                            {{ object.fecha|date:"d/m/Y H:i" }}
+
+                        </div>
+
+                    </div>
+
+                    <!-- TEXT -->
+                    <div class="observacion-delete-text">
+
+                        {{ object.texto }}
+
+                    </div>
+
+                </div>
+
+                <!-- WARNING -->
+                <div class="delete-warning-box">
+
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+
+                    Esta acción no se puede deshacer.
+
+                </div>
+
+                <!-- FORM -->
+                <form method="post">
+
+                    {% csrf_token %}
+
+                    <div class="form-actions justify-content-center mt-4">
+
+                        <a href="{% url 'pedido_detail' object.pedido_id %}"
+                           class="btn btn-light custom-cancel-btn">
+
+                            Cancelar
+
+                        </a>
+
+                        <button type="submit"
+                                class="btn btn-danger custom-submit-btn">
+
+                            <i class="bi bi-trash"></i>
+
+                            Eliminar observación
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
 
 </div>
 

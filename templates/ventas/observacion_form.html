@@ -1,25 +1,126 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+
+<link rel="stylesheet"
+      href="{% static 'css/forms.css' %}?{% now 'U' %}">
+
+{% endblock %}
 
 {% block content %}
 
-<div class="card p-4">
+<div class="form-wrapper">
 
-    <h4>Observación</h4>
+    <div class="row justify-content-center">
 
-    <form method="post">
-        {% csrf_token %}
+        <div class="col-12 col-lg-8 col-xl-7">
 
-        <div class="mb-3">
-            {{ form.texto }}
+            <!-- FORM CONTAINER -->
+            <div class="form-container observacion-form-container">
+
+                <!-- HEADER -->
+                <div class="form-header">
+
+                    <div class="form-icon observacion-form-icon">
+
+                        <i class="bi bi-chat-left-text"></i>
+
+                    </div>
+
+                    <div>
+
+                        <h2 class="form-title">
+
+                            Observación
+
+                        </h2>
+
+                        <p class="form-subtitle mb-0">
+
+                            Agrega notas y seguimiento
+                            interno del pedido
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <!-- INFO CARD -->
+                <div class="selection-card observacion-info-card mb-4">
+
+                    <div class="selection-header">
+
+                        <span class="selection-badge">
+
+                            Pedido
+
+                        </span>
+
+                        <h5 class="selection-title">
+
+                            {{ pedido.alumno.nombre }}
+
+                        </h5>
+
+                    </div>
+
+                </div>
+
+                <!-- FORM -->
+                <form method="post">
+
+                    {% csrf_token %}
+
+                    <!-- TEXTAREA -->
+                    <div class="mb-4">
+
+                        <label class="custom-label">
+
+                            Observación
+
+                        </label>
+
+                        {{ form.texto }}
+
+                        <div class="input-help">
+
+                            Registra información importante,
+                            seguimiento o notas internas.
+
+                        </div>
+
+                    </div>
+
+                    <!-- ACTIONS -->
+                    <div class="form-actions">
+
+                        <a href="{% url 'pedido_detail' pedido_id %}"
+                           class="btn btn-light custom-cancel-btn">
+
+                            Cancelar
+
+                        </a>
+
+                        <button type="submit"
+                                class="btn btn-dark custom-submit-btn">
+
+                            <i class="bi bi-check-lg"></i>
+
+                            Guardar observación
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
         </div>
 
-        <button class="btn btn-success">Guardar</button>
-
-        <a href="{% url 'pedido_detail' pedido_id %}" class="btn btn-secondary">
-            Cancelar
-        </a>
-
-    </form>
+    </div>
 
 </div>
 
