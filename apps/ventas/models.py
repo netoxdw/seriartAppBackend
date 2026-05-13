@@ -12,30 +12,39 @@ from apps.catalogo.models import (
 
 # PEDIDO
 
+
 class Pedido(models.Model):
+
+    ESTADO_CHOICES = [
+        ("pendiente", "Pendiente"),
+        ("proceso", "En proceso"),
+        ("listo", "Listo para entregar"),
+        ("entregado", "Entregado"),
+    ]
+
     alumno = models.ForeignKey(
         Alumno,
         on_delete=models.CASCADE,
         related_name="pedidos"
     )
-    fecha = models.DateField(auto_now_add=True)
+
+    fecha = models.DateField(
+        auto_now_add=True
+    )
+
     total = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         default=0
     )
-    
-    ESTADO_CHOICES = [
-        ("pendiente", "Pendiente"),
-        ("listo", "Listo para entregar"),
-        ("entregado", "Entregado"),
-    ]
 
     estado = models.CharField(
         max_length=20,
         choices=ESTADO_CHOICES,
-        default="pendiente"
+        default="pendiente",
+        db_index=True
     )
+
     recibido_por = models.CharField(
         max_length=150,
         blank=True,
@@ -47,15 +56,36 @@ class Pedido(models.Model):
         blank=True,
         null=True
     )
-    
+
+    actualizado = models.DateTimeField(
+        auto_now=True,
+        null=True,
+        blank=True
+    )
+
+    notas_entrega = models.TextField(
+        blank=True,
+        null=True
+    )
+
     class Meta:
         ordering = ["-id"]
         verbose_name = "Pedido"
         verbose_name_plural = "Pedidos"
 
+    def marcar_entregado(self, nombre_receptor):
+        self.estado = "entregado"
+        self.recibido_por = nombre_receptor
+        self.fecha_entrega = timezone.now()
+        self.save()
+
+    @property
+    def entregado(self):
+        return self.estado == "entregado"
+
     def __str__(self):
         return f"Pedido {self.id} - {self.alumno}"
-
+    
     def calcular_total(self):
         total_bases = sum(item.subtotal for item in self.items_base.all())
         total_anillos = sum(item.subtotal for item in self.items_anillo.all())
