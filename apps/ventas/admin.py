@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import Pedido, PedidoItemBase, PedidoItemAnillo, PedidoItemExtra, Observacion, Pago, PedidoDescuento
+from django.utils.html import format_html
 
 
 class PedidoItemBaseInline(admin.TabularInline):
@@ -95,40 +96,103 @@ class PagoInline(admin.TabularInline):
 
 @admin.register(Pedido)
 class PedidoAdmin(admin.ModelAdmin):
+
     list_display = (
         "id",
         "alumno",
         "fecha",
+        "estado_color",
         "total",
-        "estado",
-        "fecha_entrega",
         "mostrar_total_pagado",
         "mostrar_saldo_pendiente",
         "mostrar_estado_pago",
+        "recibido_por",
+        "fecha_entrega",
     )
+
     search_fields = (
+        "id",
         "alumno__nombre",
         "alumno__telefono",
+        "recibido_por",
     )
-    list_filter = ("fecha", "estado")
+
+    list_filter = (
+        "estado",
+        "fecha",
+        "fecha_entrega",
+    )
+
     readonly_fields = (
         "total",
         "mostrar_total_pagado",
         "mostrar_saldo_pendiente",
         "mostrar_estado_pago",
+        "fecha_entrega",
+        "actualizado",
     )
-    inlines = [PedidoItemBaseInline, PedidoItemAnilloInline, PedidoItemExtraInline, ObservacionInline, PagoInline]
+
+    inlines = [
+        PedidoItemBaseInline,
+        PedidoItemAnilloInline,
+        PedidoItemExtraInline,
+        ObservacionInline,
+        PagoInline,
+    ]
+
+    ordering = ("-id",)
+
+    list_per_page = 25
+
+    # =========================
+    # ESTADO CON COLOR
+    # =========================
+
+    def estado_color(self, obj):
+
+        colores = {
+            "pendiente": "#ffc107",
+            "proceso": "#0d6efd",
+            "listo": "#198754",
+            "entregado": "#6c757d",
+        }
+
+        return format_html(
+            """
+            <span style="
+                background-color: {};
+                color: white;
+                padding: 5px 10px;
+                border-radius: 10px;
+                font-size: 12px;
+                font-weight: 600;
+            ">
+                {}
+            </span>
+            """,
+            colores.get(obj.estado, "#6c757d"),
+            obj.get_estado_display()
+        )
+
+    estado_color.short_description = "Estado"
+
+    # =========================
+    # PAGOS
+    # =========================
 
     def mostrar_total_pagado(self, obj):
         return obj.total_pagado
+
     mostrar_total_pagado.short_description = "Total pagado"
 
     def mostrar_saldo_pendiente(self, obj):
         return obj.saldo_pendiente
+
     mostrar_saldo_pendiente.short_description = "Saldo pendiente"
 
     def mostrar_estado_pago(self, obj):
         return obj.estado_pago
+
     mostrar_estado_pago.short_description = "Estado de pago"
 
 
@@ -240,3 +304,5 @@ class PagoAdmin(admin.ModelAdmin):
 @admin.register(PedidoDescuento)
 class PedidoDescuentoAdmin(admin.ModelAdmin):
     list_display = ("pedido", "monto", "motivo", "fecha")
+
+
