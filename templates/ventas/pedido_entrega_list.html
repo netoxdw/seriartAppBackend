@@ -1,230 +1,387 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+
+<link rel="stylesheet"
+      href="{% static 'css/entregas.css' %}?{% now 'U' %}">
+
+{% endblock %}
 
 {% block content %}
 
-<div class="container-fluid mt-4">
+<div class="delivery-dashboard">
 
-    <!-- HEADER -->
+    <!-- ========================================
+         PAGE HEADER
+    ========================================= -->
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="dashboard-header">
 
+        <!-- LEFT -->
         <div>
-            <h3 class="fw-bold mb-1">
-                Panel de Entregas
-            </h3>
 
-            <p class="text-muted mb-0">
-                Gestión y control de pedidos
+            <div class="dashboard-badge">
+
+                <i class="bi bi-box-seam"></i>
+
+                Operaciones
+
+            </div>
+
+            <h1 class="dashboard-title">
+
+                Panel de Entregas
+
+            </h1>
+
+            <p class="dashboard-subtitle">
+
+                Gestión y control operativo
+                de pedidos y entregas
+
             </p>
+
         </div>
 
     </div>
 
-    <!-- FILTROS -->
+    <!-- ========================================
+         FILTERS
+    ========================================= -->
 
-    <div class="card border-0 shadow-sm mb-4">
+    <div class="dashboard-card filter-card">
 
-        <div class="card-body">
+        <form method="get">
 
-            <form method="get">
+            <div class="row g-3 align-items-end">
 
-                <div class="row g-3">
+                <!-- SEARCH -->
+                <div class="col-12 col-lg-5">
 
-                    <div class="col-md-4">
+                    <label class="custom-label">
+
+                        Buscar pedido
+
+                    </label>
+
+                    <div class="search-input-wrapper">
+
+                        <i class="bi bi-search"></i>
 
                         <input
                             type="text"
                             name="q"
-                            class="form-control"
-                            placeholder="Buscar pedido, alumno o teléfono"
+                            class="form-control custom-input"
+                            placeholder="Pedido, alumno o teléfono"
                             value="{{ busqueda }}"
                         >
 
                     </div>
 
-                    <div class="col-md-3">
-
-                        <select
-                            name="estado"
-                            class="form-select"
-                        >
-
-                            <option value="">
-                                Todos los estados
-                            </option>
-
-                            {% for value, label in estados %}
-
-                            <option
-                                value="{{ value }}"
-                                {% if estado_actual == value %}
-                                    selected
-                                {% endif %}
-                            >
-                                {{ label }}
-                            </option>
-
-                            {% endfor %}
-
-                        </select>
-
-                    </div>
-
-                    <div class="col-md-2">
-
-                        <button
-                            type="submit"
-                            class="btn btn-dark w-100"
-                        >
-                            Filtrar
-                        </button>
-
-                    </div>
-
                 </div>
 
-            </form>
+                <!-- STATUS -->
+                <div class="col-12 col-md-6 col-lg-3">
 
-        </div>
+                    <label class="custom-label">
 
-    </div>
+                        Estado
 
-    <!-- TABLA -->
+                    </label>
 
-    <div class="card border-0 shadow-sm">
+                    <select
+                        name="estado"
+                        class="form-select custom-select"
+                    >
 
-        <div class="card-body p-0">
+                        <option value="">
+                            Todos los estados
+                        </option>
 
-            <div class="table-responsive">
+                        {% for value, label in estados %}
 
-                <table class="table align-middle mb-0">
-
-                    <thead class="table-light">
-
-                        <tr>
-                            <th>Pedido</th>
-                            <th>Alumno</th>
-                            <th>Teléfono</th>
-                            <th>Estado</th>
-                            <th>Total</th>
-                            <th>Entrega</th>
-                            <th></th>
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                        {% for pedido in pedidos %}
-
-                        <tr>
-
-                            <td>
-                                #{{ pedido.id }}
-                            </td>
-
-                            <td>
-                                {{ pedido.alumno.nombre }}
-                            </td>
-
-                            <td>
-                                {{ pedido.alumno.telefono }}
-                            </td>
-
-                            <td>
-
-                                {% if pedido.estado == "pendiente" %}
-
-                                    <span class="badge bg-warning text-dark">
-                                        Pendiente
-                                    </span>
-
-                                {% elif pedido.estado == "proceso" %}
-
-                                    <span class="badge bg-primary">
-                                        En proceso
-                                    </span>
-
-                                {% elif pedido.estado == "listo" %}
-
-                                    <span class="badge bg-success">
-                                        Listo
-                                    </span>
-
-                                {% else %}
-
-                                    <span class="badge bg-secondary">
-                                        Entregado
-                                    </span>
-
-                                {% endif %}
-
-                            </td>
-
-                            <td>
-                                ${{ pedido.total }}
-                            </td>
-
-                            <td>
-
-                                {% if pedido.fecha_entrega %}
-
-                                    <small>
-                                        {{ pedido.fecha_entrega|date:"d/m/Y H:i" }}
-                                    </small>
-
-                                {% else %}
-
-                                    <span class="text-muted">
-                                        —
-                                    </span>
-
-                                {% endif %}
-
-                            </td>
-
-                            <td>
-
-                                <a
-                                    href="#"
-                                    class="btn btn-sm btn-dark"
-                                >
-                                    Gestionar
-                                </a>
-
-                            </td>
-
-                        </tr>
-
-                        {% empty %}
-
-                        <tr>
-
-                            <td colspan="7">
-
-                                <div class="text-center p-5">
-
-                                    <h5>
-                                        No hay pedidos
-                                    </h5>
-
-                                    <p class="text-muted mb-0">
-                                        No se encontraron resultados.
-                                    </p>
-
-                                </div>
-
-                            </td>
-
-                        </tr>
+                        <option
+                            value="{{ value }}"
+                            {% if estado_actual == value %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ label }}
+                        </option>
 
                         {% endfor %}
 
-                    </tbody>
+                    </select>
 
-                </table>
+                </div>
+
+                <!-- BUTTON -->
+                <div class="col-12 col-md-6 col-lg-2">
+
+                    <button
+                        type="submit"
+                        class="btn btn-dark custom-filter-btn w-100"
+                    >
+
+                        <i class="bi bi-funnel"></i>
+
+                        Filtrar
+
+                    </button>
+
+                </div>
 
             </div>
+
+        </form>
+
+    </div>
+
+    <!-- ========================================
+         TABLE CARD
+    ========================================= -->
+
+    <div class="dashboard-card table-card">
+
+        <!-- TABLE HEADER -->
+        <div class="table-card-header">
+
+            <div>
+
+                <h4 class="table-card-title">
+
+                    Pedidos registrados
+
+                </h4>
+
+                <p class="table-card-subtitle">
+
+                    Seguimiento operativo
+                    y control de entregas
+
+                </p>
+
+            </div>
+
+        </div>
+
+        <!-- TABLE -->
+        <div class="table-responsive">
+
+            <table class="table modern-table align-middle mb-0">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Pedido
+                        </th>
+
+                        <th>
+                            Alumno
+                        </th>
+
+                        <th>
+                            Estado
+                        </th>
+
+                        <th>
+                            Total
+                        </th>
+
+                        <th>
+                            Entrega
+                        </th>
+
+                        <th class="text-end">
+                            Acción
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for pedido in pedidos %}
+
+                    <tr>
+
+                        <!-- PEDIDO -->
+                        <td>
+
+                            <div class="pedido-id">
+
+                                #{{ pedido.id }}
+
+                            </div>
+
+                        </td>
+
+                        <!-- ALUMNO -->
+                        <td>
+
+                            <div class="student-cell">
+
+                                <div class="student-avatar">
+
+                                    {{ pedido.alumno.nombre|first|upper }}
+
+                                </div>
+
+                                <div>
+
+                                    <div class="student-name">
+
+                                        {{ pedido.alumno.nombre }}
+
+                                    </div>
+
+                                    <div class="student-phone">
+
+                                        {{ pedido.alumno.telefono }}
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+                        <!-- STATUS -->
+                        <td>
+
+                            {% if pedido.estado == "pendiente" %}
+
+                            <div class="status-badge pending">
+
+                                Pendiente
+
+                            </div>
+
+                            {% elif pedido.estado == "proceso" %}
+
+                            <div class="status-badge process">
+
+                                En proceso
+
+                            </div>
+
+                            {% elif pedido.estado == "listo" %}
+
+                            <div class="status-badge ready">
+
+                                Listo
+
+                            </div>
+
+                            {% else %}
+
+                            <div class="status-badge delivered">
+
+                                Entregado
+
+                            </div>
+
+                            {% endif %}
+
+                        </td>
+
+                        <!-- TOTAL -->
+                        <td>
+
+                            <div class="pedido-total">
+
+                                ${{ pedido.total }}
+
+                            </div>
+
+                        </td>
+
+                        <!-- ENTREGA -->
+                        <td>
+
+                            {% if pedido.fecha_entrega %}
+
+                            <div class="delivery-date">
+
+                                <i class="bi bi-calendar-check"></i>
+
+                                {{ pedido.fecha_entrega|date:"d/m/Y H:i" }}
+
+                            </div>
+
+                            {% else %}
+
+                            <span class="empty-date">
+
+                                Sin asignar
+
+                            </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <!-- ACTION -->
+                        <td class="text-end">
+
+                            <a
+                                href="#"
+                                class="manage-btn"
+                            >
+
+                                Gestionar
+
+                                <i class="bi bi-arrow-right"></i>
+
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td colspan="6">
+
+                            <div class="empty-state">
+
+                                <div class="empty-icon">
+
+                                    <i class="bi bi-inbox"></i>
+
+                                </div>
+
+                                <h4>
+
+                                    No hay pedidos
+
+                                </h4>
+
+                                <p>
+
+                                    No se encontraron resultados
+                                    para los filtros seleccionados.
+
+                                </p>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
 
         </div>
 
