@@ -2,7 +2,6 @@ from django.contrib import admin
 from .models import Pedido, PedidoItemBase, PedidoItemAnillo, PedidoItemExtra, Observacion, Pago, PedidoDescuento
 from django.utils.html import format_html
 
-
 class PedidoItemBaseInline(admin.TabularInline):
     model = PedidoItemBase
     extra = 1

@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
-
+from django.db.models import Q
 
 from apps.alumnos.models import Alumno
 from .models import PedidoItemBase, Pedido, PedidoItemAnillo, PedidoItemExtra, Observacion, Pago, PedidoDescuento
@@ -14,6 +14,61 @@ from django.http import JsonResponse
 from apps.catalogo.models import PrecioBaseGeneracion
 
 
+
+class PedidoEntregaListView(ListView):
+
+    model = Pedido
+    template_name = "ventas/pedido_entrega_list.html"
+    context_object_name = "pedidos"
+    paginate_by = 20
+
+    def get_queryset(self):
+
+        queryset = (
+            Pedido.objects
+            .select_related("alumno")
+            .order_by("-id")
+        )
+
+        # =========================
+        # FILTRO POR ESTADO
+        # =========================
+
+        estado = self.request.GET.get("estado")
+
+        if estado:
+            queryset = queryset.filter(estado=estado)
+
+        # =========================
+        # BUSCADOR
+        # =========================
+
+        q = self.request.GET.get("q")
+
+        if q:
+            queryset = queryset.filter(
+                Q(id__icontains=q) |
+                Q(alumno__nombre__icontains=q) |
+                Q(alumno__telefono__icontains=q)
+            )
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+
+        context = super().get_context_data(**kwargs)
+
+        context["estado_actual"] = self.request.GET.get("estado", "")
+        context["busqueda"] = self.request.GET.get("q", "")
+
+        context["estados"] = [
+            ("pendiente", "Pendiente"),
+            ("proceso", "En proceso"),
+            ("listo", "Listo"),
+            ("entregado", "Entregado"),
+        ]
+
+        return context
 
 class PedidoCreateView(LoginRequiredMixin, CreateView):
     model = Pedido
