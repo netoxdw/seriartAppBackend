@@ -253,6 +253,24 @@
 
             </nav>
 
+            <!-- MOBILE LOGOUT -->
+            <div class="mobile-sidebar-footer">
+
+                <form method="post" action="{% url 'logout' %}">
+
+                    {% csrf_token %}
+
+                    <button class="mobile-logout-btn">
+
+                        <i class="bi bi-box-arrow-right"></i>
+
+                        Cerrar sesión
+
+                    </button>
+
+                </form>
+
+            </div>
         </div>
 
     </div>
