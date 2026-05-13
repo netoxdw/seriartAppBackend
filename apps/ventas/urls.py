@@ -22,7 +22,10 @@ from .views import (
     PedidoDescuentoUpdateView,
     PedidoDescuentoDeleteView,
     PedidoEntregaListView,
+    PedidoCambiarEstadoView,
     )
+
+app_name = "ventas"
 
 urlpatterns = [
     path('pedidos/nuevo/<int:alumno_id>/', PedidoCreateView.as_view(), name='pedido_create'),
@@ -57,4 +60,6 @@ urlpatterns = [
     path("descuento/<int:pk>/eliminar/", PedidoDescuentoDeleteView.as_view(), name="descuento_delete"),
 
     path("entregas/", PedidoEntregaListView.as_view(), name="pedido_entrega_list"),
+    path("entregas/<int:pk>/estado/", PedidoCambiarEstadoView.as_view(), name="pedido_cambiar_estado"),
+
 ]

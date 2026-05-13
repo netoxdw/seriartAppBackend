@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+
+<link rel="stylesheet"
+      href="{% static 'css/forms.css' %}?{% now 'U' %}">
+
+{% endblock %}
+
+{% block content %}
+
+<div class="form-wrapper">
+
+    <div class="row justify-content-center">
+
+        <div class="col-12 col-lg-8 col-xl-7">
+
+            <!-- FORM CONTAINER -->
+            <div class="form-container delivery-form-container">
+
+                <!-- HEADER -->
+                <div class="form-header">
+
+                    <div class="form-icon delivery-form-icon">
+
+                        <i class="bi bi-box-seam"></i>
+
+                    </div>
+
+                    <div>
+
+                        <h2 class="form-title">
+
+                            Cambiar estado
+
+                        </h2>
+
+                        <p class="form-subtitle mb-0">
+
+                            Gestión y control operativo
+                            del pedido
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <!-- INFO CARD -->
+                <div class="selection-card delivery-info-card mb-4">
+
+                    <div class="selection-header">
+
+                        <span class="selection-badge secondary">
+
+                            Pedido #{{ pedido.id }}
+
+                        </span>
+
+                        <h5 class="selection-title">
+
+                            {{ pedido.alumno.nombre }}
+
+                        </h5>
+
+                    </div>
+
+                    <!-- INFO GRID -->
+                    <div class="delivery-info-grid">
+
+                        <!-- TOTAL -->
+                        <div class="delivery-info-item">
+
+                            <div class="delivery-info-label">
+
+                                Total
+
+                            </div>
+
+                            <div class="delivery-info-value total">
+
+                                ${{ pedido.total }}
+
+                            </div>
+
+                        </div>
+
+                        <!-- TELEFONO -->
+                        <div class="delivery-info-item">
+
+                            <div class="delivery-info-label">
+
+                                Teléfono
+
+                            </div>
+
+                            <div class="delivery-info-value">
+
+                                {{ pedido.alumno.telefono }}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- FORM -->
+                <form method="post">
+
+                    {% csrf_token %}
+
+                    <!-- ESTADO -->
+                    <div class="mb-4">
+
+                        <label class="custom-label">
+
+                            Estado del pedido
+
+                        </label>
+
+                        {{ form.estado }}
+
+                        <div class="input-help">
+
+                            Actualiza el estado operativo
+                            de la entrega
+
+                        </div>
+
+                    </div>
+
+                    <!-- RECIBIDO POR -->
+                    <div class="mb-4">
+
+                        <label class="custom-label">
+
+                            Recibido por
+
+                        </label>
+
+                        {{ form.recibido_por }}
+
+                        <div class="input-help">
+
+                            Persona que recibe el pedido
+
+                        </div>
+
+                        {% if form.recibido_por.errors %}
+
+                        <div class="text-danger small mt-2">
+
+                            {{ form.recibido_por.errors }}
+
+                        </div>
+
+                        {% endif %}
+
+                    </div>
+
+                    <!-- NOTAS -->
+                    <div class="mb-4">
+
+                        <label class="custom-label">
+
+                            Notas de entrega
+
+                        </label>
+
+                        {{ form.notas_entrega }}
+
+                        <div class="input-help">
+
+                            Información adicional
+                            sobre la entrega
+
+                        </div>
+
+                    </div>
+
+                    <!-- ACTIONS -->
+                    <div class="form-actions">
+
+                        <a
+                            href="{% url 'ventas:pedido_entrega_list' %}"
+                            class="btn btn-light custom-cancel-btn"
+                        >
+
+                            Cancelar
+
+                        </a>
+
+                        <button
+                            type="submit"
+                            class="btn btn-dark custom-submit-btn"
+                        >
+
+                            <i class="bi bi-check-lg"></i>
+
+                            Guardar cambios
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1085,3 +1085,131 @@
 
     color: #b45309;
 }
+
+
+/* ========================================
+   DELIVERY FORM
+======================================== */
+
+.delivery-form-container {
+
+    border-top:
+        4px solid #111827;
+}
+
+/* ========================================
+   ICON
+======================================== */
+
+.delivery-form-icon {
+
+    background:
+        linear-gradient(
+            135deg,
+            #111827,
+            #374151
+        );
+
+    box-shadow:
+        0 12px 30px rgba(17,24,39,0.25);
+}
+
+/* ========================================
+   INFO CARD
+======================================== */
+
+.delivery-info-card {
+
+    background:
+        linear-gradient(
+            135deg,
+            #fafafa,
+            #ffffff
+        );
+}
+
+/* ========================================
+   INFO GRID
+======================================== */
+
+.delivery-info-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(auto-fit, minmax(180px, 1fr));
+
+    gap: 18px;
+
+    margin-top: 20px;
+}
+
+/* ITEM */
+
+.delivery-info-item {
+
+    background: white;
+
+    border: 1px solid #f1f5f9;
+
+    border-radius: 16px;
+
+    padding: 18px;
+}
+
+/* LABEL */
+
+.delivery-info-label {
+
+    font-size: 13px;
+
+    color: var(--muted);
+
+    font-weight: 600;
+
+    margin-bottom: 8px;
+}
+
+/* VALUE */
+
+.delivery-info-value {
+
+    font-size: 16px;
+
+    font-weight: 700;
+
+    color: var(--text);
+}
+
+/* TOTAL */
+
+.delivery-info-value.total {
+
+    color: var(--primary);
+
+    font-size: 20px;
+}
+
+/* ========================================
+   TEXTAREA
+======================================== */
+
+.delivery-form-container textarea {
+
+    min-height: 130px;
+
+    resize: vertical;
+}
+
+/* ========================================
+   MOBILE
+======================================== */
+
+@media (max-width: 768px) {
+
+    .delivery-info-grid {
+
+        grid-template-columns: 1fr;
+    }
+
+}

@@ -1,16 +1,18 @@
-from django.views.generic import CreateView, DetailView, UpdateView, DeleteView, ListView
+from django.views.generic import CreateView, DetailView, UpdateView, DeleteView, ListView, View
 from django.urls import reverse
 from django.shortcuts import redirect
 from django.shortcuts import get_object_or_404
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+from django.contrib import messages
 from django.http import JsonResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 
 from apps.alumnos.models import Alumno
 from .models import PedidoItemBase, Pedido, PedidoItemAnillo, PedidoItemExtra, Observacion, Pago, PedidoDescuento
-from .form import PedidoItemBaseForm, PedidoItemAnilloForm, PedidoItemExtraForm, ObservacionForm, PagoForm, PedidoDescuentoForm
-from django.http import JsonResponse
+from .form import PedidoItemBaseForm, PedidoItemAnilloForm, PedidoItemExtraForm, ObservacionForm, PagoForm, PedidoDescuentoForm, PedidoCambiarEstadoForm
 from apps.catalogo.models import PrecioBaseGeneracion
 
 
@@ -552,3 +554,84 @@ class PedidoDescuentoDeleteView(LoginRequiredMixin, DeleteView):
 
     def get_success_url(self):
         return reverse("pedido_detail", kwargs={"pk": self.object.pedido_id})
+
+
+# Cambiar estado de panel de entregas
+
+class PedidoCambiarEstadoView(View):
+
+    template_name = "ventas/pedido_cambiar_estado.html"
+
+    def get(self, request, pk):
+
+        pedido = get_object_or_404(
+            Pedido,
+            pk=pk
+        )
+
+        form = PedidoCambiarEstadoForm(
+            instance=pedido
+        )
+
+        context = {
+            "pedido": pedido,
+            "form": form,
+        }
+
+        return render(
+            request,
+            self.template_name,
+            context
+        )
+
+    def post(self, request, pk):
+
+        pedido = get_object_or_404(
+            Pedido,
+            pk=pk
+        )
+
+        form = PedidoCambiarEstadoForm(
+            request.POST,
+            instance=pedido
+        )
+
+        if form.is_valid():
+
+            pedido = form.save(commit=False)
+
+            # =========================
+            # FECHA ENTREGA
+            # =========================
+
+            if pedido.estado == "entregado":
+
+                if not pedido.fecha_entrega:
+                    pedido.fecha_entrega = timezone.now()
+
+            else:
+
+                pedido.fecha_entrega = None
+                pedido.recibido_por = None
+
+            pedido.save()
+
+            messages.success(
+                request,
+                "Estado actualizado correctamente."
+            )
+
+            return redirect(
+                "ventas:pedido_entrega_list"
+            )
+
+        context = {
+            "pedido": pedido,
+            "form": form,
+        }
+
+        return render(
+            request,
+            self.template_name,
+            context
+        )

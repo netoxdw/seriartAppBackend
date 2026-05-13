@@ -1,6 +1,6 @@
 from django import forms
 from apps.catalogo.models import Modelo, Anillo, PrecioBaseGeneracion
-from .models import PedidoItemBase, PedidoItemAnillo, PedidoItemExtra, Observacion, Pago, PedidoDescuento
+from .models import Pedido, PedidoItemBase, PedidoItemAnillo, PedidoItemExtra, Observacion, Pago, PedidoDescuento
 
 # apps/ventas/forms.py
 
@@ -108,3 +108,59 @@ class PedidoDescuentoForm(forms.ModelForm):
             "monto": forms.NumberInput(attrs={"class": "form-control"}),
             "motivo": forms.TextInput(attrs={"class": "form-control"}),
         }
+
+class PedidoCambiarEstadoForm(forms.ModelForm):
+
+    class Meta:
+
+        model = Pedido
+
+        fields = [
+            "estado",
+            "recibido_por",
+            "notas_entrega",
+        ]
+
+        widgets = {
+
+            "estado": forms.Select(
+                attrs={
+                    "class": "form-select"
+                }
+            ),
+
+            "recibido_por": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Nombre de quien recibe"
+                }
+            ),
+
+            "notas_entrega": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 3,
+                    "placeholder": "Notas adicionales"
+                }
+            ),
+        }
+
+    def clean(self):
+
+        cleaned_data = super().clean()
+
+        estado = cleaned_data.get("estado")
+        recibido_por = cleaned_data.get("recibido_por")
+
+        # =========================
+        # VALIDAR ENTREGA
+        # =========================
+
+        if estado == "entregado" and not recibido_por:
+
+            self.add_error(
+                "recibido_por",
+                "Debes indicar quién recibe el pedido."
+            )
+
+        return cleaned_data
