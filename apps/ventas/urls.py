@@ -21,12 +21,12 @@ from .views import (
     PedidoDescuentoCreateView,
     PedidoDescuentoUpdateView,
     PedidoDescuentoDeleteView,
+    PedidoEntregaListView,
     )
 
 urlpatterns = [
     path('pedidos/nuevo/<int:alumno_id>/', PedidoCreateView.as_view(), name='pedido_create'),
     path('pedidos/<int:pk>/', PedidoDetailView.as_view(), name='pedido_detail'),
-
 
     path('pedidos/<int:pedido_id>/add-base/', PedidoItemBaseCreateView.as_view(), name='itembase_create'),
     path('alumnos/<int:alumno_id>/pedido/', alumno_pedido_redirect, name='alumno_pedido'),
@@ -55,4 +55,6 @@ urlpatterns = [
     path("pedidos/<int:pedido_id>/add-descuento/", PedidoDescuentoCreateView.as_view(), name="descuento_create"),
     path("descuento/<int:pk>/editar/", PedidoDescuentoUpdateView.as_view(), name="descuento_update"),
     path("descuento/<int:pk>/eliminar/", PedidoDescuentoDeleteView.as_view(), name="descuento_delete"),
+
+    path("entregas/", PedidoEntregaListView.as_view(), name="pedido_entrega_list"),
 ]

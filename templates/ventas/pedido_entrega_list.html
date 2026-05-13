@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <!-- HEADER -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h3 class="fw-bold mb-1">
+                Panel de Entregas
+            </h3>
+
+            <p class="text-muted mb-0">
+                Gestión y control de pedidos
+            </p>
+        </div>
+
+    </div>
+
+    <!-- FILTROS -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-body">
+
+            <form method="get">
+
+                <div class="row g-3">
+
+                    <div class="col-md-4">
+
+                        <input
+                            type="text"
+                            name="q"
+                            class="form-control"
+                            placeholder="Buscar pedido, alumno o teléfono"
+                            value="{{ busqueda }}"
+                        >
+
+                    </div>
+
+                    <div class="col-md-3">
+
+                        <select
+                            name="estado"
+                            class="form-select"
+                        >
+
+                            <option value="">
+                                Todos los estados
+                            </option>
+
+                            {% for value, label in estados %}
+
+                            <option
+                                value="{{ value }}"
+                                {% if estado_actual == value %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ label }}
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-2">
+
+                        <button
+                            type="submit"
+                            class="btn btn-dark w-100"
+                        >
+                            Filtrar
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <!-- TABLA -->
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table class="table align-middle mb-0">
+
+                    <thead class="table-light">
+
+                        <tr>
+                            <th>Pedido</th>
+                            <th>Alumno</th>
+                            <th>Teléfono</th>
+                            <th>Estado</th>
+                            <th>Total</th>
+                            <th>Entrega</th>
+                            <th></th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for pedido in pedidos %}
+
+                        <tr>
+
+                            <td>
+                                #{{ pedido.id }}
+                            </td>
+
+                            <td>
+                                {{ pedido.alumno.nombre }}
+                            </td>
+
+                            <td>
+                                {{ pedido.alumno.telefono }}
+                            </td>
+
+                            <td>
+
+                                {% if pedido.estado == "pendiente" %}
+
+                                    <span class="badge bg-warning text-dark">
+                                        Pendiente
+                                    </span>
+
+                                {% elif pedido.estado == "proceso" %}
+
+                                    <span class="badge bg-primary">
+                                        En proceso
+                                    </span>
+
+                                {% elif pedido.estado == "listo" %}
+
+                                    <span class="badge bg-success">
+                                        Listo
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge bg-secondary">
+                                        Entregado
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+                                ${{ pedido.total }}
+                            </td>
+
+                            <td>
+
+                                {% if pedido.fecha_entrega %}
+
+                                    <small>
+                                        {{ pedido.fecha_entrega|date:"d/m/Y H:i" }}
+                                    </small>
+
+                                {% else %}
+
+                                    <span class="text-muted">
+                                        —
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                <a
+                                    href="#"
+                                    class="btn btn-sm btn-dark"
+                                >
+                                    Gestionar
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+                        {% empty %}
+
+                        <tr>
+
+                            <td colspan="7">
+
+                                <div class="text-center p-5">
+
+                                    <h5>
+                                        No hay pedidos
+                                    </h5>
+
+                                    <p class="text-muted mb-0">
+                                        No se encontraron resultados.
+                                    </p>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
