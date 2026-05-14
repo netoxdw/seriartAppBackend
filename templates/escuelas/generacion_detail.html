@@ -37,7 +37,7 @@
     </div>
 
     <!-- ACTION -->
-    <a href="{% url 'escuela_create' generacion.id %}"
+    <a href="{% url 'escuelas:escuela_create' generacion.id %}"
        class="btn btn-primary detail-main-btn">
 
         <i class="bi bi-plus-lg"></i>
@@ -145,7 +145,7 @@
 
                             <div>
 
-                                <a href="{% url 'escuela_detail' generacion.id escuela.id %}"
+                                <a href="{% url 'escuelas:escuela_detail' generacion.id escuela.id %}"
                                    class="table-title">
 
                                     {{ escuela.nombre }}
@@ -187,7 +187,7 @@
                     <!-- ACTION -->
                     <td class="text-end">
 
-                        <a href="{% url 'escuela_detail' generacion.id escuela.id %}"
+                        <a href="{% url 'escuelas:escuela_detail' generacion.id escuela.id %}"
                            class="btn btn-light btn-sm action-btn">
 
                             Ver detalle
@@ -220,7 +220,7 @@
                                 Comienza agregando la primera escuela.
                             </p>
 
-                            <a href="{% url 'escuela_create' generacion.id %}"
+                            <a href="{% url 'escuelas:escuela_create' generacion.id %}"
                                class="btn btn-primary">
 
                                 Agregar escuela

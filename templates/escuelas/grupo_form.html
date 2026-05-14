@@ -147,9 +147,9 @@
                     <div class="form-actions">
 
                         <a href="{% if object %}
-                                    {% url 'escuela_detail' object.generacion.id object.escuela.id %}
+                                    {% url 'escuelas:escuela_detail' object.generacion.id object.escuela.id %}
                                  {% else %}
-                                    {% url 'escuela_detail' view.kwargs.generacion_id view.kwargs.escuela_id %}
+                                    {% url 'escuelas:escuela_detail' view.kwargs.generacion_id view.kwargs.escuela_id %}
                                  {% endif %}"
 
                            class="btn btn-light custom-cancel-btn">

@@ -84,7 +84,7 @@ class EscuelaCreateView(LoginRequiredMixin, FormView):
     def get_success_url(self):
 
         return reverse(
-            "generacion_detail",
+            "escuelas:generacion_detail",
             kwargs={
                 "pk": self.generacion.id
             }
@@ -153,7 +153,7 @@ class GrupoCreateView(LoginRequiredMixin, CreateView):
     def get_success_url(self):
 
         return reverse(
-            "escuela_detail",
+            "escuelas:escuela_detail",
             kwargs={
                 "generacion_id": self.kwargs["generacion_id"],
                 "pk": self.kwargs["escuela_id"]
@@ -182,7 +182,7 @@ class GrupoUpdateView(LoginRequiredMixin, UpdateView):
     def get_success_url(self):
 
         return reverse(
-            "escuela_detail",
+            "escuelas:escuela_detail",
             kwargs={
                 "generacion_id": self.object.generacion.id,
                 "pk": self.object.escuela.id
