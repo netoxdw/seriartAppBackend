@@ -36,14 +36,31 @@
 
     </div>
 
-    <!-- ACTION -->
+
+    <!-- ACTIONS -->
+<div class="d-flex flex-column flex-sm-row gap-2">
+
+    <!-- NEW -->
     <a href="{% url 'escuelas:escuela_create' generacion.id %}"
        class="btn btn-primary detail-main-btn">
 
         <i class="bi bi-plus-lg"></i>
+
         Nueva Escuela
 
     </a>
+
+        <!-- BACK -->
+    <a href="/"
+       class="btn btn-light custom-back-btn">
+
+        <i class="bi bi-arrow-left"></i>
+
+        Volver
+
+    </a>
+
+</div>
 
 </div>
 
@@ -243,17 +260,5 @@
 
 </div>
 
-<!-- FOOT ACTIONS -->
-<div class="mt-4 d-flex flex-column flex-md-row gap-2">
-
-    <a href="/"
-       class="btn btn-light custom-back-btn">
-
-        <i class="bi bi-arrow-left"></i>
-        Volver a generaciones
-
-    </a>
-
-</div>
 
 {% endblock %}
