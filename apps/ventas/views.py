@@ -28,7 +28,7 @@ class PedidoCreateView(LoginRequiredMixin, CreateView):
 
     def get_success_url(self):
         return reverse(
-            "pedido_detail",
+            "ventas:pedido_detail",
             kwargs={"pk": self.object.id}
         )
     
@@ -223,7 +223,7 @@ class PedidoItemBaseCreateView(LoginRequiredMixin, CreateView):
 
     def get_success_url(self):
         return reverse(
-            "pedido_detail",
+            "ventas:pedido_detail",
             kwargs={"pk": self.kwargs["pedido_id"]}
         )
 
@@ -300,7 +300,7 @@ def alumno_pedido_redirect(request, alumno_id):
     if not pedido:
         pedido = Pedido.objects.create(alumno=alumno)
 
-    return redirect("pedido_detail", pk=pedido.id)
+    return redirect("ventas:pedido_detail", pk=pedido.id)
 
 
 # ✏️ UPDATE
@@ -317,7 +317,7 @@ class PedidoItemBaseUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_success_url(self):
         return reverse(
-            "pedido_detail",
+            "ventas:pedido_detail",
             kwargs={"pk": self.object.pedido_id}
         )
     
@@ -333,7 +333,7 @@ class PedidoItemBaseDeleteView(LoginRequiredMixin, DeleteView):
 
     def get_success_url(self):
         return reverse(
-            "pedido_detail",
+            "ventas:pedido_detail",
             kwargs={"pk": self.object.pedido.id}
         )
     
@@ -359,7 +359,7 @@ class PedidoItemAnilloCreateView(LoginRequiredMixin, CreateView):
         return kwargs
 
     def get_success_url(self):
-        return reverse("pedido_detail", kwargs={"pk": self.kwargs["pedido_id"]})
+        return reverse("ventas:pedido_detail", kwargs={"pk": self.kwargs["pedido_id"]})
     
 class PedidoItemAnilloUpdateView(LoginRequiredMixin, UpdateView):
     model = PedidoItemAnillo
@@ -372,7 +372,7 @@ class PedidoItemAnilloUpdateView(LoginRequiredMixin, UpdateView):
         return context
 
     def get_success_url(self):
-        return reverse("pedido_detail", kwargs={"pk": self.object.pedido_id})
+        return reverse("ventas:ventas:pedido_detail", kwargs={"pk": self.object.pedido_id})
     
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -386,7 +386,7 @@ class PedidoItemAnilloDeleteView(LoginRequiredMixin, DeleteView):
 
     def get_success_url(self):
         return reverse(
-            "pedido_detail",
+            "ventas:pedido_detail",
             kwargs={"pk": self.object.pedido_id}
         )
     
@@ -408,7 +408,7 @@ class PedidoItemExtraCreateView(LoginRequiredMixin, CreateView):
         return context
 
     def get_success_url(self):
-        return reverse("pedido_detail", kwargs={"pk": self.kwargs["pedido_id"]})
+        return reverse("ventas:pedido_detail", kwargs={"pk": self.kwargs["pedido_id"]})
 
 
 # ✏️ UPDATE
@@ -423,7 +423,7 @@ class PedidoItemExtraUpdateView(LoginRequiredMixin, UpdateView):
         return context
 
     def get_success_url(self):
-        return reverse("pedido_detail", kwargs={"pk": self.object.pedido_id})
+        return reverse("ventas:pedido_detail", kwargs={"pk": self.object.pedido_id})
 
 
 # 🗑 DELETE
@@ -432,7 +432,7 @@ class PedidoItemExtraDeleteView(LoginRequiredMixin, DeleteView):
     template_name = "ventas/itemextra_confirm_delete.html"
 
     def get_success_url(self):
-        return reverse("pedido_detail", kwargs={"pk": self.object.pedido_id})
+        return reverse("ventas:pedido_detail", kwargs={"pk": self.object.pedido_id})
     
 
 # Observacion ######################################################################
@@ -453,7 +453,7 @@ class ObservacionCreateView(LoginRequiredMixin, CreateView):
         return context
 
     def get_success_url(self):
-        return reverse("pedido_detail", kwargs={"pk": self.kwargs["pedido_id"]})
+        return reverse("ventas:pedido_detail", kwargs={"pk": self.kwargs["pedido_id"]})
 
 
 # ✏️ UPDATE
@@ -468,7 +468,7 @@ class ObservacionUpdateView(LoginRequiredMixin, UpdateView):
         return context
 
     def get_success_url(self):
-        return reverse("pedido_detail", kwargs={"pk": self.object.pedido_id})
+        return reverse("ventas:pedido_detail", kwargs={"pk": self.object.pedido_id})
 
 
 # 🗑 DELETE
@@ -477,7 +477,7 @@ class ObservacionDeleteView(LoginRequiredMixin, DeleteView):
     template_name = "ventas/observacion_confirm_delete.html"
 
     def get_success_url(self):
-        return reverse("pedido_detail", kwargs={"pk": self.object.pedido_id})
+        return reverse("ventas:pedido_detail", kwargs={"pk": self.object.pedido_id})
 
 
 # Pago #####################################################################################
@@ -497,7 +497,7 @@ class PagoCreateView(LoginRequiredMixin, CreateView):
         return context
 
     def get_success_url(self):
-        return reverse("pedido_detail", kwargs={"pk": self.kwargs["pedido_id"]})
+        return reverse("ventas:pedido_detail", kwargs={"pk": self.kwargs["pedido_id"]})
 
 
 class PagoDeleteView(LoginRequiredMixin, DeleteView):
@@ -505,7 +505,7 @@ class PagoDeleteView(LoginRequiredMixin, DeleteView):
     template_name = "ventas/pago_confirm_delete.html"
 
     def get_success_url(self):
-        return reverse("pedido_detail", kwargs={"pk": self.object.pedido_id})
+        return reverse("ventas:pedido_detail", kwargs={"pk": self.object.pedido_id})
     
 
 # DESCUENTO ###############################################################################3
@@ -524,7 +524,7 @@ class PedidoDescuentoCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse("pedido_detail", kwargs={"pk": self.kwargs["pedido_id"]})
+        return reverse("ventas:pedido_detail", kwargs={"pk": self.kwargs["pedido_id"]})
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -539,7 +539,7 @@ class PedidoDescuentoUpdateView(LoginRequiredMixin, UpdateView):
     template_name = "ventas/descuento_form.html"
 
     def get_success_url(self):
-        return reverse("pedido_detail", kwargs={"pk": self.object.pedido_id})
+        return reverse("ventas:pedido_detail", kwargs={"pk": self.object.pedido_id})
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -553,7 +553,7 @@ class PedidoDescuentoDeleteView(LoginRequiredMixin, DeleteView):
     template_name = "ventas/descuento_confirm_delete.html"
 
     def get_success_url(self):
-        return reverse("pedido_detail", kwargs={"pk": self.object.pedido_id})
+        return reverse("ventas:pedido_detail", kwargs={"pk": self.object.pedido_id})
 
 
 # Cambiar estado de panel de entregas
