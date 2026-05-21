@@ -90,109 +90,69 @@
 
     </div>
 
-    <!-- BOTTOM INFO -->
+
     <div class="pedido-info-grid">
 
-        <!-- FOLIO -->
-        <div class="pedido-info-card">
+    <!-- FOLIO -->
+    <div class="pedido-meta-item">
 
-            <div class="pedido-info-icon">
+        <span class="pedido-meta-label">
+            Folio:
+        </span>
 
-                <i class="bi bi-upc-scan"></i>
+        <span class="pedido-meta-value">
 
-            </div>
+            {{ pedido.alumno.folio_fotos|default:"Sin folio" }}
 
-            <div>
-
-                <div class="pedido-info-label">
-                    Folio
-                </div>
-
-                <div class="pedido-info-value">
-
-                    {{ pedido.alumno.folio_fotos|default:"Sin folio" }}
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <!-- TELEFONO -->
-        <div class="pedido-info-card">
-
-            <div class="pedido-info-icon success">
-
-                <i class="bi bi-telephone"></i>
-
-            </div>
-
-            <div>
-
-                <div class="pedido-info-label">
-                    Teléfono
-                </div>
-
-                <div class="pedido-info-value">
-
-                    {{ pedido.alumno.telefono|default:"Sin teléfono" }}
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <!-- GRUPO -->
-        <div class="pedido-info-card">
-
-            <div class="pedido-info-icon dark">
-
-                <i class="bi bi-people"></i>
-
-            </div>
-
-            <div>
-
-                <div class="pedido-info-label">
-                    Grupo
-                </div>
-
-                <div class="pedido-info-value">
-
-                    {{ pedido.alumno.grupo.nombre }}
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <!-- ESCUELA -->
-        <div class="pedido-info-card">
-
-            <div class="pedido-info-icon primary">
-
-                <i class="bi bi-building"></i>
-
-            </div>
-
-            <div>
-
-                <div class="pedido-info-label">
-                    Escuela
-                </div>
-
-                <div class="pedido-info-value">
-
-                    {{ pedido.alumno.grupo.escuela.nombre }}
-
-                </div>
-
-            </div>
-
-        </div>
+        </span>
 
     </div>
+
+    <!-- TELEFONO -->
+    <div class="pedido-meta-item">
+
+        <span class="pedido-meta-label">
+            Teléfono:
+        </span>
+
+        <span class="pedido-meta-value">
+
+            {{ pedido.alumno.telefono|default:"Sin teléfono" }}
+
+        </span>
+
+    </div>
+
+    <!-- GRUPO -->
+    <div class="pedido-meta-item">
+
+        <span class="pedido-meta-label">
+            Grupo:
+        </span>
+
+        <span class="pedido-meta-value">
+
+            {{ pedido.alumno.grupo.nombre }}
+
+        </span>
+
+    </div>
+
+    <!-- ESCUELA -->
+    <div class="pedido-meta-item">
+
+        <span class="pedido-meta-label">
+            Escuela:
+        </span>
+
+        <span class="pedido-meta-value">
+
+            {{ pedido.alumno.grupo.escuela.nombre }}
+
+        </span>
+
+    </div>
+
+</div>
 
 </div>

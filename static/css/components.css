@@ -233,40 +233,25 @@
 }
 
 /* ========================================
-   BADGES
+   PEDIDO META INFO
 ======================================== */
 
-.badge-custom {
+.pedido-info-grid {
 
-    padding: 8px 14px;
+    display: flex;
 
-    border-radius: 999px;
+    flex-wrap: wrap;
 
-    font-size: 13px;
+    gap: 12px;
 
-    font-weight: 700;
+    margin-top: 18px;
 }
 
-/* FOLIO */
+/* ========================================
+   META ITEM
+======================================== */
 
-.folio-badge {
-
-    background: #eff6ff;
-
-    color: var(--primary);
-
-    padding: 8px 14px;
-
-    border-radius: 999px;
-
-    font-size: 13px;
-
-    font-weight: 700;
-}
-
-/* PHONE */
-
-.phone-badge {
+.pedido-meta-item {
 
     display: inline-flex;
 
@@ -274,41 +259,64 @@
 
     gap: 8px;
 
-    background: #f3f4f6;
+    background: #f8fafc;
 
-    color: #374151;
+    border: 1px solid #e2e8f0;
 
-    padding: 8px 12px;
+    border-radius: 14px;
 
-    border-radius: 10px;
+    padding: 10px 14px;
+
+    min-height: 46px;
+}
+
+/* ========================================
+   LABEL
+======================================== */
+
+.pedido-meta-label {
+
+    color: var(--muted);
 
     font-size: 13px;
 
-    font-weight: 500;
+    font-weight: 600;
 }
 
-/* LOCATION */
+/* ========================================
+   VALUE
+======================================== */
 
-.location-badge {
+.pedido-meta-value {
 
-    display: inline-flex;
+    color: var(--text);
 
-    align-items: center;
+    font-size: 14px;
 
-    gap: 8px;
-
-    background: #f3f4f6;
-
-    color: #374151;
-
-    padding: 8px 12px;
-
-    border-radius: 10px;
-
-    font-size: 13px;
-
-    font-weight: 500;
+    font-weight: 700;
 }
+
+/* ========================================
+   MOBILE
+======================================== */
+
+@media (max-width: 768px) {
+
+    .pedido-info-grid {
+
+        gap: 10px;
+    }
+
+    .pedido-meta-item {
+
+        width: 100%;
+
+        justify-content: space-between;
+    }
+
+}
+
+
 
 /* ========================================
    TABLE ICON
