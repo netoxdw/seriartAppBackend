@@ -12,7 +12,7 @@
             </span>
         </h4>
 
-        <a href="{% url 'pedido_create' alumno.id %}" class="btn btn-success">
+        <a href="{% url 'alumnos:pedido_create' alumno.id %}" class="btn btn-success">
             + Nuevo Pedido
         </a>
     </div>
@@ -31,7 +31,7 @@
             {% for pedido in pedidos %}
             <tr>
                 <td>
-                    <a href="{% url 'pedido_detail' pedido.id %}">
+                    <a href="{% url 'alumnos:pedido_detail' pedido.id %}">
                         #{{ pedido.id }}
                     </a>
                 </td>

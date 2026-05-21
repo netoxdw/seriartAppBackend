@@ -120,9 +120,9 @@
                     <div class="form-actions">
 
                         <a href="{% if object %}
-                                    {% url 'grupo_detail' object.grupo.id %}
+                                    {% url 'alumnos:grupo_detail' object.grupo.id %}
                                  {% else %}
-                                    {% url 'grupo_detail' view.kwargs.grupo_id %}
+                                    {% url 'alumnos:grupo_detail' view.kwargs.grupo_id %}
                                  {% endif %}"
 
                            class="btn btn-light custom-cancel-btn">

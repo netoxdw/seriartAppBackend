@@ -25,7 +25,7 @@
         </div>
 
         <!-- ACTION -->
-        <a href="{% url 'pago_create' pedido.id %}"
+        <a href="{% url 'ventas:pago_create' pedido.id %}"
            class="btn btn-success custom-table-btn">
 
             <i class="bi bi-cash-stack"></i>
@@ -156,7 +156,7 @@
 
                         <div class="table-actions">
 
-                            <a href="{% url 'pago_delete' pago.id %}"
+                            <a href="{% url 'ventas:pago_delete' pago.id %}"
                                class="table-action-btn danger">
 
                                 <i class="bi bi-trash"></i>
@@ -196,7 +196,7 @@
 
                             </p>
 
-                            <a href="{% url 'pago_create' pedido.id %}"
+                            <a href="{% url 'ventas:pago_create' pedido.id %}"
                                class="btn btn-success">
 
                                 Registrar pago

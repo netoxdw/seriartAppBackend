@@ -25,7 +25,7 @@
         </div>
 
         <!-- ACTION -->
-        <a href="{% url 'descuento_create' pedido.id %}"
+        <a href="{% url 'ventas:descuento_create' pedido.id %}"
            class="btn btn-warning custom-table-btn">
 
             <i class="bi bi-percent"></i>
@@ -157,7 +157,7 @@
                         <div class="table-actions">
 
                             <!-- EDIT -->
-                            <a href="{% url 'descuento_update' d.id %}"
+                            <a href="{% url 'ventas:descuento_update' d.id %}"
                                class="table-action-btn warning">
 
                                 <i class="bi bi-pencil"></i>
@@ -165,7 +165,7 @@
                             </a>
 
                             <!-- DELETE -->
-                            <a href="{% url 'descuento_delete' d.id %}"
+                            <a href="{% url 'ventas:descuento_delete' d.id %}"
                                class="table-action-btn danger">
 
                                 <i class="bi bi-trash"></i>
@@ -205,7 +205,7 @@
 
                             </p>
 
-                            <a href="{% url 'descuento_create' pedido.id %}"
+                            <a href="{% url 'ventas:descuento_create' pedido.id %}"
                                class="btn btn-warning">
 
                                 Agregar descuento

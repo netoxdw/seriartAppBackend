@@ -65,7 +65,7 @@ class AlumnoCreateView(LoginRequiredMixin, CreateView):
         )
 
         return redirect(
-            "pedido_detail",
+            "ventas:pedido_detail",
             pk=pedido.id
         )
 
@@ -89,7 +89,7 @@ class AlumnoUpdateView(LoginRequiredMixin, UpdateView):
     def get_success_url(self):
 
         return reverse(
-            "grupo_detail",
+            "alumnos:grupo_detail",
             kwargs={
                 "pk": self.object.grupo.id
             }

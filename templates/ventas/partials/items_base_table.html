@@ -24,7 +24,7 @@
         </div>
 
         <!-- ACTION -->
-        <a href="{% url 'itembase_create' pedido.id %}"
+        <a href="{% url 'ventas:itembase_create' pedido.id %}"
            class="btn btn-primary custom-table-btn">
 
             <i class="bi bi-plus-lg"></i>
@@ -185,7 +185,7 @@
                         <div class="table-actions">
 
                             <!-- EDIT -->
-                            <a href="{% url 'itembase_update' item.id %}"
+                            <a href="{% url 'ventas:itembase_update' item.id %}"
                                class="table-action-btn warning">
 
                                 <i class="bi bi-pencil"></i>
@@ -193,7 +193,7 @@
                             </a>
 
                             <!-- DELETE -->
-                            <a href="{% url 'itembase_delete' item.id %}"
+                            <a href="{% url 'ventas:itembase_delete' item.id %}"
                                class="table-action-btn danger">
 
                                 <i class="bi bi-trash"></i>
@@ -232,7 +232,7 @@
 
                             </p>
 
-                            <a href="{% url 'itembase_create' pedido.id %}"
+                            <a href="{% url 'ventas:itembase_create' pedido.id %}"
                                class="btn btn-primary">
 
                                 Agregar producto

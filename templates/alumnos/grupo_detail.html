@@ -16,13 +16,13 @@
 
             <span>/</span>
 
-            <a href="{% url 'generacion_detail' grupo.generacion.id %}">
+            <a href="{% url 'escuelas:generacion_detail' grupo.generacion.id %}">
                 {{ grupo.generacion }}
             </a>
 
             <span>/</span>
 
-            <a href="{% url 'escuela_detail' grupo.generacion.id grupo.escuela.id %}">
+            <a href="{% url 'escuelas:escuela_detail' grupo.generacion.id grupo.escuela.id %}">
                 {{ grupo.escuela }}
             </a>
 
@@ -52,7 +52,7 @@
     <!-- ACTIONS -->
     <div class="d-flex gap-2 flex-wrap">
 
-        <a href="{% url 'alumno_create' grupo.id %}"
+        <a href="{% url 'alumnos:alumno_create' grupo.id %}"
            class="btn btn-primary detail-main-btn">
 
             <i class="bi bi-plus-lg"></i>
@@ -60,7 +60,7 @@
 
         </a>
 
-        <a href="{% url 'escuela_detail' grupo.generacion.id grupo.escuela.id %}"
+        <a href="{% url 'escuelas:escuela_detail' grupo.generacion.id grupo.escuela.id %}"
            class="btn btn-light custom-back-btn">
 
             <i class="bi bi-arrow-left"></i>
@@ -205,7 +205,7 @@
 
                             <div>
 
-                                <a href="{% url 'alumno_pedido' alumno.id %}"
+                                <a href="{% url 'ventas:alumno_pedido' alumno.id %}"
                                    class="table-title">
 
                                     {{ alumno.nombre }}
@@ -251,14 +251,14 @@
 
                         <div class="d-flex justify-content-end gap-2 flex-wrap">
 
-                            <a href="{% url 'alumno_pedido' alumno.id %}"
+                            <a href="{% url 'ventas:alumno_pedido' alumno.id %}"
                                class="btn btn-light btn-sm action-btn">
 
                                 Ver pedido
 
                             </a>
 
-                            <a href="{% url 'alumno_update' alumno.id %}"
+                            <a href="{% url 'alumnos:alumno_update' alumno.id %}"
                                class="btn btn-warning btn-sm action-btn">
 
                                 Editar
@@ -293,7 +293,7 @@
                                 Comienza agregando el primer alumno.
                             </p>
 
-                            <a href="{% url 'alumno_create' grupo.id %}"
+                            <a href="{% url 'alumnos:alumno_create' grupo.id %}"
                                class="btn btn-primary">
 
                                 Agregar alumno

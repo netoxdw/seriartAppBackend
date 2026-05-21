@@ -19,19 +19,19 @@
 
                 <span>/</span>
 
-                <a href="{% url 'generacion_detail' pedido.alumno.grupo.generacion.id %}">
+                <a href="{% url 'escuelas:generacion_detail' pedido.alumno.grupo.generacion.id %}">
                     {{ pedido.alumno.grupo.generacion }}
                 </a>
 
                 <span>/</span>
 
-                <a href="{% url 'escuela_detail' pedido.alumno.grupo.generacion.id pedido.alumno.grupo.escuela.id %}">
+                <a href="{% url 'escuelas:escuela_detail' pedido.alumno.grupo.generacion.id pedido.alumno.grupo.escuela.id %}">
                     {{ pedido.alumno.grupo.escuela.nombre }}
                 </a>
 
                 <span>/</span>
 
-                <a href="{% url 'grupo_detail' pedido.alumno.grupo.id %}">
+                <a href="{% url 'alumnos:grupo_detail' pedido.alumno.grupo.id %}">
                     {{ pedido.alumno.grupo.nombre }}
                 </a>
 
@@ -77,7 +77,7 @@
         <!-- ACTIONS -->
         <div class="pedido-header-actions">
 
-            <a href="{% url 'grupo_detail' pedido.alumno.grupo.id %}"
+            <a href="{% url 'alumnos:grupo_detail' pedido.alumno.grupo.id %}"
                class="btn btn-light custom-action-btn">
 
                 <i class="bi bi-arrow-left"></i>

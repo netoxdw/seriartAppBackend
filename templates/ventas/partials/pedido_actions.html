@@ -15,7 +15,7 @@
     <div class="pedido-actions-list">
 
         <!-- EDITAR -->
-        <a href="{% url 'alumno_update' pedido.alumno.id %}"
+        <a href="{% url 'alumnos:alumno_update' pedido.alumno.id %}"
            class="pedido-action-btn warning">
 
             <i class="bi bi-pencil-square"></i>
@@ -25,7 +25,7 @@
         </a>
 
         <!-- BASE -->
-        <a href="{% url 'itembase_create' pedido.id %}"
+        <a href="{% url 'ventas:itembase_create' pedido.id %}"
            class="pedido-action-btn primary">
 
             <i class="bi bi-box-seam"></i>
@@ -35,7 +35,7 @@
         </a>
 
         <!-- ANILLO -->
-        <a href="{% url 'itemanillo_create' pedido.id %}"
+        <a href="{% url 'ventas:itemanillo_create' pedido.id %}"
            class="pedido-action-btn dark">
 
             <i class="bi bi-gem"></i>
@@ -45,7 +45,7 @@
         </a>
 
         <!-- PAGO -->
-        <a href="{% url 'pago_create' pedido.id %}"
+        <a href="{% url 'ventas:pago_create' pedido.id %}"
            class="pedido-action-btn success">
 
             <i class="bi bi-cash-stack"></i>

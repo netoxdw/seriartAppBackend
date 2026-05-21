@@ -25,7 +25,7 @@
         </div>
 
         <!-- ACTION -->
-        <a href="{% url 'observacion_create' pedido.id %}"
+        <a href="{% url 'ventas:observacion_create' pedido.id %}"
            class="btn btn-dark custom-table-btn">
 
             <i class="bi bi-chat-left-text"></i>
@@ -77,7 +77,7 @@
                     <div class="table-actions">
 
                         <!-- EDIT -->
-                        <a href="{% url 'observacion_update' obs.id %}"
+                        <a href="{% url 'ventas:observacion_update' obs.id %}"
                            class="table-action-btn warning">
 
                             <i class="bi bi-pencil"></i>
@@ -85,7 +85,7 @@
                         </a>
 
                         <!-- DELETE -->
-                        <a href="{% url 'observacion_delete' obs.id %}"
+                        <a href="{% url 'ventas:observacion_delete' obs.id %}"
                            class="table-action-btn danger">
 
                             <i class="bi bi-trash"></i>
@@ -131,7 +131,7 @@
 
             </p>
 
-            <a href="{% url 'observacion_create' pedido.id %}"
+            <a href="{% url 'ventas:observacion_create' pedido.id %}"
                class="btn btn-dark">
 
                 Agregar observación

@@ -25,7 +25,7 @@
         </div>
 
         <!-- ACTION -->
-        <a href="{% url 'itemextra_create' pedido.id %}"
+        <a href="{% url 'ventas:itemextra_create' pedido.id %}"
            class="btn btn-secondary custom-table-btn">
 
             <i class="bi bi-plus-circle"></i>
@@ -172,7 +172,7 @@
                         <div class="table-actions">
 
                             <!-- EDIT -->
-                            <a href="{% url 'itemextra_update' item.id %}"
+                            <a href="{% url 'ventas:itemextra_update' item.id %}"
                                class="table-action-btn warning">
 
                                 <i class="bi bi-pencil"></i>
@@ -180,7 +180,7 @@
                             </a>
 
                             <!-- DELETE -->
-                            <a href="{% url 'itemextra_delete' item.id %}"
+                            <a href="{% url 'ventas:itemextra_delete' item.id %}"
                                class="table-action-btn danger">
 
                                 <i class="bi bi-trash"></i>
@@ -220,7 +220,7 @@
 
                             </p>
 
-                            <a href="{% url 'itemextra_create' pedido.id %}"
+                            <a href="{% url 'ventas:itemextra_create' pedido.id %}"
                                class="btn btn-secondary">
 
                                 Agregar extra
