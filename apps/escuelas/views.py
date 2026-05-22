@@ -11,7 +11,7 @@ from django.db.models import Count
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .models import Generacion, Escuela, Grupo
-from .form import GrupoForm, EscuelaForm
+from .forms import GrupoForm, EscuelaForm
 
 
 class GeneracionDetailView(LoginRequiredMixin, DetailView):
