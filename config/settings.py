@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     'apps.catalogo',
     'apps.ventas',
     'apps.core',
+    'import_export',
 ]
 
 # Middleware
