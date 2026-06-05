@@ -133,6 +133,7 @@ class Pedido(models.Model):
 class PedidoItemBase(models.Model):
 
     PLACA_CHOICES = [
+        ("arena", "arena"),
         ("mediterranea", "Mediterránea"),
         ("4_piezas", "4 piezas"),
         ("extendida", "Extendida"),
