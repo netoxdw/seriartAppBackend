@@ -19,6 +19,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'import_export',  # ← agrega esto
+
     'apps.escuelas',
     'apps.alumnos',
     'apps.catalogo',
