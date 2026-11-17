@@ -1,0 +1,125 @@
+{% extends "catalogo/panel_base.html" %}
+
+{% block panel %}
+<form method="post" novalidate>
+    {% csrf_token %}
+    <input type="hidden" name="generacion" value="{{ generacion.id }}">
+
+    <div class="catalogo-card">
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
+            <div>
+                <h5 class="mb-1">Precios de bases · Generación {{ generacion.anio }}</h5>
+                <div class="text-muted small">
+                    Un precio por sección y tamaño. Deja una celda vacía para quitar ese precio.
+                    Las filas de variante (ej. ESCULTURAS) tienen prioridad sobre la fila general de su sección.
+                </div>
+            </div>
+            <a class="btn btn-sm btn-outline-secondary" href="{% url 'catalogo:copiar_precios' %}?generacion={{ generacion.id }}">
+                <i class="bi bi-copy"></i> Copiar a otra generación
+            </a>
+        </div>
+
+        {% if sin_precio %}
+        <div class="alert alert-warning py-2 small mb-3">
+            <strong>{{ sin_precio|length }} producto(s) activo(s) sin precio</strong> en {{ generacion.anio }}: no aparecerán al capturar pedidos.
+            <details class="mt-1"><summary>Ver cuáles</summary>
+                {% for p in sin_precio|slice:":40" %}{{ p }}{% if not forloop.last %} · {% endif %}{% endfor %}{% if sin_precio|length > 40 %} …{% endif %}
+            </details>
+        </div>
+        {% endif %}
+
+        {% if filas %}
+        <div class="table-responsive">
+            <table class="table table-sm tabla-precios mb-0">
+                <thead>
+                    <tr>
+                        <th>Sección</th>
+                        <th></th>
+                        {% for t in tamanos %}<th class="text-end">{{ t.nombre }}</th>{% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for f in filas %}
+                    <tr>
+                        {% if f.primera %}
+                        <td class="seccion-cell" rowspan="{{ f.rowspan }}">{{ f.seccion.nombre }}</td>
+                        {% endif %}
+                        <td class="variante-label">
+                            {% if f.variante %}{{ f.variante }}{% elif f.tiene_variantes %}General{% endif %}
+                        </td>
+                        {% for c in f.celdas %}
+                        <td>
+                            {% if c.disponible %}
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">$</span>
+                                <input type="text" inputmode="decimal" name="{{ c.nombre }}" value="{{ c.valor }}"
+                                       class="form-control precio-input {% if c.error %}is-invalid{% endif %}" placeholder="—"
+                                       aria-label="{{ f.seccion.nombre }} {{ f.variante|default:'' }}">
+                            </div>
+                            {% else %}
+                            <div class="celda-na" title="La sección no tiene productos en este tamaño">—</div>
+                            {% endif %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted mb-0">No hay productos todavía. Créalos en <a href="{% url 'catalogo:productos' %}">Productos</a> o sube el Excel.</p>
+        {% endif %}
+    </div>
+
+    <div class="catalogo-card">
+        <h5 class="mb-1">Precios especiales · {{ generacion.anio }}</h5>
+        <div class="text-muted small mb-3">Un producto concreto con un precio distinto al de su sección y tamaño.</div>
+
+        <div class="table-responsive">
+            <table class="table table-sm align-middle">
+                <thead><tr><th>Producto</th><th>Precio</th><th class="text-center">Quitar</th></tr></thead>
+                <tbody>
+                    {% for e in especiales %}
+                    <tr>
+                        <td>{{ e.producto }}</td>
+                        <td style="max-width:180px">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">$</span>
+                                <input type="text" inputmode="decimal" name="e-{{ e.id }}" value="{{ e.precio|stringformat:'.2f' }}" class="form-control precio-input">
+                            </div>
+                        </td>
+                        <td class="text-center"><input type="checkbox" class="form-check-input" name="edel-{{ e.id }}" value="1" aria-label="Quitar"></td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="3" class="text-muted small">Sin precios especiales.</td></tr>
+                    {% endfor %}
+                    <tr class="table-light">
+                        <td>
+                            <select name="nuevo_producto" class="form-select form-select-sm" aria-label="Producto para precio especial">
+                                <option value="">+ Agregar precio especial para…</option>
+                                {% regroup productos by seccion as por_seccion %}
+                                {% for grupo in por_seccion %}
+                                <optgroup label="{{ grupo.grouper }}">
+                                    {% for p in grupo.list %}<option value="{{ p.id }}">{{ p.descripcion }} · {{ p.tamano }}</option>{% endfor %}
+                                </optgroup>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td style="max-width:180px">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">$</span>
+                                <input type="text" inputmode="decimal" name="nuevo_precio" class="form-control precio-input" placeholder="0.00">
+                            </div>
+                        </td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="catalogo-sticky-actions d-flex justify-content-end">
+        <button type="submit" class="btn btn-primary px-4"><i class="bi bi-check2-circle"></i> Guardar precios</button>
+    </div>
+</form>
+{% endblock %}

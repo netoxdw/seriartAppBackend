@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/forms.css' %}?{% now 'U' %}">
+<style>
+    .catalogo-header { display:flex; flex-wrap:wrap; gap:1rem; align-items:center; justify-content:space-between; margin-bottom:1.25rem; }
+    .catalogo-header h2 { font-weight:700; margin:0; }
+    .catalogo-tabs { flex-wrap:nowrap; overflow-x:auto; overflow-y:hidden; margin-bottom:1.5rem; }
+    .catalogo-tabs .nav-link { white-space:nowrap; }
+    .catalogo-card { background:#fff; border:1px solid #e5e7eb; border-radius:16px; padding:1.25rem; margin-bottom:1.5rem; }
+    .catalogo-card h5 { font-weight:700; }
+    .precio-input { min-width:96px; text-align:right; }
+    .precio-input.is-invalid { border-color:#dc3545; }
+    .celda-na { color:#cbd5e1; text-align:center; }
+    .tabla-precios th, .tabla-precios td { vertical-align:middle; }
+    .tabla-precios .seccion-cell { font-weight:600; background:#f8fafc; }
+    .tabla-precios .variante-label { font-size:.85rem; color:#64748b; }
+    .catalogo-sticky-actions { position:sticky; bottom:0; background:#fff; border-top:1px solid #e5e7eb; padding:.75rem 0; z-index:3; }
+    .badge-soft { background:#eef2ff; color:#3730a3; }
+</style>
+{% block panel_css %}{% endblock %}
+{% endblock %}
+
+{% block content %}
+<div class="catalogo-header">
+    <div>
+        <h2><i class="bi bi-grid-3x3-gap"></i> Catálogo</h2>
+        <div class="text-muted small">Bases, precios, anillos y opciones de captura</div>
+    </div>
+
+    {% if generaciones %}
+    <form method="get" class="d-flex align-items-center gap-2">
+        {% for k, v in request.GET.items %}{% if k != "generacion" %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endif %}{% endfor %}
+        <label for="sel-generacion" class="small text-muted text-nowrap">Precios de</label>
+        <select id="sel-generacion" name="generacion" class="form-select form-select-sm" onchange="this.form.submit()">
+            {% for g in generaciones %}
+            <option value="{{ g.id }}" {% if generacion and g.id == generacion.id %}selected{% endif %}>Generación {{ g.anio }}</option>
+            {% endfor %}
+        </select>
+    </form>
+    {% endif %}
+</div>
+
+{% with gq=generacion.id|default_if_none:"" %}
+<ul class="nav nav-tabs catalogo-tabs">
+    <li class="nav-item"><a class="nav-link {% if tab == 'precios' %}active{% endif %}" href="{% url 'catalogo:precios' %}{% if gq %}?generacion={{ gq }}{% endif %}"><i class="bi bi-currency-dollar"></i> Precios</a></li>
+    <li class="nav-item"><a class="nav-link {% if tab == 'productos' %}active{% endif %}" href="{% url 'catalogo:productos' %}{% if gq %}?generacion={{ gq }}{% endif %}"><i class="bi bi-image"></i> Productos</a></li>
+    <li class="nav-item"><a class="nav-link {% if tab == 'anillos' %}active{% endif %}" href="{% url 'catalogo:anillos' %}{% if gq %}?generacion={{ gq }}{% endif %}"><i class="bi bi-gem"></i> Anillos</a></li>
+    <li class="nav-item"><a class="nav-link {% if tab == 'dimensiones' %}active{% endif %}" href="{% url 'catalogo:dimensiones_inicio' %}"><i class="bi bi-sliders"></i> Opciones</a></li>
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle {% if tab == 'herramientas' %}active{% endif %}" data-bs-toggle="dropdown" href="#" role="button"><i class="bi bi-tools"></i> Herramientas</a>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="{% url 'catalogo:copiar_precios' %}{% if gq %}?generacion={{ gq }}{% endif %}"><i class="bi bi-copy"></i> Copiar precios a otra generación</a></li>
+            <li><a class="dropdown-item" href="{% url 'catalogo:importar' %}"><i class="bi bi-file-earmark-excel"></i> Subir Excel</a></li>
+        </ul>
+    </li>
+</ul>
+{% endwith %}
+
+{% block panel %}{% endblock %}
+{% endblock %}

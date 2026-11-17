@@ -130,10 +130,17 @@
                     <!-- MENU -->
                     <nav class="sidebar-nav">
 
-                        <a href="{% url 'home' %}" class="sidebar-link active">
+                        <a href="{% url 'home' %}" class="sidebar-link {% if request.resolver_match.app_name != 'catalogo' %}active{% endif %}">
                             <i class="bi bi-calendar2-week"></i>
                             <span>Paquetes de graduación</span>
                         </a>
+
+                        {% if user.is_staff %}
+                        <a href="{% url 'catalogo:panel' %}" class="sidebar-link {% if request.resolver_match.app_name == 'catalogo' %}active{% endif %}">
+                            <i class="bi bi-grid-3x3-gap"></i>
+                            <span>Catálogo</span>
+                        </a>
+                        {% endif %}
 
                     </nav>
 
@@ -151,6 +158,17 @@
                 {% endif %}
                 content-area
                 ">
+
+                {% if messages %}
+                <div class="app-messages mb-3">
+                    {% for message in messages %}
+                    <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
 
                 {% block content %}
                 {% endblock %}
@@ -196,10 +214,17 @@
             <!-- MENU -->
             <nav class="sidebar-nav">
 
-                <a href="#" class="sidebar-link active">
+                <a href="{% url 'home' %}" class="sidebar-link {% if request.resolver_match.app_name != 'catalogo' %}active{% endif %}">
                     <i class="bi bi-calendar2-week"></i>
                     <span>Generaciones</span>
                 </a>
+
+                {% if user.is_staff %}
+                <a href="{% url 'catalogo:panel' %}" class="sidebar-link {% if request.resolver_match.app_name == 'catalogo' %}active{% endif %}">
+                    <i class="bi bi-grid-3x3-gap"></i>
+                    <span>Catálogo</span>
+                </a>
+                {% endif %}
 
             </nav>
 

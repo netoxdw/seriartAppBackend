@@ -1,0 +1,53 @@
+{% extends "catalogo/panel_base.html" %}
+
+{% block panel %}
+<ul class="nav nav-pills mb-3 flex-wrap gap-1">
+    {% for clave, nombre in tipos %}
+    <li class="nav-item"><a class="nav-link {% if clave == tipo %}active{% endif %}" href="{% url 'catalogo:dimensiones' clave %}">{{ nombre }}</a></li>
+    {% endfor %}
+</ul>
+
+<div class="catalogo-card">
+    <h5 class="mb-1">{{ titulo }}</h5>
+    <div class="text-muted small mb-3">
+        {{ descripcion }} En lugar de borrar, desmarca <strong>Activo</strong>: así no se pierden los pedidos que ya lo usan.
+    </div>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {{ formset.management_form }}
+        {% if formset.non_form_errors %}<div class="alert alert-danger">{{ formset.non_form_errors|join:" " }}</div>{% endif %}
+
+        <div class="table-responsive">
+            <table class="table table-sm align-middle">
+                <thead>
+                    <tr>{% for field in formset.empty_form.visible_fields %}<th>{{ field.label }}</th>{% endfor %}</tr>
+                </thead>
+                <tbody>
+                    {% for form in formset %}
+                    <tr class="{% if not form.instance.pk %}table-light{% endif %}">
+                        {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+                        {% for field in form.visible_fields %}
+                        <td>
+                            {{ field }}
+                            {% for e in field.errors %}<div class="field-error small">{{ e }}</div>{% endfor %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="input-help mb-2">La última fila (gris) sirve para agregar uno nuevo.</div>
+
+        <div class="catalogo-sticky-actions d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary px-4"><i class="bi bi-check2-circle"></i> Guardar {{ titulo|lower }}</button>
+        </div>
+    </form>
+</div>
+
+<script>
+// Placeholder en la fila nueva
+document.querySelectorAll("tr.table-light input[type=text]").forEach(i => { if (!i.placeholder) i.placeholder = "+ Agregar nuevo"; });
+</script>
+{% endblock %}

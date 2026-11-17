@@ -1,0 +1,70 @@
+{% extends "catalogo/panel_base.html" %}
+
+{% block panel %}
+<div class="catalogo-card">
+    <h5 class="mb-1">Anillos · precios {{ generacion.anio }}</h5>
+    <div class="text-muted small mb-3">
+        Edita modelo, metal y precio directamente. Un anillo sin precio en {{ generacion.anio }} no aparece al capturar pedidos de esa generación.
+    </div>
+
+    <form method="post" id="form-anillos" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="generacion" value="{{ generacion.id }}">
+
+        <div class="table-responsive">
+            <table class="table table-sm align-middle">
+                <thead>
+                    <tr><th>Modelo</th><th>Metal</th><th style="width:190px">Precio {{ generacion.anio }}</th><th class="text-center">Activo</th><th></th></tr>
+                </thead>
+                <tbody>
+                    {% for f in filas %}
+                    <tr>
+                        <td><input type="text" name="modelo-{{ f.a.id }}" value="{{ f.a.modelo }}" class="form-control form-control-sm" maxlength="100" aria-label="Modelo"></td>
+                        <td><input type="text" name="metal-{{ f.a.id }}" value="{{ f.a.metal }}" class="form-control form-control-sm" maxlength="50" aria-label="Metal"></td>
+                        <td>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">$</span>
+                                <input type="text" inputmode="decimal" name="precio-{{ f.a.id }}" value="{{ f.precio }}" class="form-control precio-input" placeholder="sin precio" aria-label="Precio">
+                            </div>
+                        </td>
+                        <td class="text-center"><input type="checkbox" class="form-check-input" name="activo-{{ f.a.id }}" value="1" {% if f.a.activo %}checked{% endif %} aria-label="Activo"></td>
+                        <td class="text-end">
+                            {% if not f.usado %}
+                            <button type="submit" form="eliminar-{{ f.a.id }}" class="btn btn-sm btn-outline-danger" title="Eliminar"
+                                    onclick="return confirm('¿Eliminar el anillo {{ f.a|escapejs }}?')"><i class="bi bi-trash"></i></button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="text-muted small">Todavía no hay anillos. Agrega el primero abajo.</td></tr>
+                    {% endfor %}
+                    <tr class="table-light">
+                        <td><input type="text" name="nuevo_modelo" class="form-control form-control-sm" maxlength="100" placeholder="+ Modelo nuevo" aria-label="Modelo nuevo"></td>
+                        <td><input type="text" name="nuevo_metal" class="form-control form-control-sm" maxlength="50" placeholder="Metal (ej. ORO 10K)" aria-label="Metal nuevo"></td>
+                        <td>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">$</span>
+                                <input type="text" inputmode="decimal" name="nuevo_precio" class="form-control precio-input" placeholder="0.00" aria-label="Precio nuevo">
+                            </div>
+                        </td>
+                        <td></td><td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="catalogo-sticky-actions d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary px-4"><i class="bi bi-check2-circle"></i> Guardar anillos</button>
+        </div>
+    </form>
+
+    {% for f in filas %}{% if not f.usado %}
+    <form method="post" id="eliminar-{{ f.a.id }}" class="d-none">
+        {% csrf_token %}
+        <input type="hidden" name="generacion" value="{{ generacion.id }}">
+        <input type="hidden" name="accion" value="eliminar">
+        <input type="hidden" name="anillo" value="{{ f.a.id }}">
+    </form>
+    {% endif %}{% endfor %}
+</div>
+{% endblock %}

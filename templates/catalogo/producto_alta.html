@@ -1,0 +1,81 @@
+{% extends "catalogo/panel_base.html" %}
+
+{% block panel_css %}
+<style>
+    .check-grid { display:flex; flex-wrap:wrap; gap:.5rem; }
+    .check-grid > div { border:1px solid #e5e7eb; border-radius:10px; padding:.35rem .75rem; }
+    .check-grid label { margin-left:.35rem; }
+    .check-grid ul { list-style:none; padding:0; margin:0; display:flex; flex-wrap:wrap; gap:.5rem; }
+    .check-grid li { border:1px solid #e5e7eb; border-radius:10px; padding:.35rem .75rem; }
+    .check-grid li label { display:flex; gap:.4rem; align-items:center; margin:0; cursor:pointer; }
+</style>
+{% endblock %}
+
+{% block panel %}
+<div class="catalogo-card" style="max-width:820px">
+    <h5 class="mb-1">Alta de productos</h5>
+    <div class="text-muted small mb-3">
+        Se crea un producto por cada combinación de tamaño × color × variante.
+        Las combinaciones que ya existen se omiten.
+    </div>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors|join:" " }}</div>{% endif %}
+
+        <div class="row g-3">
+            <div class="col-12 col-md-4">
+                <label class="custom-label" for="{{ form.seccion.id_for_label }}">{{ form.seccion.label }}</label>
+                {{ form.seccion }}
+                {% for e in form.seccion.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="col-12 col-md-4">
+                <label class="custom-label" for="{{ form.modelo.id_for_label }}">{{ form.modelo.label }}</label>
+                {{ form.modelo }}
+            </div>
+            <div class="col-12 col-md-4">
+                <label class="custom-label" for="{{ form.modelo_nuevo.id_for_label }}">{{ form.modelo_nuevo.label }}</label>
+                {{ form.modelo_nuevo }}
+            </div>
+
+            <div class="col-12">
+                <label class="custom-label">{{ form.tamanos.label }}</label>
+                <div class="check-grid" data-grupo="tamanos">{{ form.tamanos }}</div>
+                {% for e in form.tamanos.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="col-12">
+                <label class="custom-label">{{ form.colores.label }}</label>
+                <div class="check-grid" data-grupo="colores">{{ form.colores }}</div>
+                <div class="input-help">Sin colores marcados = producto sin color.</div>
+            </div>
+            <div class="col-12">
+                <label class="custom-label">{{ form.variantes.label }}</label>
+                <div class="check-grid" data-grupo="variantes">{{ form.variantes }}</div>
+                <div class="input-help">Sin variantes marcadas = producto sin variante.</div>
+            </div>
+        </div>
+
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-4">
+            <div class="fw-semibold" id="alta-cuenta">Se crearán 0 producto(s)</div>
+            <div class="d-flex gap-2">
+                <a href="{% url 'catalogo:productos' %}" class="btn btn-light border">Cancelar</a>
+                <button type="submit" class="btn btn-primary" id="alta-guardar"><i class="bi bi-plus-lg"></i> Crear productos</button>
+            </div>
+        </div>
+        <div class="input-help mt-1">Después asigna sus precios en la pestaña Precios (si su sección y tamaño ya tienen precio, no hace falta).</div>
+    </form>
+</div>
+
+<script>
+(function () {
+    const cuenta = g => document.querySelectorAll(`[data-grupo="${g}"] input:checked`).length;
+    function actualizar() {
+        const n = cuenta("tamanos") * Math.max(cuenta("colores"), 1) * Math.max(cuenta("variantes"), 1);
+        document.getElementById("alta-cuenta").textContent = `Se crearán hasta ${n} producto(s)`;
+        document.getElementById("alta-guardar").disabled = n === 0;
+    }
+    document.querySelectorAll(".check-grid input").forEach(i => i.addEventListener("change", actualizar));
+    actualizar();
+})();
+</script>
+{% endblock %}
