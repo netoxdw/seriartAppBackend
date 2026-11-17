@@ -1,5 +1,5 @@
 from django import forms
-from apps.catalogo.models import Modelo, Anillo, PrecioBaseGeneracion
+from apps.catalogo.models import Producto, Placa, Anillo
 from .models import Pedido, PedidoItemBase, PedidoItemAnillo, PedidoItemExtra, Observacion, Pago, PedidoDescuento
 
 # apps/ventas/forms.py
@@ -8,27 +8,23 @@ class PedidoItemBaseForm(forms.ModelForm):
 
     class Meta:
         model = PedidoItemBase
-        fields = ["modelo", "placa", "color_placa", "cantidad"]
+        fields = ["concepto", "producto", "placa", "color_placa", "cantidad"]
 
     def __init__(self, *args, **kwargs):
         pedido = kwargs.pop("pedido", None)
         super().__init__(*args, **kwargs)
 
         if pedido:
+            # El modelo valida contra el pedido (precio por generación)
+            self.instance.pedido = pedido
             generacion = pedido.alumno.grupo.generacion
-
-            modelos_ids = PrecioBaseGeneracion.objects.filter(
-                generacion=generacion
-            ).values_list("modelo_id", flat=True)
-
-            self.fields["modelo"].queryset = Modelo.objects.filter(
-                id__in=modelos_ids
-            )
+            self.fields["producto"].queryset = Producto.con_precio_para(
+                generacion
+            ).select_related("seccion", "modelo", "tamano", "color", "variante")
         else:
-            self.fields["modelo"].queryset = Modelo.objects.none()
+            self.fields["producto"].queryset = Producto.objects.none()
 
-
-
+        self.fields["placa"].queryset = Placa.objects.filter(activo=True)
 
 
 class PedidoItemAnilloForm(forms.ModelForm):
@@ -164,3 +160,47 @@ class PedidoCambiarEstadoForm(forms.ModelForm):
             )
 
         return cleaned_data
+
+# ==============================
+# ⚡ CAPTURA RÁPIDA DE ITEMS BASE
+# ==============================
+
+class CapturaItemForm(forms.Form):
+    """Una fila de la captura rápida. Las filas sin producto se ignoran."""
+
+    concepto = forms.ChoiceField(choices=PedidoItemBase.CONCEPTO_CHOICES)
+    producto = forms.ModelChoiceField(queryset=Producto.objects.none(), required=False)
+    placa = forms.ModelChoiceField(queryset=Placa.objects.none(), required=False)
+    color_placa = forms.CharField(max_length=50, required=False)
+    cantidad = forms.IntegerField(min_value=1, max_value=99, initial=1)
+
+    def __init__(self, *args, productos=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["producto"].queryset = productos if productos is not None else Producto.objects.none()
+        self.fields["placa"].queryset = Placa.objects.filter(activo=True)
+
+
+CapturaFormSet = forms.formset_factory(CapturaItemForm, extra=0, max_num=30, validate_max=True)
+
+
+class CapturaAnilloForm(forms.Form):
+    """Una fila de anillo en la captura rápida. Las filas sin anillo se ignoran."""
+
+    anillo = forms.ModelChoiceField(queryset=Anillo.objects.none(), required=False)
+    tamano_anillo = forms.DecimalField(
+        max_digits=4, decimal_places=1, min_value=1, max_value=20, required=False
+    )
+    cantidad = forms.IntegerField(min_value=1, max_value=99, initial=1)
+
+    def __init__(self, *args, anillos=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["anillo"].queryset = anillos if anillos is not None else Anillo.objects.none()
+
+    def clean(self):
+        datos = super().clean()
+        if datos.get("anillo") and datos.get("tamano_anillo") is None:
+            self.add_error("tamano_anillo", "Indica la talla del anillo.")
+        return datos
+
+
+CapturaAnilloFormSet = forms.formset_factory(CapturaAnilloForm, extra=0, max_num=10, validate_max=True)

@@ -6,12 +6,13 @@ from django.views.generic import (
 )
 
 from django.urls import reverse
+from django.shortcuts import get_object_or_404
 from django.db.models import Count
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .models import Generacion, Escuela, Grupo
-from .forms import GrupoForm, EscuelaForm
+from .forms import GrupoForm, EscuelaForm, EscuelaUpdateForm
 
 
 class GeneracionDetailView(LoginRequiredMixin, DetailView):
@@ -71,6 +72,7 @@ class EscuelaCreateView(LoginRequiredMixin, FormView):
             # crear nueva
             escuela = Escuela.objects.create(
                 nombre=form.cleaned_data["nombre"],
+                nivel=form.cleaned_data.get("nivel") or Escuela.NIVEL_OTRO,
                 direccion=form.cleaned_data["direccion"],
                 telefono=form.cleaned_data["telefono"]
             )
@@ -187,4 +189,24 @@ class GrupoUpdateView(LoginRequiredMixin, UpdateView):
                 "generacion_id": self.object.generacion.id,
                 "pk": self.object.escuela.id
             }
+        )
+
+
+class EscuelaUpdateView(LoginRequiredMixin, UpdateView):
+
+    model = Escuela
+
+    form_class = EscuelaUpdateForm
+
+    template_name = "escuelas/escuela_update.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["generacion"] = get_object_or_404(Generacion, pk=self.kwargs["generacion_id"])
+        return context
+
+    def get_success_url(self):
+        return reverse(
+            "escuelas:escuela_detail",
+            kwargs={"generacion_id": self.kwargs["generacion_id"], "pk": self.object.pk},
         )

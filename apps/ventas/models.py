@@ -4,9 +4,9 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 from apps.alumnos.models import Alumno
 from apps.catalogo.models import (
-    Modelo,
+    Producto,
+    Placa,
     Anillo,
-    PrecioBaseGeneracion,
     PrecioAnilloGeneracion,
 )
 
@@ -132,18 +132,15 @@ class Pedido(models.Model):
 
 class PedidoItemBase(models.Model):
 
-    PLACA_CHOICES = [
-        ("arena", "arena"),
-        ("mediterranea", "Mediterránea"),
-        ("4_piezas", "4 piezas"),
-        ("extendida", "Extendida"),
-        ("corte_plano", "Corte plano"),
-        ("palermo", "Palermo"),
-        ("circulo", "Círculo"),
-        ("corazon", "Corazón"),
-        ("estrella", "Estrella"),
-        ("columnas", "Columnas"),
-        ("pergamino", "Pergamino"),
+    CONCEPTO_PANORAMICA = "panoramica"
+    CONCEPTO_DIPLOMA = "diploma"
+    CONCEPTO_AGRADECIMIENTO = "agradecimiento"
+    CONCEPTO_OTRO = "otro"
+    CONCEPTO_CHOICES = [
+        (CONCEPTO_PANORAMICA, "Foto panorámica"),
+        (CONCEPTO_DIPLOMA, "Diploma"),
+        (CONCEPTO_AGRADECIMIENTO, "Agradecimiento"),
+        (CONCEPTO_OTRO, "Otro"),
     ]
 
     pedido = models.ForeignKey(
@@ -152,15 +149,23 @@ class PedidoItemBase(models.Model):
         related_name="items_base"
     )
 
-    modelo = models.ForeignKey(
-        Modelo,
-        on_delete=models.CASCADE,
-        related_name="items_pedido_base"
+    concepto = models.CharField(
+        max_length=20,
+        choices=CONCEPTO_CHOICES,
+        default=CONCEPTO_OTRO,
+        help_text="Qué va en el marco: foto panorámica, diploma, agradecimiento u otro."
     )
 
-    placa = models.CharField(
-        max_length=20,
-        choices=PLACA_CHOICES,
+    producto = models.ForeignKey(
+        Producto,
+        on_delete=models.PROTECT,
+        related_name="items_pedido"
+    )
+
+    placa = models.ForeignKey(
+        Placa,
+        on_delete=models.PROTECT,
+        related_name="items_pedido",
         blank=True,
         null=True
     )
@@ -187,15 +192,48 @@ class PedidoItemBase(models.Model):
         default=0
     )
 
-    def save(self, *args, **kwargs):
+    class Meta:
+        ordering = ["id"]
+        verbose_name = "Item base del pedido"
+        verbose_name_plural = "Items base del pedido"
+
+    def __str__(self):
+        return f"{self.cantidad} x {self.producto}"
+
+    def _precio_catalogo(self):
         generacion = self.pedido.alumno.grupo.generacion
+        return self.producto.precio_para(generacion)
 
-        precio_obj = PrecioBaseGeneracion.objects.get(
-        modelo=self.modelo,
-        generacion=generacion
-    )
+    def clean(self):
+        if self.producto_id and self.pedido_id:
+            if self._state.adding or self._producto_cambio():
+                if self._precio_catalogo() is None:
+                    raise ValidationError(
+                        "Este producto no tiene precio para la generación del alumno."
+                    )
+            if not self.producto.seccion.lleva_placa:
+                self.placa = None
+                self.color_placa = None
 
-        self.precio_unitario = precio_obj.precio
+    def _producto_cambio(self):
+        anterior = (
+            PedidoItemBase.objects.filter(pk=self.pk)
+            .values_list("producto_id", flat=True)
+            .first()
+        )
+        return anterior != self.producto_id
+
+    def save(self, *args, **kwargs):
+        # El precio se toma del catálogo solo al crear el ítem o al cambiar
+        # de producto; editar la cantidad conserva el precio original.
+        if self._state.adding or self._producto_cambio():
+            precio = self._precio_catalogo()
+            if precio is None:
+                raise ValidationError(
+                    "Este producto no tiene precio para la generación del alumno."
+                )
+            self.precio_unitario = precio
+
         self.subtotal = self.cantidad * self.precio_unitario
 
         super().save(*args, **kwargs)
@@ -216,7 +254,7 @@ class PedidoItemAnillo(models.Model):
     )
     anillo = models.ForeignKey(
         Anillo,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="items_pedido_anillo"
     )
     tamano_anillo = models.DecimalField(

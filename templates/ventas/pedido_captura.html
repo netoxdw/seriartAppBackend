@@ -1,0 +1,430 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/forms.css' %}?{% now 'U' %}">
+<style>
+    .captura-fila {
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        padding: 1rem 1.25rem;
+        background: #fff;
+        transition: border-color .15s, box-shadow .15s;
+    }
+    .captura-fila.completa { border-color: #86efac; box-shadow: 0 0 0 3px rgba(34,197,94,.08); }
+    .captura-fila.con-error { border-color: #fca5a5; }
+    .captura-fila .form-select, .captura-fila .form-control { min-height: 44px; }
+    .captura-concepto { font-weight: 600; min-width: 190px; }
+    .captura-subtotal { font-weight: 700; font-size: 1.05rem; white-space: nowrap; }
+    .captura-aviso { font-size: .85rem; }
+    .captura-total {
+        position: sticky; bottom: 0; z-index: 5;
+        background: #fff; border-top: 1px solid #e5e7eb;
+        padding: 1rem 0; margin-top: 1.5rem;
+    }
+    .captura-existentes { font-size: .9rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-wrapper">
+<div class="row justify-content-center">
+<div class="col-12 col-xxl-10">
+<div class="form-container">
+
+    <!-- HEADER -->
+    <div class="form-header">
+        <div class="form-icon"><i class="bi bi-lightning-charge"></i></div>
+        <div>
+            <h2 class="form-title">Captura rápida</h2>
+            <p class="form-subtitle mb-0">
+                <span class="badge text-bg-primary me-1">{{ pedido.alumno.grupo.escuela.get_nivel_display }}</span>
+                {{ pedido.alumno.nombre }} · {{ pedido.alumno.grupo.escuela.nombre }}
+                {{ pedido.alumno.grupo.nombre }} · Generación {{ pedido.alumno.grupo.generacion.anio }}
+            </p>
+        </div>
+    </div>
+
+    {% if items_existentes or anillos_existentes %}
+    <div class="alert alert-light border captura-existentes">
+        <strong>Ya en el pedido:</strong>
+        {% for it in items_existentes %}
+            {{ it.get_concepto_display }}: {{ it.producto.seccion }} {{ it.producto.descripcion }} {{ it.producto.tamano }} (x{{ it.cantidad }}){% if not forloop.last or anillos_existentes %} · {% endif %}
+        {% endfor %}
+        {% for an in anillos_existentes %}
+            Anillo: {{ an.anillo }} talla {{ an.tamano_anillo }} (x{{ an.cantidad }}){% if not forloop.last %} · {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if error_general %}
+    <div class="alert alert-danger">{{ error_general }}</div>
+    {% endif %}
+
+    {% if not catalogo.productos %}
+    <div class="alert alert-warning">
+        No hay productos con precio para la generación {{ pedido.alumno.grupo.generacion.anio }}.
+        Carga los precios del catálogo antes de capturar.
+    </div>
+    {% endif %}
+
+    <p class="input-help mb-3">
+        Elige sección y modelo de la panorámica: el diploma y el agradecimiento se llenan solos con el mismo
+        modelo. Las filas sin modelo no se guardan.
+    </p>
+
+    <form method="post" id="captura-form" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="form-TOTAL_FORMS" id="id_form-TOTAL_FORMS" value="0">
+        <input type="hidden" name="form-INITIAL_FORMS" value="0">
+        <input type="hidden" name="form-MIN_NUM_FORMS" value="0">
+        <input type="hidden" name="form-MAX_NUM_FORMS" value="30">
+
+        <input type="hidden" name="anillo-TOTAL_FORMS" id="id_anillo-TOTAL_FORMS" value="0">
+        <input type="hidden" name="anillo-INITIAL_FORMS" value="0">
+        <input type="hidden" name="anillo-MIN_NUM_FORMS" value="0">
+        <input type="hidden" name="anillo-MAX_NUM_FORMS" value="10">
+
+        <h5 class="selection-title mb-3"><i class="bi bi-image"></i> Cuadros</h5>
+
+        <div id="captura-filas" class="d-grid gap-3"></div>
+
+        <button type="button" id="agregar-fila" class="btn btn-outline-primary mt-3">
+            <i class="bi bi-plus-lg"></i> Agregar otro cuadro
+        </button>
+
+        <h5 class="selection-title mt-5 mb-3"><i class="bi bi-gem"></i> Anillos</h5>
+
+        <div id="captura-anillos" class="d-grid gap-3"></div>
+
+        {% if catalogo.anillos %}
+        <button type="button" id="agregar-anillo" class="btn btn-outline-dark mt-3">
+            <i class="bi bi-plus-lg"></i> Agregar anillo
+        </button>
+        {% else %}
+        <div class="input-help">
+            No hay anillos con precio para la generación {{ pedido.alumno.grupo.generacion.anio }}.
+            Cárgalos en el admin (Anillos → precio por generación) para poder agregarlos aquí.
+        </div>
+        {% endif %}
+
+        <div class="captura-total d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div>
+                <div class="text-muted small">Total a agregar</div>
+                <div class="fs-4 fw-bold" id="captura-total">$0.00</div>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{% url 'ventas:pedido_detail' pedido.id %}" class="btn btn-light border">Cancelar</a>
+                <button type="submit" class="btn btn-primary px-4" id="guardar" disabled>
+                    <i class="bi bi-check2-circle"></i> <span id="guardar-texto">Guardar</span>
+                </button>
+            </div>
+        </div>
+    </form>
+
+</div>
+</div>
+</div>
+</div>
+
+{{ catalogo|json_script:"catalogo-data" }}
+{{ filas|json_script:"filas-data" }}
+{{ filas_anillo|json_script:"anillos-data" }}
+
+<script>
+(function () {
+    const CAT = JSON.parse(document.getElementById("catalogo-data").textContent);
+    const FILAS = JSON.parse(document.getElementById("filas-data").textContent);
+    const FILAS_ANILLO = JSON.parse(document.getElementById("anillos-data").textContent);
+    const anilloPorId = new Map(CAT.anillos.map(a => [a.id, a]));
+    const contenedorAnillos = document.getElementById("captura-anillos");
+    const anillos = [];  // estado de cada fila de anillo
+    const VINCULABLES = ["diploma", "agradecimiento"];
+
+    const productoPorId = new Map(CAT.productos.map(p => [p.id, p]));
+    const seccionPorId = new Map(CAT.secciones.map(s => [s.id, s]));
+    const contenedor = document.getElementById("captura-filas");
+    const filas = [];  // estado de cada fila
+
+    const dinero = n => "$" + Number(n).toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    function el(tag, attrs = {}, ...hijos) {
+        const e = document.createElement(tag);
+        for (const [k, v] of Object.entries(attrs)) {
+            if (k === "class") e.className = v;
+            else if (k === "text") e.textContent = v;
+            else e.setAttribute(k, v);
+        }
+        hijos.forEach(h => h && e.append(h));
+        return e;
+    }
+
+    function opciones(select, lista, vacio, valor) {
+        select.replaceChildren(new Option(vacio, ""));
+        lista.forEach(o => select.add(new Option(o.nombre, o.id)));
+        select.value = valor != null && lista.some(o => String(o.id) === String(valor)) ? String(valor) : "";
+    }
+
+    // ---------- Fila ----------
+    function crearFila(datos) {
+        const f = { vinculada: false };
+        const prodIni = datos.producto ? productoPorId.get(Number(datos.producto)) : null;
+
+        f.concepto = el("select", { class: "form-select captura-concepto", "data-campo": "concepto" });
+        CAT.conceptos.forEach(c => f.concepto.add(new Option(c.nombre, c.id)));
+        f.concepto.value = datos.concepto || "otro";
+
+        f.tamano = el("select", { class: "form-select", "aria-label": "Tamaño" });
+        f.seccion = el("select", { class: "form-select", "aria-label": "Sección" });
+        f.producto = el("select", { class: "form-select", "data-campo": "producto", "aria-label": "Modelo" });
+        f.placa = el("select", { class: "form-select", "data-campo": "placa", "aria-label": "Placa" });
+        f.colorPlaca = el("input", { class: "form-control", "data-campo": "color_placa", placeholder: "Color de placa", maxlength: "50" });
+        f.cantidad = el("input", { class: "form-control", type: "number", min: "1", max: "99", "data-campo": "cantidad", "aria-label": "Cantidad" });
+        f.cantidad.value = datos.cantidad || 1;
+        f.colorPlaca.value = datos.color_placa || "";
+        f.subtotal = el("div", { class: "captura-subtotal text-end", text: "—" });
+        f.aviso = el("div", { class: "captura-aviso text-warning-emphasis mt-2" });
+        f.errores = el("div", { class: "captura-aviso text-danger mt-2" });
+        if (datos.errores && datos.errores.length) f.errores.textContent = datos.errores.join(" ");
+
+        f.vinculo = el("input", { class: "form-check-input", type: "checkbox", id: "vinc-" + Math.random().toString(36).slice(2) });
+        f.vinculoWrap = el("div", { class: "form-check form-switch mb-0" },
+            f.vinculo,
+            el("label", { class: "form-check-label small", for: f.vinculo.id, text: "Igual que la panorámica" }));
+
+        const quitar = el("button", { type: "button", class: "btn btn-sm btn-outline-danger", title: "Quitar fila" });
+        quitar.append(el("i", { class: "bi bi-x-lg" }));
+
+        f.placaCol = el("div", { class: "col-12 col-md-6" },
+            el("div", { class: "row g-2" },
+                el("div", { class: "col-6" }, f.placa),
+                el("div", { class: "col-6" }, f.colorPlaca)));
+
+        f.nodo = el("div", { class: "captura-fila" },
+            el("div", { class: "d-flex flex-wrap align-items-center gap-2 mb-3" },
+                f.concepto, f.vinculoWrap, el("div", { class: "ms-auto" }), f.subtotal, quitar),
+            el("div", { class: "row g-2 align-items-start" },
+                el("div", { class: "col-6 col-md-2" }, f.tamano),
+                el("div", { class: "col-6 col-md-3" }, f.seccion),
+                el("div", { class: "col-9 col-md-5" }, f.producto),
+                el("div", { class: "col-3 col-md-2" }, f.cantidad),
+                f.placaCol),
+            f.aviso, f.errores);
+
+        // Valores iniciales
+        opciones(f.tamano, CAT.tamanos, "Tamaño", prodIni ? prodIni.tamano : datos.tamano);
+        cargarSecciones(f, prodIni ? prodIni.seccion : null);
+        cargarProductos(f, prodIni ? prodIni.id : null);
+        opciones(f.placa, CAT.placas, "Placa", datos.placa);
+
+        // Las filas de diploma/agradecimiento nuevas arrancan vinculadas
+        f.vinculo.checked = VINCULABLES.includes(f.concepto.value) && !prodIni;
+
+        // Eventos
+        f.concepto.addEventListener("change", () => { actualizarVinculoVisible(f); sincronizar(); });
+        f.tamano.addEventListener("change", () => { cargarSecciones(f); cargarProductos(f); trasCambioManual(f); });
+        f.seccion.addEventListener("change", () => { cargarProductos(f); trasCambioManual(f); f.producto.focus(); });
+        f.producto.addEventListener("change", () => trasCambioManual(f));
+        f.placa.addEventListener("change", () => trasCambioManual(f));
+        f.colorPlaca.addEventListener("input", () => trasCambioManual(f));
+        f.cantidad.addEventListener("input", recalcular);
+        f.vinculo.addEventListener("change", sincronizar);
+        quitar.addEventListener("click", () => {
+            filas.splice(filas.indexOf(f), 1);
+            f.nodo.remove();
+            sincronizar();
+        });
+
+        filas.push(f);
+        contenedor.append(f.nodo);
+        actualizarVinculoVisible(f);
+        return f;
+    }
+
+    function cargarSecciones(f, valor) {
+        const t = Number(f.tamano.value);
+        const ids = new Set(CAT.productos.filter(p => p.tamano === t).map(p => p.seccion));
+        opciones(f.seccion, CAT.secciones.filter(s => ids.has(s.id)), "Sección", valor ?? f.seccion.value);
+    }
+
+    function cargarProductos(f, valor) {
+        const t = Number(f.tamano.value), s = Number(f.seccion.value);
+        const lista = CAT.productos
+            .filter(p => p.tamano === t && p.seccion === s)
+            .map(p => ({ id: p.id, nombre: `${p.nombre} — ${dinero(p.precio)}` }));
+        opciones(f.producto, lista, s ? "Modelo" : "Elige sección", valor ?? f.producto.value);
+        f.producto.disabled = !s;
+    }
+
+    function panoramica() {
+        return filas.find(f => f.concepto.value === "panoramica" && f.producto.value);
+    }
+
+    function actualizarVinculoVisible(f) {
+        const vinculable = VINCULABLES.includes(f.concepto.value);
+        f.vinculoWrap.style.display = vinculable ? "" : "none";
+        if (!vinculable) f.vinculo.checked = false;
+    }
+
+    // Si el usuario cambia a mano una fila vinculada, se desvincula
+    function trasCambioManual(f) {
+        if (f.vinculo.checked && !f._sincronizando) f.vinculo.checked = false;
+        sincronizar();
+    }
+
+    // Copia sección/modelo/color/variante/placa de la panorámica a las filas vinculadas
+    function sincronizar() {
+        const pano = panoramica();
+        filas.forEach(f => {
+            f.aviso.textContent = "";
+            if (!f.vinculo.checked || f === pano) return;
+            if (!pano) { f.aviso.textContent = "Elige primero el modelo de la panorámica."; return; }
+
+            const base = productoPorId.get(Number(pano.producto.value));
+            const t = Number(f.tamano.value);
+            const candidatos = CAT.productos.filter(p => p.tamano === t && p.seccion === base.seccion && p.modelo === base.modelo);
+            const match = candidatos.find(p => p.color === base.color && p.variante === base.variante)
+                       || candidatos.find(p => p.color === base.color)
+                       || candidatos[0];
+
+            f._sincronizando = true;
+            if (match) {
+                cargarSecciones(f, match.seccion);
+                cargarProductos(f, match.id);
+                f.placa.value = pano.placa.value;
+                f.colorPlaca.value = pano.colorPlaca.value;
+            } else {
+                const tam = CAT.tamanos.find(x => x.id === t);
+                f.aviso.textContent = `Este modelo no existe en ${tam ? tam.nombre : "este tamaño"}: elige otro.`;
+                cargarSecciones(f, "");
+                cargarProductos(f, "");
+            }
+            f._sincronizando = false;
+        });
+        recalcular();
+    }
+
+    // ---------- Fila de anillo ----------
+    function crearFilaAnillo(datos) {
+        const a = {};
+        a.anillo = el("select", { class: "form-select", "data-campo": "anillo", "aria-label": "Anillo" });
+        opciones(a.anillo, CAT.anillos.map(x => ({ id: x.id, nombre: `${x.nombre} — ${dinero(x.precio)}` })),
+                 "Modelo y metal", datos.anillo);
+        a.talla = el("input", { class: "form-control", type: "number", step: "0.5", min: "1", max: "20",
+                                "data-campo": "tamano_anillo", placeholder: "Talla", "aria-label": "Talla" });
+        a.talla.value = datos.tamano_anillo || "";
+        a.cantidad = el("input", { class: "form-control", type: "number", min: "1", max: "99",
+                                   "data-campo": "cantidad", "aria-label": "Cantidad" });
+        a.cantidad.value = datos.cantidad || 1;
+        a.subtotal = el("div", { class: "captura-subtotal text-end", text: "—" });
+        a.aviso = el("div", { class: "captura-aviso text-warning-emphasis mt-2" });
+        a.errores = el("div", { class: "captura-aviso text-danger mt-2" });
+        if (datos.errores && datos.errores.length) a.errores.textContent = datos.errores.join(" ");
+
+        const quitar = el("button", { type: "button", class: "btn btn-sm btn-outline-danger", title: "Quitar anillo" });
+        quitar.append(el("i", { class: "bi bi-x-lg" }));
+
+        a.nodo = el("div", { class: "captura-fila" },
+            el("div", { class: "row g-2 align-items-center" },
+                el("div", { class: "col-12 col-md-6" }, a.anillo),
+                el("div", { class: "col-5 col-md-2" }, a.talla),
+                el("div", { class: "col-4 col-md-2" }, a.cantidad),
+                el("div", { class: "col-3 col-md-2 d-flex align-items-center justify-content-end gap-2" }, a.subtotal, quitar)),
+            a.aviso, a.errores);
+
+        a.anillo.addEventListener("change", () => { recalcular(); if (a.anillo.value) a.talla.focus(); });
+        a.talla.addEventListener("input", recalcular);
+        a.cantidad.addEventListener("input", recalcular);
+        quitar.addEventListener("click", () => {
+            anillos.splice(anillos.indexOf(a), 1);
+            a.nodo.remove();
+            recalcular();
+        });
+
+        anillos.push(a);
+        contenedorAnillos.append(a.nodo);
+        return a;
+    }
+
+    function recalcular() {
+        let total = 0, completas = 0, incompletas = 0;
+        anillos.forEach(a => {
+            const an = anilloPorId.get(Number(a.anillo.value));
+            const cant = Math.max(parseInt(a.cantidad.value, 10) || 0, 0);
+            const talla = parseFloat(a.talla.value);
+            a.aviso.textContent = an && !talla ? "Falta la talla." : "";
+            const lista = !!(an && talla && cant);
+            if (lista) {
+                const sub = Number(an.precio) * cant;
+                total += sub;
+                completas += 1;
+                a.subtotal.textContent = dinero(sub);
+            } else {
+                a.subtotal.textContent = "—";
+                if (an) incompletas += 1;
+            }
+            a.nodo.classList.toggle("completa", lista);
+            a.nodo.classList.toggle("con-error", !!a.errores.textContent);
+        });
+        filas.forEach(f => {
+            const p = productoPorId.get(Number(f.producto.value));
+            const sec = seccionPorId.get(Number(f.seccion.value));
+            f.placaCol.style.display = sec && sec.lleva_placa ? "" : "none";
+            const cant = Math.max(parseInt(f.cantidad.value, 10) || 0, 0);
+            if (p && cant) {
+                const sub = Number(p.precio) * cant;
+                total += sub;
+                completas += 1;
+                f.subtotal.textContent = dinero(sub);
+            } else {
+                f.subtotal.textContent = "—";
+            }
+            f.nodo.classList.toggle("completa", !!(p && cant));
+            f.nodo.classList.toggle("con-error", !!f.errores.textContent);
+        });
+        document.getElementById("captura-total").textContent = dinero(total);
+        const btn = document.getElementById("guardar");
+        btn.disabled = completas === 0 || incompletas > 0;
+        document.getElementById("guardar-texto").textContent =
+            completas ? `Guardar ${completas} artículo${completas > 1 ? "s" : ""}` : "Guardar";
+    }
+
+    // Antes de enviar: numerar las filas como formset de Django
+    document.getElementById("captura-form").addEventListener("submit", () => {
+        filas.forEach((f, i) => {
+            f.nodo.querySelectorAll("[data-campo]").forEach(c => {
+                c.name = `form-${i}-${c.dataset.campo}`;
+                c.disabled = false;
+            });
+        });
+        anillos.forEach((a, i) => {
+            a.nodo.querySelectorAll("[data-campo]").forEach(c => {
+                c.name = `anillo-${i}-${c.dataset.campo}`;
+            });
+        });
+        document.getElementById("id_form-TOTAL_FORMS").value = filas.length;
+        document.getElementById("id_anillo-TOTAL_FORMS").value = anillos.length;
+        document.getElementById("guardar").disabled = true;
+    });
+
+    const btnAnillo = document.getElementById("agregar-anillo");
+    if (btnAnillo) btnAnillo.addEventListener("click", () => {
+        crearFilaAnillo({ cantidad: 1 }).anillo.focus();
+        recalcular();
+    });
+
+    document.getElementById("agregar-fila").addEventListener("click", () => {
+        const f = crearFila({ concepto: "otro", cantidad: 1 });
+        f.tamano.focus();
+        recalcular();
+    });
+
+    FILAS.forEach(crearFila);
+    // Sin anillos en el catálogo no se muestran filas de anillo
+    if (CAT.anillos.length) FILAS_ANILLO.forEach(crearFilaAnillo);
+    sincronizar();
+    const primera = filas.find(f => !f.producto.value);
+    if (primera) (primera.seccion.options.length > 1 ? primera.seccion : primera.tamano).focus();
+})();
+</script>
+{% endblock %}

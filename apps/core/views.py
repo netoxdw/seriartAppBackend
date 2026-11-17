@@ -28,7 +28,7 @@ class GeneracionCreateView(LoginRequiredMixin, CreateView):
 
     model = Generacion
 
-    fields = ["nombre", "anio"]
+    fields = ["nombre_generacion", "anio"]
 
     template_name = "generaciones/create.html"
 

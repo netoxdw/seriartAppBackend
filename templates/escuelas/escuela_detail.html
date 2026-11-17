@@ -37,6 +37,7 @@
 
         <p class="detail-subtitle mb-0">
 
+            <span class="badge text-bg-primary me-1">{{ escuela.get_nivel_display }}</span>
             Administración de grupos y jornadas fotográficas
 
         </p>
@@ -51,6 +52,14 @@
 
             <i class="bi bi-plus-lg"></i>
             Nuevo Grupo
+
+        </a>
+
+        <a href="{% url 'escuelas:escuela_update' generacion.id escuela.id %}"
+           class="btn btn-light custom-back-btn">
+
+            <i class="bi bi-pencil-square"></i>
+            Editar escuela
 
         </a>
 

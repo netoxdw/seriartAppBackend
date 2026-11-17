@@ -89,7 +89,7 @@
 
                                 {% for t in tamanos %}
 
-                                <option value="{{ t.id }}">
+                                <option value="{{ t.id }}" {% if t.id == tamano_actual %}selected{% endif %}>
 
                                     {{ t.nombre }}
 
@@ -155,6 +155,25 @@
 
                         </div>
 
+                        <!-- CONCEPTO -->
+                        <div class="mb-4">
+
+                            <label class="custom-label">
+
+                                Concepto
+
+                            </label>
+
+                            {{ form.concepto }}
+
+                            <div class="input-help">
+
+                                Qué va en el marco
+
+                            </div>
+
+                        </div>
+
                         <!-- MODELO -->
                         <div class="mb-4">
 
@@ -164,18 +183,25 @@
 
                             </label>
 
-                            {{ form.modelo }}
+                            {{ form.producto }}
+
+                            {% if form.producto.errors %}
+                            <div class="text-danger small mt-1">{{ form.producto.errors|join:" " }}</div>
+                            {% endif %}
+                            {% if form.non_field_errors %}
+                            <div class="text-danger small mt-1">{{ form.non_field_errors|join:" " }}</div>
+                            {% endif %}
 
                             <div class="input-help">
 
-                                Selecciona el modelo disponible
+                                Modelo, color y variante disponibles
 
                             </div>
 
                         </div>
 
-                        <!-- ROW -->
-                        <div class="row">
+                        <!-- PLACA (solo secciones que llevan placa) -->
+                        <div class="row" id="placa-row">
 
                             <!-- PLACA -->
                             <div class="col-12 col-md-6">
@@ -272,75 +298,70 @@
 <script>
 
     const generacion = "{{ pedido.alumno.grupo.generacion.id }}";
+    const seccionActual = "{{ seccion_actual|default:'' }}";
+    const productoActual = "{{ producto_actual|default:'' }}";
 
     const tamano = document.getElementById("tamano");
-
     const seccion = document.getElementById("seccion");
+    const producto = document.getElementById("id_producto");
+    const placaRow = document.getElementById("placa-row");
 
-    const modelo = document.getElementById("id_modelo");
+    const vacio = (texto) => new Option(texto, "");
 
-    // ========================================
+    function mostrarPlaca() {
+        const op = seccion.options[seccion.selectedIndex];
+        placaRow.style.display =
+            op && op.dataset.llevaPlaca === "true" ? "" : "none";
+    }
+
     // TAMAÑO → SECCIONES
-    // ========================================
+    function cargarSecciones(seleccion) {
+        seccion.replaceChildren(vacio("Selecciona una sección"));
+        producto.replaceChildren(vacio("Selecciona un modelo"));
+        mostrarPlaca();
+        if (!tamano.value) return Promise.resolve();
 
-    tamano.addEventListener("change", function () {
-
-        fetch(
-            `/ajax/secciones/?tamano=${this.value}&generacion=${generacion}`
-        )
-
-        .then(res => res.json())
-
-        .then(data => {
-
-            seccion.innerHTML =
-                '<option value="">Selecciona una sección</option>';
-
-            modelo.innerHTML =
-                '<option value="">Selecciona un modelo</option>';
-
-            data.forEach(item => {
-
-                seccion.innerHTML += `
-                    <option value="${item.id}">
-                        ${item.nombre}
-                    </option>
-                `;
+        return fetch(`/ajax/secciones/?tamano=${tamano.value}&generacion=${generacion}`)
+            .then(res => res.json())
+            .then(data => {
+                data.forEach(item => {
+                    const op = new Option(item.nombre, item.id);
+                    op.dataset.llevaPlaca = item.lleva_placa;
+                    seccion.add(op);
+                });
+                if (seleccion) seccion.value = seleccion;
+                mostrarPlaca();
             });
+    }
 
-        });
+    // SECCIÓN → PRODUCTOS (modelo · color · variante)
+    function cargarProductos(seleccion) {
+        producto.replaceChildren(vacio("Selecciona un modelo"));
+        mostrarPlaca();
+        if (!seccion.value) return Promise.resolve();
 
-    });
-
-    // ========================================
-    // SECCIÓN → MODELOS
-    // ========================================
-
-    seccion.addEventListener("change", function () {
-
-        fetch(
-            `/ajax/modelos/?tamano=${tamano.value}&seccion=${this.value}&generacion=${generacion}`
-        )
-
-        .then(res => res.json())
-
-        .then(data => {
-
-            modelo.innerHTML =
-                '<option value="">Selecciona un modelo</option>';
-
-            data.forEach(item => {
-
-                modelo.innerHTML += `
-                    <option value="${item.id}">
-                        ${item.nombre}
-                    </option>
-                `;
+        return fetch(`/ajax/productos/?tamano=${tamano.value}&seccion=${seccion.value}&generacion=${generacion}`)
+            .then(res => res.json())
+            .then(data => {
+                data.forEach(item => {
+                    producto.add(new Option(`${item.nombre} — $${item.precio}`, item.id));
+                });
+                if (seleccion) producto.value = seleccion;
             });
+    }
 
+    tamano.addEventListener("change", () => cargarSecciones());
+    seccion.addEventListener("change", () => cargarProductos());
+
+    // Al editar: precargar la selección actual
+    if (tamano.value) {
+        cargarSecciones(seccionActual).then(() => {
+            if (seccion.value) cargarProductos(productoActual);
         });
-
-    });
+    } else {
+        producto.replaceChildren(vacio("Selecciona un modelo"));
+        mostrarPlaca();
+    }
 
 </script>
 

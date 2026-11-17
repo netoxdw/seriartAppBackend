@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 
 
 class Generacion(models.Model):
-    nombre = models.CharField(max_length=50)
+    nombre_generacion = models.CharField(max_length=50)
     anio = models.IntegerField(unique=True)
 
     class Meta:
@@ -15,7 +15,25 @@ class Generacion(models.Model):
 
 
 class Escuela(models.Model):
+
+    NIVEL_SECUNDARIA = "secundaria"
+    NIVEL_PREPARATORIA = "preparatoria"
+    NIVEL_UNIVERSIDAD = "universidad"
+    NIVEL_OTRO = "otro"
+    NIVEL_CHOICES = [
+        (NIVEL_SECUNDARIA, "Secundaria"),
+        (NIVEL_PREPARATORIA, "Preparatoria"),
+        (NIVEL_UNIVERSIDAD, "Universidad"),
+        (NIVEL_OTRO, "Otro"),
+    ]
+
     nombre = models.CharField(max_length=150)
+    nivel = models.CharField(
+        max_length=20,
+        choices=NIVEL_CHOICES,
+        default=NIVEL_OTRO,
+        help_text="Define qué artículos se precargan en la captura rápida de pedidos."
+    )
     direccion = models.CharField(max_length=255, blank=True)
     telefono = models.CharField(max_length=20, blank=True)
 

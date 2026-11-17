@@ -13,6 +13,7 @@ class EscuelaAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "nombre",
+        "nivel",
         "direccion",
         "telefono",
         "get_generaciones",
@@ -25,6 +26,7 @@ class EscuelaAdmin(admin.ModelAdmin):
     )
 
     list_filter = (
+        "nivel",
         "generaciones",
     )
 

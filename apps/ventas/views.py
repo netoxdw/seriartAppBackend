@@ -12,8 +12,11 @@ from django.db.models import Q
 
 from apps.alumnos.models import Alumno
 from .models import PedidoItemBase, Pedido, PedidoItemAnillo, PedidoItemExtra, Observacion, Pago, PedidoDescuento
-from .forms import PedidoItemBaseForm, PedidoItemAnilloForm, PedidoItemExtraForm, ObservacionForm, PagoForm, PedidoDescuentoForm, PedidoCambiarEstadoForm
-from apps.catalogo.models import PrecioBaseGeneracion
+from .forms import PedidoItemBaseForm, PedidoItemAnilloForm, PedidoItemExtraForm, ObservacionForm, PagoForm, PedidoDescuentoForm, PedidoCambiarEstadoForm, CapturaFormSet, CapturaAnilloFormSet
+from apps.catalogo.models import Producto, Seccion, Tamano, Placa, Anillo, PrecioAnilloGeneracion
+from apps.escuelas.models import Escuela
+from django.core.exceptions import ValidationError
+from django.db import transaction
 
 
 
@@ -27,8 +30,9 @@ class PedidoCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
     def get_success_url(self):
+        # Pedido nuevo: directo a la captura rápida de artículos
         return reverse(
-            "ventas:pedido_detail",
+            "ventas:pedido_captura",
             kwargs={"pk": self.object.id}
         )
     
@@ -51,7 +55,10 @@ class PedidoDetailView(LoginRequiredMixin, DetailView):
         # ITEMS
         # ========================================
 
-        items_base = pedido.items_base.all()
+        items_base = pedido.items_base.select_related(
+            "producto__seccion", "producto__modelo", "producto__tamano",
+            "producto__color", "producto__variante", "placa"
+        )
 
         items_anillo = pedido.items_anillo.all()
 
@@ -201,23 +208,7 @@ class PedidoItemBaseCreateView(LoginRequiredMixin, CreateView):
         context["pedido"] = pedido
         context["pedido_id"] = pedido.id
 
-        # 🔥 OBTENER TAMAÑOS DISPONIBLES
-        generacion = pedido.alumno.grupo.generacion
-
-        precios = PrecioBaseGeneracion.objects.filter(
-            generacion=generacion
-        ).select_related("modelo__tamano_producto")
-
-        tamanos_dict = {}
-
-        for p in precios:
-            t = p.modelo.tamano_producto
-            tamanos_dict[t.id] = t.nombre
-
-        context["tamanos"] = [
-            {"id": k, "nombre": v}
-            for k, v in tamanos_dict.items()
-        ]
+        context.update(_contexto_selector(pedido))
 
         return context
 
@@ -226,6 +217,29 @@ class PedidoItemBaseCreateView(LoginRequiredMixin, CreateView):
             "ventas:pedido_detail",
             kwargs={"pk": self.kwargs["pedido_id"]}
         )
+
+
+# ==============================
+# 🧩 SELECTOR TAMAÑO → SECCIÓN → PRODUCTO
+# ==============================
+def _productos_disponibles(generacion_id):
+    from apps.escuelas.models import Generacion
+    generacion = get_object_or_404(Generacion, id=generacion_id)
+    return Producto.con_precio_para(generacion), generacion
+
+
+def _contexto_selector(pedido, item=None):
+    """Tamaños disponibles para la generación del pedido y, al editar, la selección actual."""
+    productos, _ = _productos_disponibles(pedido.alumno.grupo.generacion_id)
+    tamanos = Tamano.objects.filter(
+        activo=True, productos__in=productos
+    ).distinct()
+    contexto = {"tamanos": tamanos, "pedido": pedido, "pedido_id": pedido.id}
+    if item and item.producto_id:
+        contexto["tamano_actual"] = item.producto.tamano_id
+        contexto["seccion_actual"] = item.producto.seccion_id
+        contexto["producto_actual"] = item.producto_id
+    return contexto
 
 
 # ==============================
@@ -239,31 +253,24 @@ def cargar_secciones(request):
     if not tamano_id or not generacion_id:
         return JsonResponse([], safe=False)
 
-    precios = PrecioBaseGeneracion.objects.filter(
-        generacion_id=generacion_id,
-        modelo__tamano_producto_id=tamano_id
-    ).select_related("modelo__seccion")
-
-    # 🔥 evitar duplicados
-    secciones_dict = {}
-
-    for p in precios:
-        s = p.modelo.seccion
-        secciones_dict[s.id] = s.nombre
+    productos, _ = _productos_disponibles(generacion_id)
+    secciones = Seccion.objects.filter(
+        activo=True,
+        productos__in=productos.filter(tamano_id=tamano_id),
+    ).distinct()
 
     data = [
-        {"id": k, "nombre": v}
-        for k, v in secciones_dict.items()
+        {"id": s.id, "nombre": s.nombre, "lleva_placa": s.lleva_placa}
+        for s in secciones
     ]
-
     return JsonResponse(data, safe=False)
 
 
 # ==============================
-# ⚡ AJAX → CARGAR MODELOS
+# ⚡ AJAX → CARGAR PRODUCTOS
 # ==============================
 @login_required
-def cargar_modelos(request):
+def cargar_productos(request):
     tamano_id = request.GET.get("tamano")
     seccion_id = request.GET.get("seccion")
     generacion_id = request.GET.get("generacion")
@@ -271,20 +278,19 @@ def cargar_modelos(request):
     if not tamano_id or not seccion_id or not generacion_id:
         return JsonResponse([], safe=False)
 
-    precios = PrecioBaseGeneracion.objects.filter(
-        generacion_id=generacion_id,
-        modelo__tamano_producto_id=tamano_id,
-        modelo__seccion_id=seccion_id
-    ).select_related("modelo")
+    productos, generacion = _productos_disponibles(generacion_id)
+    productos = productos.filter(
+        tamano_id=tamano_id, seccion_id=seccion_id
+    ).select_related("modelo", "color", "variante")
 
     data = [
         {
-            "id": p.modelo.id,
-            "nombre": p.modelo.nombre
+            "id": p.id,
+            "nombre": p.descripcion,
+            "precio": str(p.precio_para(generacion)),
         }
-        for p in precios
+        for p in productos
     ]
-
     return JsonResponse(data, safe=False)
 
 # 🔁 REDIRECT ALUMNO → PEDIDO
@@ -299,6 +305,7 @@ def alumno_pedido_redirect(request, alumno_id):
 
     if not pedido:
         pedido = Pedido.objects.create(alumno=alumno)
+        return redirect("ventas:pedido_captura", pk=pedido.id)
 
     return redirect("ventas:pedido_detail", pk=pedido.id)
 
@@ -312,7 +319,7 @@ class PedidoItemBaseUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["pedido_id"] = self.object.pedido_id  # 🔥 clave
+        context.update(_contexto_selector(self.object.pedido, self.object))
         return context
 
     def get_success_url(self):
@@ -635,3 +642,203 @@ class PedidoCambiarEstadoView(View):
             self.template_name,
             context
         )
+
+# ==============================
+# ⚡ CAPTURA RÁPIDA DE ARTÍCULOS
+# Bases (panorámica, diploma, agradecimiento...) y anillos en una sola pantalla.
+# Lo que se precarga depende del nivel académico de la escuela.
+# ==============================
+
+_PANO = (PedidoItemBase.CONCEPTO_PANORAMICA, "PANORAMICA")
+_DIPLOMA = (PedidoItemBase.CONCEPTO_DIPLOMA, "CARTA")
+_AGRADEC = (PedidoItemBase.CONCEPTO_AGRADECIMIENTO, "CARTA")
+
+# Nivel de la escuela -> (bases a precargar (concepto, tamaño), ¿precargar anillo?)
+CAPTURA_POR_NIVEL = {
+    Escuela.NIVEL_SECUNDARIA: ([_PANO], False),
+    Escuela.NIVEL_PREPARATORIA: ([_PANO], False),
+    Escuela.NIVEL_UNIVERSIDAD: ([_PANO, _DIPLOMA, _AGRADEC], True),
+    Escuela.NIVEL_OTRO: ([_PANO, _DIPLOMA, _AGRADEC], False),
+}
+
+
+def _anillos_con_precio(generacion):
+    precios = {
+        p.anillo_id: p.precio
+        for p in PrecioAnilloGeneracion.objects.filter(generacion=generacion, anillo__activo=True)
+    }
+    return Anillo.objects.filter(id__in=precios), precios
+
+
+def _catalogo_captura(generacion):
+    """Todo el catálogo disponible para la generación, para que el selector sea instantáneo."""
+    productos = Producto.con_precio_para(generacion).select_related(
+        "seccion", "modelo", "tamano", "color", "variante"
+    )
+    anillos, precios_anillo = _anillos_con_precio(generacion)
+    data_productos = [
+        {
+            "id": p.id,
+            "seccion": p.seccion_id,
+            "tamano": p.tamano_id,
+            "modelo": p.modelo_id,
+            "color": p.color_id,
+            "variante": p.variante_id,
+            "nombre": p.descripcion,
+            "precio": str(p.precio_para(generacion)),
+        }
+        for p in productos
+    ]
+    tamanos_ids = {p["tamano"] for p in data_productos}
+    secciones_ids = {p["seccion"] for p in data_productos}
+    return productos, anillos, {
+        "productos": data_productos,
+        "tamanos": [
+            {"id": t.id, "nombre": t.nombre}
+            for t in Tamano.objects.filter(id__in=tamanos_ids)
+        ],
+        "secciones": [
+            {"id": s.id, "nombre": s.nombre, "lleva_placa": s.lleva_placa}
+            for s in Seccion.objects.filter(id__in=secciones_ids)
+        ],
+        "placas": [
+            {"id": p.id, "nombre": p.nombre}
+            for p in Placa.objects.filter(activo=True)
+        ],
+        "conceptos": [
+            {"id": k, "nombre": v} for k, v in PedidoItemBase.CONCEPTO_CHOICES
+        ],
+        "anillos": [
+            {"id": a.id, "nombre": f"{a.modelo} · {a.metal}", "precio": str(precios_anillo[a.id])}
+            for a in anillos
+        ],
+    }
+
+
+def _filas_iniciales(pedido):
+    """Precarga según el nivel de la escuela, sin repetir lo que el pedido ya tiene."""
+    nivel = pedido.alumno.grupo.escuela.nivel
+    bases, con_anillo = CAPTURA_POR_NIVEL.get(nivel, CAPTURA_POR_NIVEL[Escuela.NIVEL_OTRO])
+    existentes = set(pedido.items_base.values_list("concepto", flat=True))
+    tamanos = {t.nombre: t.id for t in Tamano.objects.all()}
+
+    filas = [
+        {"concepto": concepto, "tamano": tamanos.get(tamano), "cantidad": 1}
+        for concepto, tamano in bases
+        if concepto not in existentes
+    ]
+    anillos = (
+        [{"cantidad": 1}]
+        if con_anillo and not pedido.items_anillo.exists()
+        else []
+    )
+    if not filas and not anillos:
+        filas = [{"concepto": PedidoItemBase.CONCEPTO_OTRO, "tamano": None, "cantidad": 1}]
+    return filas, anillos
+
+
+def _errores(form):
+    return [str(e) for errs in form.errors.values() for e in errs]
+
+
+def _filas_desde_formset(formset, productos):
+    """Reconstruye las filas tras un error para no perder lo capturado."""
+    tamano_de = {p.id: p.tamano_id for p in productos}
+    filas = []
+    for form in formset:
+        producto = form.data.get(form.add_prefix("producto")) or ""
+        producto = int(producto) if producto.isdigit() else None
+        filas.append({
+            "concepto": form.data.get(form.add_prefix("concepto"), PedidoItemBase.CONCEPTO_OTRO),
+            "tamano": tamano_de.get(producto),
+            "producto": producto,
+            "placa": form.data.get(form.add_prefix("placa")) or None,
+            "color_placa": form.data.get(form.add_prefix("color_placa"), ""),
+            "cantidad": form.data.get(form.add_prefix("cantidad"), 1),
+            "errores": _errores(form),
+        })
+    return filas
+
+
+def _anillos_desde_formset(formset):
+    filas = []
+    for form in formset:
+        anillo = form.data.get(form.add_prefix("anillo")) or ""
+        filas.append({
+            "anillo": int(anillo) if anillo.isdigit() else None,
+            "tamano_anillo": form.data.get(form.add_prefix("tamano_anillo"), ""),
+            "cantidad": form.data.get(form.add_prefix("cantidad"), 1),
+            "errores": _errores(form),
+        })
+    return filas
+
+
+@login_required
+def pedido_captura(request, pk):
+    pedido = get_object_or_404(
+        Pedido.objects.select_related("alumno__grupo__generacion", "alumno__grupo__escuela"),
+        pk=pk,
+    )
+    generacion = pedido.alumno.grupo.generacion
+    productos, anillos, catalogo = _catalogo_captura(generacion)
+    error_general = None
+
+    if request.method == "POST":
+        formset = CapturaFormSet(request.POST, form_kwargs={"productos": productos})
+        formset_anillos = CapturaAnilloFormSet(
+            request.POST, prefix="anillo", form_kwargs={"anillos": anillos}
+        )
+        if formset.is_valid() and formset_anillos.is_valid():
+            bases = [f.cleaned_data for f in formset if f.cleaned_data.get("producto")]
+            aros = [f.cleaned_data for f in formset_anillos if f.cleaned_data.get("anillo")]
+            if not bases and not aros:
+                error_general = "Selecciona al menos un artículo."
+            else:
+                try:
+                    with transaction.atomic():
+                        for datos in bases:
+                            item = PedidoItemBase(
+                                pedido=pedido,
+                                concepto=datos["concepto"],
+                                producto=datos["producto"],
+                                placa=datos.get("placa"),
+                                color_placa=datos.get("color_placa") or None,
+                                cantidad=datos["cantidad"],
+                            )
+                            item.full_clean()
+                            item.save()
+                        for datos in aros:
+                            item = PedidoItemAnillo(
+                                pedido=pedido,
+                                anillo=datos["anillo"],
+                                tamano_anillo=datos["tamano_anillo"],
+                                cantidad=datos["cantidad"],
+                            )
+                            item.full_clean()
+                            item.save()
+                except ValidationError as exc:
+                    error_general = " ".join(exc.messages)
+                else:
+                    total = len(bases) + len(aros)
+                    messages.success(request, f"Se agregaron {total} artículo(s) al pedido.")
+                    return redirect("ventas:pedido_detail", pk=pedido.pk)
+        else:
+            errores = list(formset.non_form_errors()) + list(formset_anillos.non_form_errors())
+            error_general = " ".join(str(e) for e in errores) or None
+        filas = _filas_desde_formset(formset, productos)
+        filas_anillo = _anillos_desde_formset(formset_anillos)
+    else:
+        filas, filas_anillo = _filas_iniciales(pedido)
+
+    return render(request, "ventas/pedido_captura.html", {
+        "pedido": pedido,
+        "catalogo": catalogo,
+        "filas": filas,
+        "filas_anillo": filas_anillo,
+        "error_general": error_general,
+        "items_existentes": pedido.items_base.select_related(
+            "producto__seccion", "producto__modelo", "producto__tamano",
+            "producto__color", "producto__variante",
+        ),
+        "anillos_existentes": pedido.items_anillo.select_related("anillo"),
+    })

@@ -4,11 +4,10 @@ from django.utils.html import format_html
 
 class PedidoItemBaseInline(admin.TabularInline):
     model = PedidoItemBase
-    extra = 1
+    extra = 0
     fields = (
-        "get_tamano",
-        "get_seccion",
-        "modelo",
+        "concepto",
+        "producto",
         "placa",
         "color_placa",
         "cantidad",
@@ -16,23 +15,10 @@ class PedidoItemBaseInline(admin.TabularInline):
         "subtotal",
     )
     readonly_fields = (
-        "get_tamano",
-        "get_seccion",
         "precio_unitario",
         "subtotal",
     )
-
-    def get_tamano(self, obj):
-        if obj and obj.modelo:
-            return obj.modelo.tamano_producto
-        return "-"
-    get_tamano.short_description = "Tamaño"
-
-    def get_seccion(self, obj):
-        if obj and obj.modelo:
-            return obj.modelo.seccion
-        return "-"
-    get_seccion.short_description = "Sección"
+    autocomplete_fields = ("producto",)
 
 
 class PedidoItemAnilloInline(admin.TabularInline):
@@ -199,34 +185,48 @@ class PedidoAdmin(admin.ModelAdmin):
 class PedidoItemBaseAdmin(admin.ModelAdmin):
     list_display = (
         "pedido",
-        "mostrar_tamano",
+        "concepto",
         "mostrar_seccion",
-        "mostrar_modelo",
+        "mostrar_producto",
+        "mostrar_tamano",
+        "placa",
         "cantidad",
         "precio_unitario",
         "subtotal",
     )
     list_filter = (
-        "modelo__tamano_producto",
-        "modelo__seccion",
+        "concepto",
+        "producto__seccion",
+        "producto__tamano",
+        "placa",
     )
     search_fields = (
         "pedido__alumno__nombre",
-        "modelo__nombre",
+        "producto__modelo__nombre",
+    )
+    list_select_related = (
+        "pedido__alumno",
+        "producto__seccion",
+        "producto__modelo",
+        "producto__tamano",
+        "producto__color",
+        "producto__variante",
+        "placa",
     )
     readonly_fields = ("precio_unitario", "subtotal")
-
-    def mostrar_tamano(self, obj):
-        return obj.modelo.tamano_producto
-    mostrar_tamano.short_description = "Tamaño"
+    autocomplete_fields = ("producto",)
 
     def mostrar_seccion(self, obj):
-        return obj.modelo.seccion
+        return obj.producto.seccion
     mostrar_seccion.short_description = "Sección"
 
-    def mostrar_modelo(self, obj):
-        return obj.modelo.nombre
-    mostrar_modelo.short_description = "Modelo"
+    def mostrar_producto(self, obj):
+        return obj.producto.descripcion
+    mostrar_producto.short_description = "Modelo"
+
+    def mostrar_tamano(self, obj):
+        return obj.producto.tamano
+    mostrar_tamano.short_description = "Tamaño"
 
 
 @admin.register(PedidoItemAnillo)

@@ -7,11 +7,11 @@ class GeneracionForm(forms.ModelForm):
 
     class Meta:
         model = Generacion
-        fields = ['nombre', 'anio']
+        fields = ['nombre_generacion', 'anio']
 
         widgets = {
 
-            'nombre': forms.TextInput(attrs={
+            'nombre_generacion': forms.TextInput(attrs={
                 'placeholder': 'Ejemplo: Ingeniería 2025'
             }),
 
@@ -30,8 +30,27 @@ class EscuelaForm(forms.Form):
     )
 
     nombre = forms.CharField(required=False)
+    nivel = forms.ChoiceField(
+        choices=Escuela.NIVEL_CHOICES,
+        initial=Escuela.NIVEL_OTRO,
+        required=False,
+        widget=forms.Select(attrs={"class": "form-select"}),
+    )
     direccion = forms.CharField(required=False)
     telefono = forms.CharField(required=False)
+
+
+class EscuelaUpdateForm(forms.ModelForm):
+
+    class Meta:
+        model = Escuela
+        fields = ["nombre", "nivel", "direccion", "telefono"]
+        widgets = {
+            "nombre": forms.TextInput(attrs={"class": "form-control"}),
+            "nivel": forms.Select(attrs={"class": "form-select"}),
+            "direccion": forms.TextInput(attrs={"class": "form-control"}),
+            "telefono": forms.TextInput(attrs={"class": "form-control"}),
+        }
 
 
 class GrupoForm(forms.ModelForm):
