@@ -1,6 +1,18 @@
 from django.contrib import admin
-from .models import Pedido, PedidoItemBase, PedidoItemAnillo, PedidoItemExtra, Observacion, Pago, PedidoDescuento
+from .models import PedidoEstadoHistorial, Pedido, PedidoItemBase, PedidoItemAnillo, PedidoItemExtra, Observacion, Pago, PedidoDescuento
 from django.utils.html import format_html
+
+class PedidoEstadoHistorialInline(admin.TabularInline):
+    model = PedidoEstadoHistorial
+    extra = 0
+    can_delete = False
+    fields = ("fecha", "estado_anterior", "estado_nuevo", "usuario", "nota")
+    readonly_fields = fields
+    verbose_name_plural = "Historial de estados"
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
 
 class PedidoItemBaseInline(admin.TabularInline):
     model = PedidoItemBase
@@ -108,7 +120,14 @@ class PedidoAdmin(admin.ModelAdmin):
         "fecha_entrega",
     )
 
+    # El estado solo cambia con pagos (automático) o desde "Gestionar estado",
+    # para que todo quede en el historial.
     readonly_fields = (
+        "estado",
+        "recibido_por",
+        "notas_entrega",
+        "motivo_devolucion",
+        "fecha_devolucion",
         "total",
         "mostrar_total_pagado",
         "mostrar_saldo_pendiente",
@@ -118,6 +137,7 @@ class PedidoAdmin(admin.ModelAdmin):
     )
 
     inlines = [
+        PedidoEstadoHistorialInline,
         PedidoItemBaseInline,
         PedidoItemAnilloInline,
         PedidoItemExtraInline,
@@ -136,10 +156,12 @@ class PedidoAdmin(admin.ModelAdmin):
     def estado_color(self, obj):
 
         colores = {
-            "pendiente": "#ffc107",
-            "proceso": "#0d6efd",
-            "listo": "#198754",
-            "entregado": "#6c757d",
+            "sin_anticipo": "#6c757d",
+            "poco_anticipo": "#fd7e14",
+            "hacer": "#0d6efd",
+            "listo": "#0dcaf0",
+            "entregado": "#198754",
+            "devolucion": "#dc3545",
         }
 
         return format_html(

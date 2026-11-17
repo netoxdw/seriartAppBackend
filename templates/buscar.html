@@ -58,7 +58,7 @@
             </div>
             <div class="d-flex flex-wrap align-items-center gap-2">
                 {% if p %}
-                <span class="badge text-bg-light border buscar-chip">{{ p.get_estado_display }}</span>
+                {% with pedido=p %}{% include "ventas/partials/estado_badge.html" %}{% endwith %}
                 <span class="buscar-sub">${{ p.total|floatformat:2 }}</span>
                 <a href="{% url 'ventas:pedido_detail' p.id %}" class="btn btn-sm btn-primary"><i class="bi bi-receipt"></i> Pedido #{{ p.id }}</a>
                 {% else %}

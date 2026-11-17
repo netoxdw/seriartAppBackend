@@ -254,39 +254,7 @@
                         <!-- STATUS -->
                         <td>
 
-                            {% if pedido.estado == "pendiente" %}
-
-                            <div class="status-badge pending">
-
-                                Pendiente
-
-                            </div>
-
-                            {% elif pedido.estado == "proceso" %}
-
-                            <div class="status-badge process">
-
-                                En proceso
-
-                            </div>
-
-                            {% elif pedido.estado == "listo" %}
-
-                            <div class="status-badge ready">
-
-                                Listo
-
-                            </div>
-
-                            {% else %}
-
-                            <div class="status-badge delivered">
-
-                                Entregado
-
-                            </div>
-
-                            {% endif %}
+                            {% include "ventas/partials/estado_badge.html" %}
 
                         </td>
 
@@ -329,8 +297,9 @@
                         <!-- ACTION -->
                         <td class="text-end">
 
+                            {% if user.is_staff %}
                             <a
-                                href="{% url 'ventas:pedido_cambiar_estado' pedido.id %}"
+                                href="{% url 'ventas:pedido_cambiar_estado' pedido.id %}?next={{ request.get_full_path|urlencode }}"
                                 class="manage-btn"
                             >
 
@@ -339,6 +308,11 @@
                                 <i class="bi bi-arrow-right"></i>
 
                             </a>
+                            {% else %}
+                            <a href="{% url 'ventas:pedido_detail' pedido.id %}" class="manage-btn">
+                                Ver pedido <i class="bi bi-arrow-right"></i>
+                            </a>
+                            {% endif %}
 
                         </td>
 

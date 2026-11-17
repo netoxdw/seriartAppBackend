@@ -105,61 +105,67 @@ class PedidoDescuentoForm(forms.ModelForm):
             "motivo": forms.TextInput(attrs={"class": "form-control"}),
         }
 
-class PedidoCambiarEstadoForm(forms.ModelForm):
+# ==============================
+# 🚦 CAMBIOS DE ESTADO DEL PEDIDO (staff)
+# ==============================
 
-    class Meta:
+_NOTA = forms.CharField(
+    required=False, max_length=500, label="Nota (opcional)",
+    widget=forms.Textarea(attrs={"class": "form-control", "rows": 2}),
+)
 
-        model = Pedido
 
-        fields = [
-            "estado",
-            "recibido_por",
-            "notas_entrega",
-        ]
+class MarcarListoForm(forms.Form):
+    nota = _NOTA
+    confirmar_anticipo = forms.BooleanField(
+        required=False,
+        label="Confirmo marcarlo como listo aunque el anticipo es menor al 50 %",
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
+    )
 
-        widgets = {
-
-            "estado": forms.Select(
-                attrs={
-                    "class": "form-select"
-                }
-            ),
-
-            "recibido_por": forms.TextInput(
-                attrs={
-                    "class": "form-control",
-                    "placeholder": "Nombre de quien recibe"
-                }
-            ),
-
-            "notas_entrega": forms.Textarea(
-                attrs={
-                    "class": "form-control",
-                    "rows": 3,
-                    "placeholder": "Notas adicionales"
-                }
-            ),
-        }
+    def __init__(self, *args, pedido=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.pedido = pedido
 
     def clean(self):
+        datos = super().clean()
+        if self.pedido and not self.pedido.anticipo_suficiente and not datos.get("confirmar_anticipo"):
+            self.add_error("confirmar_anticipo", "El anticipo es menor al 50 %: confirma para continuar.")
+        return datos
 
-        cleaned_data = super().clean()
 
-        estado = cleaned_data.get("estado")
-        recibido_por = cleaned_data.get("recibido_por")
+class MarcarEntregadoForm(forms.Form):
+    recibido_por = forms.CharField(
+        max_length=150, label="Recibido por",
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Nombre de quien recibe"}),
+        error_messages={"required": "Indica quién recibe el pedido."},
+    )
+    nota = _NOTA
+    confirmar_saldo = forms.BooleanField(
+        required=False,
+        label="Confirmo la entrega aunque tiene saldo pendiente",
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
+    )
 
-        # =========================
-        # VALIDAR ENTREGA
-        # =========================
+    def __init__(self, *args, pedido=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.pedido = pedido
 
-        if estado == "entregado" and not recibido_por:
+    def clean(self):
+        datos = super().clean()
+        if self.pedido and self.pedido.saldo_pendiente > 0 and not datos.get("confirmar_saldo"):
+            self.add_error("confirmar_saldo", "Tiene saldo pendiente: confirma para entregar.")
+        return datos
 
-            self.add_error(
-                "recibido_por",
-                "Debes indicar quién recibe el pedido."
-            )
 
-        return cleaned_data
+class DevolucionForm(forms.Form):
+    motivo = forms.CharField(
+        max_length=1000, label="Motivo de la devolución",
+        widget=forms.Textarea(attrs={"class": "form-control", "rows": 3,
+                                     "placeholder": "Ej. marco dañado, nombre mal escrito, foto equivocada…"}),
+        error_messages={"required": "Escribe el motivo de la devolución."},
+    )
+
 
 # ==============================
 # ⚡ CAPTURA RÁPIDA DE ITEMS BASE

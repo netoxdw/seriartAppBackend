@@ -1,4 +1,5 @@
 from decimal import Decimal
+from django.conf import settings
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils import timezone
@@ -13,14 +14,41 @@ from apps.catalogo.models import (
 # PEDIDO
 
 
+class TransicionInvalida(ValidationError):
+    """El cambio de estado no está permitido desde el estado actual."""
+
+
 class Pedido(models.Model):
 
+    # --- Estados automáticos (dependen del anticipo pagado) ---
+    SIN_ANTICIPO = "sin_anticipo"
+    POCO_ANTICIPO = "poco_anticipo"
+    HACER = "hacer"
+    # --- Estados que registra el staff ---
+    LISTO = "listo"
+    ENTREGADO = "entregado"
+    DEVOLUCION = "devolucion"
+
     ESTADO_CHOICES = [
-        ("pendiente", "Pendiente"),
-        ("proceso", "En proceso"),
-        ("listo", "Listo para entregar"),
-        ("entregado", "Entregado"),
+        (SIN_ANTICIPO, "Sin anticipo"),
+        (POCO_ANTICIPO, "Poco anticipo"),
+        (HACER, "Hacer"),
+        (LISTO, "Listo para entregar"),
+        (ENTREGADO, "Entregado"),
+        (DEVOLUCION, "Devolución"),
     ]
+    ESTADOS_AUTOMATICOS = (SIN_ANTICIPO, POCO_ANTICIPO, HACER)
+    # Porcentaje del total pagado a partir del cual el pedido pasa a "Hacer"
+    PORCENTAJE_HACER = Decimal("50")
+
+    COLORES_ESTADO = {
+        SIN_ANTICIPO: "secondary",
+        POCO_ANTICIPO: "warning",
+        HACER: "primary",
+        LISTO: "info",
+        ENTREGADO: "success",
+        DEVOLUCION: "danger",
+    }
 
     alumno = models.ForeignKey(
         Alumno,
@@ -41,7 +69,7 @@ class Pedido(models.Model):
     estado = models.CharField(
         max_length=20,
         choices=ESTADO_CHOICES,
-        default="pendiente",
+        default=SIN_ANTICIPO,
         db_index=True
     )
 
@@ -68,24 +96,37 @@ class Pedido(models.Model):
         null=True
     )
 
+    motivo_devolucion = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Motivo de la última devolución (el historial guarda todas)."
+    )
+
+    fecha_devolucion = models.DateTimeField(
+        blank=True,
+        null=True
+    )
+
     class Meta:
         ordering = ["-id"]
         verbose_name = "Pedido"
         verbose_name_plural = "Pedidos"
 
-    def marcar_entregado(self, nombre_receptor):
-        self.estado = "entregado"
-        self.recibido_por = nombre_receptor
-        self.fecha_entrega = timezone.now()
-        self.save()
+    def __str__(self):
+        return f"Pedido {self.id} - {self.alumno}"
 
     @property
     def entregado(self):
-        return self.estado == "entregado"
+        return self.estado == self.ENTREGADO
 
-    def __str__(self):
-        return f"Pedido {self.id} - {self.alumno}"
-    
+    @property
+    def color_estado(self):
+        return self.COLORES_ESTADO.get(self.estado, "secondary")
+
+    # ------------------------------------------------------------------
+    # Totales y pagos
+    # ------------------------------------------------------------------
+
     def calcular_total(self):
         total_bases = sum(item.subtotal for item in self.items_base.all())
         total_anillos = sum(item.subtotal for item in self.items_anillo.all())
@@ -99,13 +140,14 @@ class Pedido(models.Model):
             self.total = 0
 
         self.save(update_fields=["total"])
+        # El total o los pagos cambiaron: el estado por anticipo puede cambiar
+        self.actualizar_estado_por_anticipo()
 
     def clean(self):
-        if self.estado == "entregado":
-            if not self.recibido_por:
-             raise ValidationError("Debes indicar quién recibió el pedido")
-        if not self.fecha_entrega:
-            self.fecha_entrega = timezone.now()
+        if self.estado == self.ENTREGADO and not self.recibido_por:
+            raise ValidationError("Debes indicar quién recibió el pedido.")
+        if self.estado == self.DEVOLUCION and not (self.motivo_devolucion or "").strip():
+            raise ValidationError("Debes indicar el motivo de la devolución.")
 
     @property
     def total_pagado(self):
@@ -118,6 +160,12 @@ class Pedido(models.Model):
         return saldo if saldo > 0 else Decimal("0.00")
 
     @property
+    def porcentaje_pagado(self):
+        if self.total <= 0:
+            return Decimal("0")
+        return (self.total_pagado * 100 / self.total).quantize(Decimal("0.1"))
+
+    @property
     def estado_pago(self):
         if self.total == 0:
             return "Sin pedido"
@@ -126,6 +174,124 @@ class Pedido(models.Model):
         if self.total_pagado < self.total:
             return "Abonando"
         return "Pagado"
+
+    # ------------------------------------------------------------------
+    # Estados
+    # ------------------------------------------------------------------
+
+    def estado_por_anticipo(self):
+        """Sin anticipo / Poco anticipo (< 50 %) / Hacer (>= 50 %)."""
+        pagado = self.total_pagado
+        if pagado <= 0:
+            return self.SIN_ANTICIPO
+        if self.total > 0 and pagado * 100 < self.total * self.PORCENTAJE_HACER:
+            return self.POCO_ANTICIPO
+        return self.HACER
+
+    @property
+    def anticipo_suficiente(self):
+        return self.estado_por_anticipo() == self.HACER
+
+    def _registrar(self, anterior, usuario=None, nota=""):
+        PedidoEstadoHistorial.objects.create(
+            pedido=self,
+            estado_anterior=anterior,
+            estado_nuevo=self.estado,
+            usuario=usuario if getattr(usuario, "is_authenticated", False) else None,
+            nota=nota or "",
+        )
+
+    def actualizar_estado_por_anticipo(self):
+        """Solo mueve el estado mientras el pedido está en un estado automático."""
+        if self.estado not in self.ESTADOS_AUTOMATICOS:
+            return False
+        nuevo = self.estado_por_anticipo()
+        if nuevo == self.estado:
+            return False
+        anterior = self.estado
+        self.estado = nuevo
+        self.save(update_fields=["estado", "actualizado"])
+        self._registrar(anterior, nota="Cambio automático por anticipo")
+        return True
+
+    def _exigir(self, permitidos, accion):
+        if self.estado not in permitidos:
+            raise TransicionInvalida(
+                f"No se puede {accion} un pedido en estado «{self.get_estado_display()}»."
+            )
+
+    def marcar_listo(self, usuario, nota=""):
+        self._exigir(self.ESTADOS_AUTOMATICOS, "marcar como listo")
+        anterior = self.estado
+        self.estado = self.LISTO
+        self.save(update_fields=["estado", "actualizado"])
+        self._registrar(anterior, usuario, nota)
+
+    def regresar_a_produccion(self, usuario, nota=""):
+        self._exigir((self.LISTO,), "regresar a producción")
+        anterior = self.estado
+        self.estado = self.estado_por_anticipo()
+        self.save(update_fields=["estado", "actualizado"])
+        self._registrar(anterior, usuario, nota or "Se deshizo 'Listo para entregar'")
+
+    def marcar_entregado(self, usuario, recibido_por, nota=""):
+        self._exigir((self.LISTO, self.DEVOLUCION), "marcar como entregado")
+        recibido_por = (recibido_por or "").strip()
+        if not recibido_por:
+            raise ValidationError("Debes indicar quién recibe el pedido.")
+        anterior = self.estado
+        self.estado = self.ENTREGADO
+        self.recibido_por = recibido_por
+        self.fecha_entrega = timezone.now()
+        if nota:
+            self.notas_entrega = nota
+        self.save(update_fields=["estado", "recibido_por", "fecha_entrega", "notas_entrega", "actualizado"])
+        texto = f"Recibió: {recibido_por}" + (f". {nota}" if nota else "")
+        if anterior == self.DEVOLUCION:
+            texto = "Reentrega tras devolución. " + texto
+        self._registrar(anterior, usuario, texto)
+
+    def marcar_devuelto(self, usuario, motivo):
+        self._exigir((self.ENTREGADO,), "registrar la devolución de")
+        motivo = (motivo or "").strip()
+        if not motivo:
+            raise ValidationError("Debes indicar el motivo de la devolución.")
+        anterior = self.estado
+        self.estado = self.DEVOLUCION
+        self.motivo_devolucion = motivo
+        self.fecha_devolucion = timezone.now()
+        self.save(update_fields=["estado", "motivo_devolucion", "fecha_devolucion", "actualizado"])
+        self._registrar(anterior, usuario, motivo)
+
+
+class PedidoEstadoHistorial(models.Model):
+    """Cada cambio de estado de un pedido: quién, cuándo y por qué."""
+
+    pedido = models.ForeignKey(
+        Pedido,
+        on_delete=models.CASCADE,
+        related_name="historial_estados"
+    )
+    estado_anterior = models.CharField(max_length=20, choices=Pedido.ESTADO_CHOICES, blank=True)
+    estado_nuevo = models.CharField(max_length=20, choices=Pedido.ESTADO_CHOICES)
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="cambios_estado_pedido",
+        help_text="Vacío = cambio automático del sistema."
+    )
+    fecha = models.DateTimeField(auto_now_add=True)
+    nota = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["-fecha", "-id"]
+        verbose_name = "Cambio de estado"
+        verbose_name_plural = "Historial de estados"
+
+    def __str__(self):
+        return f"Pedido {self.pedido_id}: {self.estado_anterior} → {self.estado_nuevo}"
 
 
 # BASES

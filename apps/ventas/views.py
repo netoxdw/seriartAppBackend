@@ -12,10 +12,11 @@ from django.db.models import Q
 
 from apps.alumnos.models import Alumno
 from .models import PedidoItemBase, Pedido, PedidoItemAnillo, PedidoItemExtra, Observacion, Pago, PedidoDescuento
-from .forms import PedidoItemBaseForm, PedidoItemAnilloForm, PedidoItemExtraForm, ObservacionForm, PagoForm, PedidoDescuentoForm, PedidoCambiarEstadoForm, CapturaFormSet, CapturaAnilloFormSet
+from .forms import PedidoItemBaseForm, PedidoItemAnilloForm, PedidoItemExtraForm, ObservacionForm, PagoForm, PedidoDescuentoForm, MarcarListoForm, MarcarEntregadoForm, DevolucionForm, CapturaFormSet, CapturaAnilloFormSet
 from apps.catalogo.models import Producto, Seccion, Tamano, Placa, Anillo, PrecioAnilloGeneracion
 from apps.escuelas.models import Escuela
-from django.core.exceptions import ValidationError
+from django.core.exceptions import PermissionDenied, ValidationError
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.db import transaction
 
 
@@ -124,7 +125,7 @@ class PedidoDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
-class PedidoEntregaListView(ListView):
+class PedidoEntregaListView(LoginRequiredMixin, ListView):
 
     model = Pedido
     template_name = "ventas/pedido_entrega_list.html"
@@ -135,7 +136,7 @@ class PedidoEntregaListView(ListView):
 
         queryset = (
             Pedido.objects
-            .select_related("alumno")
+            .select_related("alumno__grupo__escuela")
             .order_by("-id")
         )
 
@@ -170,12 +171,7 @@ class PedidoEntregaListView(ListView):
         context["estado_actual"] = self.request.GET.get("estado", "")
         context["busqueda"] = self.request.GET.get("q", "")
 
-        context["estados"] = [
-            ("pendiente", "Pendiente"),
-            ("proceso", "En proceso"),
-            ("listo", "Listo"),
-            ("entregado", "Entregado"),
-        ]
+        context["estados"] = Pedido.ESTADO_CHOICES
 
         return context
 
@@ -563,85 +559,99 @@ class PedidoDescuentoDeleteView(LoginRequiredMixin, DeleteView):
         return reverse("ventas:pedido_detail", kwargs={"pk": self.object.pedido_id})
 
 
-# Cambiar estado de panel de entregas
+# ==============================
+# 🚦 GESTIONAR ESTADO DEL PEDIDO (solo staff)
+# Sin anticipo / Poco anticipo / Hacer se calculan solos según los pagos.
+# Listo, Entregado y Devolución los registra el staff.
+# ==============================
 
-class PedidoCambiarEstadoView(View):
+class PedidoCambiarEstadoView(LoginRequiredMixin, View):
 
     template_name = "ventas/pedido_cambiar_estado.html"
 
-    def get(self, request, pk):
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated and not request.user.is_staff:
+            raise PermissionDenied("Solo el personal autorizado puede cambiar el estado de un pedido.")
+        return super().dispatch(request, *args, **kwargs)
 
-        pedido = get_object_or_404(
-            Pedido,
-            pk=pk
+    def _pedido(self, pk):
+        return get_object_or_404(
+            Pedido.objects.select_related("alumno__grupo__escuela", "alumno__grupo__generacion"),
+            pk=pk,
         )
 
-        form = PedidoCambiarEstadoForm(
-            instance=pedido
-        )
-
-        context = {
-            "pedido": pedido,
-            "form": form,
+    def _forms(self, pedido, data=None, accion=None):
+        def con_datos(nombre):
+            return data if accion == nombre else None
+        return {
+            "form_listo": MarcarListoForm(con_datos("listo"), pedido=pedido, prefix="listo"),
+            "form_entregado": MarcarEntregadoForm(
+                con_datos("entregado"), pedido=pedido, prefix="entregado",
+                initial={"recibido_por": pedido.alumno.nombre_alumno},
+            ),
+            "form_devolucion": DevolucionForm(con_datos("devolucion"), prefix="devolucion"),
         }
 
-        return render(
-            request,
-            self.template_name,
-            context
-        )
+    def _siguiente(self, request):
+        """URL a la que volver (?next=), solo si es de este sitio."""
+        url = request.POST.get("next") or request.GET.get("next") or ""
+        if url and url_has_allowed_host_and_scheme(url, allowed_hosts={request.get_host()}):
+            return url
+        return ""
+
+    def _render(self, request, pedido, forms_ctx):
+        contexto = {
+            "pedido": pedido,
+            "historial": pedido.historial_estados.select_related("usuario"),
+            "siguiente": self._siguiente(request),
+            **forms_ctx,
+        }
+        return render(request, self.template_name, contexto)
+
+    def get(self, request, pk):
+        pedido = self._pedido(pk)
+        return self._render(request, pedido, self._forms(pedido))
 
     def post(self, request, pk):
+        pedido = self._pedido(pk)
+        accion = request.POST.get("accion")
+        forms_ctx = self._forms(pedido, request.POST, accion)
 
-        pedido = get_object_or_404(
-            Pedido,
-            pk=pk
-        )
-
-        form = PedidoCambiarEstadoForm(
-            request.POST,
-            instance=pedido
-        )
-
-        if form.is_valid():
-
-            pedido = form.save(commit=False)
-
-            # =========================
-            # FECHA ENTREGA
-            # =========================
-
-            if pedido.estado == "entregado":
-
-                if not pedido.fecha_entrega:
-                    pedido.fecha_entrega = timezone.now()
-
+        try:
+            if accion == "listo":
+                form = forms_ctx["form_listo"]
+                if form.is_valid():
+                    pedido.marcar_listo(request.user, form.cleaned_data["nota"])
+                    return self._ok(request, pedido, "Pedido marcado como listo para entregar.")
+            elif accion == "regresar":
+                pedido.regresar_a_produccion(request.user)
+                return self._ok(request, pedido, f"Pedido regresado a «{pedido.get_estado_display()}».")
+            elif accion == "entregado":
+                form = forms_ctx["form_entregado"]
+                if form.is_valid():
+                    pedido.marcar_entregado(
+                        request.user, form.cleaned_data["recibido_por"], form.cleaned_data["nota"]
+                    )
+                    return self._ok(request, pedido, "Pedido marcado como entregado.")
+            elif accion == "devolucion":
+                form = forms_ctx["form_devolucion"]
+                if form.is_valid():
+                    pedido.marcar_devuelto(request.user, form.cleaned_data["motivo"])
+                    return self._ok(request, pedido, "Devolución registrada.")
             else:
+                messages.error(request, "Acción no reconocida.")
+        except ValidationError as exc:
+            messages.error(request, " ".join(exc.messages))
 
-                pedido.fecha_entrega = None
-                pedido.recibido_por = None
+        return self._render(request, pedido, forms_ctx)
 
-            pedido.save()
+    def _ok(self, request, pedido, texto):
+        messages.success(request, texto)
+        siguiente = self._siguiente(request)
+        if siguiente:
+            return redirect(siguiente)
+        return redirect("ventas:pedido_cambiar_estado", pk=pedido.pk)
 
-            messages.success(
-                request,
-                "Estado actualizado correctamente."
-            )
-
-            return redirect(
-                "ventas:pedido_entrega_list"
-            )
-
-        context = {
-            "pedido": pedido,
-            "form": form,
-        }
-
-        return render(
-            request,
-            self.template_name,
-            context
-        )
 
 # ==============================
 # ⚡ CAPTURA RÁPIDA DE ARTÍCULOS

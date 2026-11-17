@@ -37,7 +37,7 @@
                 </td>
                 <td>{{ pedido.fecha }}</td>
                 <td>${{ pedido.total }}</td>
-                <td>{{ pedido.estado }}</td>
+                <td>{% include "ventas/partials/estado_badge.html" %}</td>
             </tr>
             {% empty %}
             <tr>

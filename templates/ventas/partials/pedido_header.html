@@ -62,6 +62,7 @@
 
                     </h1>
 
+                    <div class="mb-1">{% include "ventas/partials/estado_badge.html" %}</div>
                     <div class="pedido-subtitle">
 
                         Pedido fotográfico y control de pagos
@@ -77,6 +78,13 @@
         <!-- ACTIONS -->
         <div class="pedido-header-actions">
 
+            {% if user.is_staff %}
+            <a href="{% url 'ventas:pedido_cambiar_estado' pedido.id %}?next={{ request.get_full_path|urlencode }}"
+               class="btn btn-dark custom-action-btn">
+                <i class="bi bi-signpost-split"></i>
+                Estado
+            </a>
+            {% endif %}
             <a href="{% url 'alumnos:grupo_detail' pedido.alumno.grupo.id %}"
                class="btn btn-light custom-action-btn">
 
