@@ -157,7 +157,7 @@ class PedidoEntregaListView(ListView):
         if q:
             queryset = queryset.filter(
                 Q(id__icontains=q) |
-                Q(alumno__nombre__icontains=q) |
+                Q(alumno__nombre_alumno__icontains=q) |
                 Q(alumno__telefono__icontains=q)
             )
 

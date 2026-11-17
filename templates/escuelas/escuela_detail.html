@@ -23,7 +23,7 @@
             <span>/</span>
 
             <span>
-                {{ escuela.nombre }}
+                {{ escuela.nombre_escuela }}
             </span>
 
         </div>
@@ -31,7 +31,7 @@
         <!-- TITLE -->
         <h2 class="detail-main-title">
 
-            {{ escuela.nombre }}
+            {{ escuela.nombre_escuela }}
 
         </h2>
 
@@ -119,7 +119,7 @@
             <div>
 
                 <div class="stats-value small-text">
-                    {{ escuela.nombre }}
+                    {{ escuela.nombre_escuela }}
                 </div>
 
                 <div class="stats-label">
@@ -213,7 +213,7 @@
                                 <a href="{% url 'alumnos:grupo_detail' grupo.id %}"
                                    class="table-title">
 
-                                    {{ grupo.nombre }}
+                                    {{ grupo.nombre_grupo }}
 
                                 </a>
 

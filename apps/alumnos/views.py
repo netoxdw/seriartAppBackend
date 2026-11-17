@@ -26,7 +26,7 @@ class GrupoDetailView(LoginRequiredMixin, DetailView):
 
         alumnos = Alumno.objects.filter(
             grupo=self.object
-        ).order_by("nombre")
+        ).order_by("nombre_alumno")
 
         context["alumnos"] = alumnos
 
@@ -64,8 +64,9 @@ class AlumnoCreateView(LoginRequiredMixin, CreateView):
             alumno=self.object
         )
 
+        # directo a la captura rápida de artículos
         return redirect(
-            "ventas:pedido_detail",
+            "ventas:pedido_captura",
             pk=pedido.id
         )
 

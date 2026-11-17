@@ -27,7 +27,7 @@ class Escuela(models.Model):
         (NIVEL_OTRO, "Otro"),
     ]
 
-    nombre = models.CharField(max_length=150)
+    nombre_escuela = models.CharField(max_length=150)
     nivel = models.CharField(
         max_length=20,
         choices=NIVEL_CHOICES,
@@ -43,11 +43,11 @@ class Escuela(models.Model):
     )
 
     def __str__(self):
-        return self.nombre
+        return self.nombre_escuela
 
 
 class Grupo(models.Model):
-    nombre = models.CharField(max_length=20)
+    nombre_grupo = models.CharField(max_length=20)
 
     escuela = models.ForeignKey(
         Escuela,
@@ -77,10 +77,10 @@ class Grupo(models.Model):
     )
 
     class Meta:
-        ordering = ["escuela", "nombre"]
+        ordering = ["escuela", "nombre_grupo"]
         constraints = [
             models.UniqueConstraint(
-                fields=["nombre", "escuela", "generacion"],
+                fields=["nombre_grupo", "escuela", "generacion"],
                 name="grupo_unico_por_escuela_generacion"
             )
         ]
@@ -88,7 +88,7 @@ class Grupo(models.Model):
     def clean(self):
         if self.escuela_id and self.generacion_id:
             if Grupo.objects.filter(
-                nombre=self.nombre,
+                nombre_grupo=self.nombre_grupo,
                 escuela_id=self.escuela_id,
                 generacion_id=self.generacion_id
             ).exclude(id=self.id).exists():
@@ -97,7 +97,7 @@ class Grupo(models.Model):
                 )
     
     def __str__(self):
-        escuela = self.escuela.nombre if self.escuela_id else "Sin escuela"
+        escuela = self.escuela.nombre_escuela if self.escuela_id else "Sin escuela"
         generacion = self.generacion.anio if self.generacion_id else "Sin generación"
 
-        return f"{self.nombre} - {escuela} ({generacion})"
+        return f"{self.nombre_grupo} - {escuela} ({generacion})"

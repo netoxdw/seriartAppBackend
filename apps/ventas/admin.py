@@ -97,7 +97,7 @@ class PedidoAdmin(admin.ModelAdmin):
 
     search_fields = (
         "id",
-        "alumno__nombre",
+        "alumno__nombre_alumno",
         "alumno__telefono",
         "recibido_por",
     )
@@ -201,7 +201,7 @@ class PedidoItemBaseAdmin(admin.ModelAdmin):
         "placa",
     )
     search_fields = (
-        "pedido__alumno__nombre",
+        "pedido__alumno__nombre_alumno",
         "producto__modelo__nombre",
     )
     list_select_related = (
@@ -245,7 +245,7 @@ class PedidoItemAnilloAdmin(admin.ModelAdmin):
         "anillo__metal",
     )
     search_fields = (
-        "pedido__alumno__nombre",
+        "pedido__alumno__nombre_alumno",
         "anillo__modelo",
         "anillo__metal",
     )
@@ -272,7 +272,7 @@ class PedidoItemExtraAdmin(admin.ModelAdmin):
     )
     search_fields = (
         "nombre",
-        "pedido__alumno__nombre",
+        "pedido__alumno__nombre_alumno",
     )
     list_filter = ("pedido",)
     readonly_fields = ("subtotal",)
@@ -291,7 +291,7 @@ class PagoAdmin(admin.ModelAdmin):
     )
     list_filter = ("fecha_pago", "fecha_registro")
     search_fields = (
-        "pedido__alumno__nombre",
+        "pedido__alumno__nombre_alumno",
         "folio_nota",
     )
     readonly_fields = ("fecha_registro",)

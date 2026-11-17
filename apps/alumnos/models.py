@@ -4,7 +4,7 @@ from apps.escuelas.models import Grupo
 
 class Alumno(models.Model):
 
-    nombre = models.CharField(max_length=150)
+    nombre_alumno = models.CharField(max_length=150)
 
     telefono = models.CharField(
         max_length=20,
@@ -26,10 +26,10 @@ class Alumno(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["nombre", "grupo"],
+                fields=["nombre_alumno", "grupo"],
                 name="alumno_unico_por_grupo"
             )
         ]
 
     def __str__(self):
-        return f"{self.nombre} - {self.grupo.escuela.nombre} {self.grupo.nombre} {self.grupo.generacion}"
+        return f"{self.nombre_alumno} - {self.grupo.escuela.nombre_escuela} {self.grupo.nombre_grupo} {self.grupo.generacion}"

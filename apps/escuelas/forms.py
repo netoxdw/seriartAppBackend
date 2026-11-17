@@ -29,7 +29,7 @@ class EscuelaForm(forms.Form):
         label="Escuela existente"
     )
 
-    nombre = forms.CharField(required=False)
+    nombre_escuela = forms.CharField(required=False, label="Nombre")
     nivel = forms.ChoiceField(
         choices=Escuela.NIVEL_CHOICES,
         initial=Escuela.NIVEL_OTRO,
@@ -44,9 +44,9 @@ class EscuelaUpdateForm(forms.ModelForm):
 
     class Meta:
         model = Escuela
-        fields = ["nombre", "nivel", "direccion", "telefono"]
+        fields = ["nombre_escuela", "nivel", "direccion", "telefono"]
         widgets = {
-            "nombre": forms.TextInput(attrs={"class": "form-control"}),
+            "nombre_escuela": forms.TextInput(attrs={"class": "form-control"}),
             "nivel": forms.Select(attrs={"class": "form-select"}),
             "direccion": forms.TextInput(attrs={"class": "form-control"}),
             "telefono": forms.TextInput(attrs={"class": "form-control"}),
@@ -62,10 +62,10 @@ class GrupoForm(forms.ModelForm):
 
     class Meta:
         model = Grupo
-        fields = ["nombre", "fecha_fotografia", "hora_fotografia", "lugar_fotografia"]
+        fields = ["nombre_grupo", "fecha_fotografia", "hora_fotografia", "lugar_fotografia"]
 
         widgets = {
-            "nombre": forms.TextInput(attrs={
+            "nombre_grupo": forms.TextInput(attrs={
                 "class": "form-control"
             }),
             "fecha_fotografia": forms.DateInput(attrs={
@@ -83,16 +83,16 @@ class GrupoForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        nombre = cleaned_data.get("nombre")
+        nombre = cleaned_data.get("nombre_grupo")
 
         if nombre and self.escuela and self.generacion:
             if Grupo.objects.filter(
-                nombre=nombre,
+                nombre_grupo=nombre,
                 escuela_id=self.escuela,
                 generacion_id=self.generacion
             ).exists():
                 self.add_error(
-                    "nombre",
+                    "nombre_grupo",
                     "⚠️ Este grupo ya existe en esta escuela y generación."
                 )
 

@@ -71,7 +71,7 @@ class EscuelaCreateView(LoginRequiredMixin, FormView):
 
             # crear nueva
             escuela = Escuela.objects.create(
-                nombre=form.cleaned_data["nombre"],
+                nombre_escuela=form.cleaned_data["nombre_escuela"],
                 nivel=form.cleaned_data.get("nivel") or Escuela.NIVEL_OTRO,
                 direccion=form.cleaned_data["direccion"],
                 telefono=form.cleaned_data["telefono"]
@@ -117,7 +117,7 @@ class EscuelaDetailView(LoginRequiredMixin, DetailView):
                 "alumnos",
                 distinct=True
             )
-        ).order_by("nombre")
+        ).order_by("nombre_grupo")
 
         context["generacion"] = generacion
 

@@ -29,7 +29,7 @@
             <span>/</span>
 
             <span>
-                {{ grupo.nombre }}
+                {{ grupo.nombre_grupo }}
             </span>
 
         </div>
@@ -37,7 +37,7 @@
         <!-- TITLE -->
         <h2 class="detail-main-title">
 
-            Grupo {{ grupo.nombre }}
+            Grupo {{ grupo.nombre_grupo }}
 
         </h2>
 
@@ -208,7 +208,7 @@
                                 <a href="{% url 'ventas:alumno_pedido' alumno.id %}"
                                    class="table-title">
 
-                                    {{ alumno.nombre }}
+                                    {{ alumno.nombre_alumno }}
 
                                 </a>
 

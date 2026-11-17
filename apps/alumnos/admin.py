@@ -6,7 +6,7 @@ from .models import Alumno
 class AlumnoAdmin(admin.ModelAdmin):
     list_display = (
         "id",
-        "nombre",
+        "nombre_alumno",
         "telefono",
         "folio_fotos",
         "grupo",
@@ -14,11 +14,11 @@ class AlumnoAdmin(admin.ModelAdmin):
     )
 
     search_fields = (
-        "nombre",
+        "nombre_alumno",
         "telefono",
         "folio_fotos",
-        "grupo__nombre",
-        "grupo__escuela__nombre",
+        "grupo__nombre_grupo",
+        "grupo__escuela__nombre_escuela",
     )
 
     list_filter = (
@@ -26,7 +26,7 @@ class AlumnoAdmin(admin.ModelAdmin):
         "grupo",
     )
 
-    ordering = ("nombre",)
+    ordering = ("nombre_alumno",)
 
     def get_escuela(self, obj):
         return obj.grupo.escuela

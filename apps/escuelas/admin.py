@@ -12,7 +12,7 @@ from .models import Escuela
 class EscuelaAdmin(admin.ModelAdmin):
     list_display = (
         "id",
-        "nombre",
+        "nombre_escuela",
         "nivel",
         "direccion",
         "telefono",
@@ -20,7 +20,7 @@ class EscuelaAdmin(admin.ModelAdmin):
     )
 
     search_fields = (
-        "nombre",
+        "nombre_escuela",
         "direccion",
         "telefono",
     )
@@ -41,14 +41,14 @@ class EscuelaAdmin(admin.ModelAdmin):
 class GrupoAdmin(admin.ModelAdmin):
     list_display = (
         "id",
-        "nombre",
+        "nombre_grupo",
         "escuela",
         "generacion",
     )
 
     search_fields = (
-        "nombre",
-        "escuela__nombre",
+        "nombre_grupo",
+        "escuela__nombre_escuela",
     )
 
     list_filter = (
