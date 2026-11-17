@@ -80,6 +80,18 @@ else:
         }
     }
 
+# Base de datos de la versión 1 (solo para `manage.py migrar_desde_v1`).
+# Misma conexión que la principal, otra base: DB_V1_NAME=seriart_v1
+if config('DB_V1_NAME', default=''):
+    DATABASES['v1'] = {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': config('DB_V1_NAME'),
+        'USER': config('DB_V1_USER', default=config('DB_USER', default='')),
+        'PASSWORD': config('DB_V1_PASSWORD', default=config('DB_PASSWORD', default='')),
+        'HOST': config('DB_V1_HOST', default=config('DB_HOST', default='localhost')),
+        'PORT': config('DB_V1_PORT', default=config('DB_PORT', default='3306')),
+    }
+
 # Validación de passwords
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},

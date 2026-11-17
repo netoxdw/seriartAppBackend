@@ -2,7 +2,6 @@ services:
 
   db:
     image: mysql:8.0
-    container_name: mysql_fotografia
     restart: always
     env_file:
       - .env
@@ -16,7 +15,6 @@ services:
 
   web:
     build: .
-    container_name: django_fotografia
     restart: always
 
     command: >
@@ -39,11 +37,11 @@ services:
 
   nginx:
     image: nginx:latest
-    container_name: nginx_fotografia
     restart: always
 
+    # HTTP_BIND en el .env: "80" en producción, "127.0.0.1:8081" para pruebas en paralelo
     ports:
-      - "80:80"
+      - "${HTTP_BIND:-80}:80"
 
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
