@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+    .buscar-card { background:#fff; border:1px solid #e5e7eb; border-radius:16px; padding:1.25rem; margin-bottom:1.25rem; }
+    .buscar-card h5 { font-weight:700; display:flex; align-items:center; gap:.5rem; }
+    .buscar-item { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:.5rem;
+                   padding:.65rem 0; border-top:1px solid #f1f5f9; }
+    .buscar-item:first-of-type { border-top:0; }
+    .buscar-titulo { font-weight:600; }
+    .buscar-sub { font-size:.85rem; color:#64748b; }
+    .buscar-chip { font-size:.8rem; }
+    mark { padding:0 .1em; background:#fef08a; border-radius:3px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header mb-4">
+    <div>
+        <h2 class="dashboard-title">Buscar</h2>
+        <p class="dashboard-subtitle mb-0">Escuelas, grupos y alumnos</p>
+    </div>
+</div>
+
+<form method="get" action="{% url 'buscar' %}" class="mb-4" role="search">
+    <div class="input-group input-group-lg">
+        <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+        <input type="search" name="q" value="{{ q }}" class="form-control" autofocus
+               placeholder="Nombre de escuela, grupo o alumno (ej. UPN 6A, Ana López, teléfono o folio)"
+               aria-label="Buscar">
+        <button class="btn btn-primary" type="submit">Buscar</button>
+    </div>
+    <div class="form-text">Puedes combinar palabras: <em>“UPN Ernesto”</em> busca a Ernesto en la escuela UPN.</div>
+</form>
+
+{% if q %}
+    {% if sin_resultados %}
+    <div class="buscar-card text-center text-muted py-5">
+        <i class="bi bi-search fs-2 d-block mb-2"></i>
+        No se encontró nada para <strong>“{{ q }}”</strong>.
+    </div>
+    {% else %}
+
+    <!-- ALUMNOS -->
+    {% if alumnos %}
+    <div class="buscar-card">
+        <h5><i class="bi bi-person"></i> Alumnos <span class="badge text-bg-light border">{{ totales.alumnos }}</span></h5>
+        {% for r in alumnos %}
+        {% with a=r.alumno p=r.pedido %}
+        <div class="buscar-item">
+            <div>
+                <div class="buscar-titulo">{{ a.nombre_alumno }}</div>
+                <div class="buscar-sub">
+                    {{ a.grupo.escuela.nombre_escuela }} · {{ a.grupo.nombre_grupo }} · Generación {{ a.grupo.generacion.anio }}
+                    {% if a.telefono %} · <i class="bi bi-telephone"></i> {{ a.telefono }}{% endif %}
+                    {% if a.folio_fotos %} · Folio {{ a.folio_fotos }}{% endif %}
+                </div>
+            </div>
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                {% if p %}
+                <span class="badge text-bg-light border buscar-chip">{{ p.get_estado_display }}</span>
+                <span class="buscar-sub">${{ p.total|floatformat:2 }}</span>
+                <a href="{% url 'ventas:pedido_detail' p.id %}" class="btn btn-sm btn-primary"><i class="bi bi-receipt"></i> Pedido #{{ p.id }}</a>
+                {% else %}
+                <a href="{% url 'ventas:alumno_pedido' a.id %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-plus-lg"></i> Crear pedido</a>
+                {% endif %}
+                <a href="{% url 'alumnos:grupo_detail' a.grupo_id %}" class="btn btn-sm btn-light border">Ver grupo</a>
+            </div>
+        </div>
+        {% endwith %}
+        {% endfor %}
+        {% if totales.alumnos > limite %}<div class="buscar-sub mt-2">Mostrando {{ limite }} de {{ totales.alumnos }}. Agrega más palabras para afinar.</div>{% endif %}
+    </div>
+    {% endif %}
+
+    <!-- GRUPOS -->
+    {% if grupos %}
+    <div class="buscar-card">
+        <h5><i class="bi bi-people"></i> Grupos <span class="badge text-bg-light border">{{ totales.grupos }}</span></h5>
+        {% for g in grupos %}
+        <div class="buscar-item">
+            <div>
+                <div class="buscar-titulo">{{ g.nombre_grupo }}</div>
+                <div class="buscar-sub">
+                    {{ g.escuela.nombre_escuela }} · Generación {{ g.generacion.anio }} · {{ g.num_alumnos }} alumno(s)
+                    {% if g.fecha_fotografia %} · <i class="bi bi-camera"></i> {{ g.fecha_fotografia|date:"d/m/Y" }}{% endif %}
+                </div>
+            </div>
+            <a href="{% url 'alumnos:grupo_detail' g.id %}" class="btn btn-sm btn-primary">Ver alumnos</a>
+        </div>
+        {% endfor %}
+        {% if totales.grupos > limite %}<div class="buscar-sub mt-2">Mostrando {{ limite }} de {{ totales.grupos }}.</div>{% endif %}
+    </div>
+    {% endif %}
+
+    <!-- ESCUELAS -->
+    {% if escuelas %}
+    <div class="buscar-card">
+        <h5><i class="bi bi-building"></i> Escuelas <span class="badge text-bg-light border">{{ totales.escuelas }}</span></h5>
+        {% for e in escuelas %}
+        <div class="buscar-item">
+            <div>
+                <div class="buscar-titulo">{{ e.nombre_escuela }}</div>
+                <div class="buscar-sub">
+                    {{ e.get_nivel_display }} · {{ e.num_grupos }} grupo(s){% if e.direccion %} · {{ e.direccion }}{% endif %}
+                </div>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                {% for gen in e.generaciones.all %}
+                <a href="{% url 'escuelas:escuela_detail' gen.id e.id %}" class="btn btn-sm btn-outline-primary">Generación {{ gen.anio }}</a>
+                {% empty %}
+                <span class="buscar-sub">Sin generaciones</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+        {% if totales.escuelas > limite %}<div class="buscar-sub mt-2">Mostrando {{ limite }} de {{ totales.escuelas }}.</div>{% endif %}
+    </div>
+    {% endif %}
+
+    {% endif %}
+{% endif %}
+
+<script>
+// Resalta las palabras buscadas
+(function () {
+    const palabras = "{{ q|escapejs }}".split(/\s+/).filter(Boolean);
+    if (!palabras.length) return;
+    const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const re = new RegExp("(" + palabras.map(esc).join("|") + ")", "gi");
+    document.querySelectorAll(".buscar-titulo, .buscar-sub").forEach(el => {
+        const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+        const nodos = [];
+        while (walker.nextNode()) nodos.push(walker.currentNode);
+        nodos.forEach(n => {
+            if (!re.test(n.nodeValue)) return;
+            re.lastIndex = 0;
+            const frag = document.createDocumentFragment();
+            let ultimo = 0;
+            n.nodeValue.replace(re, (m, _g, i) => {
+                frag.append(n.nodeValue.slice(ultimo, i));
+                const mk = document.createElement("mark");
+                mk.textContent = m;
+                frag.append(mk);
+                ultimo = i + m.length;
+            });
+            frag.append(n.nodeValue.slice(ultimo));
+            n.replaceWith(frag);
+        });
+    });
+})();
+</script>
+{% endblock %}

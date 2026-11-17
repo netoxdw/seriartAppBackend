@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
 
-from apps.core.views import HomeView, GeneracionCreateView
+from apps.core.views import HomeView, GeneracionCreateView, buscar
 
 urlpatterns = [
 
@@ -26,6 +26,9 @@ urlpatterns = [
 
     # HOME
     path('', HomeView.as_view(), name='home'),
+
+    # BUSCADOR
+    path('buscar/', buscar, name='buscar'),
 
     # GENERACIONES
     path(

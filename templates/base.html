@@ -113,7 +113,7 @@
                 <div class="sidebar-content">
 
                     <!-- SEARCH -->
-                    <form method="GET" class="mb-4">
+                    <form method="GET" action="{% url 'buscar' %}" class="mb-4" role="search">
 
                         <div class="input-group">
 
@@ -121,7 +121,8 @@
                                 <i class="bi bi-search"></i>
                             </span>
 
-                            <input type="text" class="form-control border-0" placeholder="Buscador desabilitado">
+                            <input type="search" name="q" value="{% if request.resolver_match.url_name == 'buscar' %}{{ request.GET.q }}{% endif %}" class="form-control border-0"
+                                   placeholder="Escuela, grupo o alumno" aria-label="Buscar escuela, grupo o alumno">
 
                         </div>
 
@@ -197,7 +198,7 @@
         <div class="offcanvas-body">
 
             <!-- SEARCH -->
-            <form method="GET" class="mb-4">
+            <form method="GET" action="{% url 'buscar' %}" class="mb-4" role="search">
 
                 <div class="input-group">
 
@@ -205,7 +206,8 @@
                         <i class="bi bi-search"></i>
                     </span>
 
-                    <input type="text" class="form-control border-0" placeholder="Buscar...">
+                    <input type="search" name="q" value="{% if request.resolver_match.url_name == 'buscar' %}{{ request.GET.q }}{% endif %}" class="form-control border-0"
+                           placeholder="Escuela, grupo o alumno" aria-label="Buscar escuela, grupo o alumno">
 
                 </div>
 
