@@ -1,0 +1,230 @@
+/* ========================================
+   LISTAS (inicio, generación, ...)
+======================================== */
+
+.lista {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+
+.lista-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    color: var(--text);
+    border-top: 1px solid var(--border);
+    transition: var(--transition);
+}
+
+.lista-row:first-child { border-top: 0; }
+
+.lista-row:hover {
+    background: #f8fbff;
+    color: var(--text);
+}
+
+.lista-icon {
+    flex: 0 0 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: #eff6ff;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.lista-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.lista-title {
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.lista-sub {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.lista-cta {
+    color: var(--primary);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.lista-vacia {
+    text-align: center;
+    color: var(--muted);
+    padding: 36px 16px;
+}
+
+.lista-vacia i {
+    font-size: 30px;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.lista-acciones {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.lista-filtro {
+    max-width: 360px;
+}
+
+@media (max-width: 480px) {
+    .lista-row { padding: 12px 14px; }
+    .lista-cta { display: none; }
+}
+
+/* Fila con enlace principal (stretched-link) y botones propios */
+.lista-row { position: relative; }
+.lista-acciones { position: relative; z-index: 2; }
+
+/* ENCABEZADO DE PÁGINA */
+.page-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.page-migas {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 4px;
+}
+
+.page-migas a { color: var(--muted); }
+.page-migas a:hover { color: var(--primary); }
+
+.page-title {
+    font-size: 26px;
+    font-weight: 800;
+    margin: 0;
+}
+
+.page-sub {
+    color: var(--muted);
+    margin: 2px 0 0;
+}
+
+.page-acciones {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.btn-volver { color: #475569; border-color: #cbd5e1; background: #fff; }
+.btn-volver:hover { color: #1e293b; background: #f1f5f9; border-color: #94a3b8; }
+
+/* NIVEL ACADÉMICO */
+.nivel {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+}
+.nivel-secundaria   { background: #ecfeff; color: #0e7490; border-color: #a5f3fc; }
+.nivel-preparatoria { background: #f5f3ff; color: #6d28d9; border-color: #ddd6fe; }
+.nivel-universidad  { background: #fff7ed; color: #c2410c; border-color: #fed7aa; }
+.nivel-otro         { background: #f8fafc; color: #64748b; border-color: #e2e8f0; border-style: dashed; }
+
+/* ========================================
+   FORMULARIOS: colores por acción
+   verde = crear/guardar · ámbar = editar · gris = cancelar/volver
+======================================== */
+.form-icon.form-icon-crear  { background: linear-gradient(135deg, #16a34a, #22c55e); }
+.form-icon.form-icon-editar { background: linear-gradient(135deg, #d97706, #f59e0b); }
+
+.field-error {
+    color: var(--danger);
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+.form-bloque {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 18px;
+    transition: var(--transition);
+}
+
+.form-bloque-titulo {
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.form-bloque.apagado {
+    opacity: .45;
+}
+
+.form-o {
+    text-align: center;
+    color: var(--muted);
+    font-weight: 600;
+    margin: 12px 0;
+}
+
+.aviso-pendiente { color: var(--warning); }
+
+/* Columna de estado/dinero en listas */
+.lista-dinero {
+    text-align: right;
+    flex-shrink: 0;
+    min-width: 140px;
+}
+
+/* ESTADOS EN UNA LÍNEA (filtro discreto) */
+.estados-linea {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 4px;
+    font-size: 13px;
+}
+
+.estado-op {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border: 0;
+    background: none;
+    padding: 4px 8px;
+    border-radius: 6px;
+    color: var(--muted);
+    cursor: pointer;
+}
+
+.estado-op b { color: var(--text); font-weight: 600; }
+.estado-op:hover { background: #eef2f7; }
+.estado-op.activo { background: #e2e8f0; color: var(--text); }
+.estado-op.alerta, .estado-op.alerta b { color: var(--danger); }
+
+.estado-op .punto {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    border: 1px solid rgba(0, 0, 0, .12);
+}
+
+@media (max-width: 576px) {
+    .lista-row { flex-wrap: wrap; }
+    .lista-dinero { order: 3; width: 100%; min-width: 0; text-align: left; padding-left: 54px; }
+}

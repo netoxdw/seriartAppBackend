@@ -1,181 +1,106 @@
 {% extends "base.html" %}
 
+{% block title %}Agregar escuela · SERIART{% endblock %}
+
 {% block content %}
 
 <div class="form-wrapper">
-
     <div class="row justify-content-center">
-
-        <div class="col-12 col-lg-9 col-xl-8">
-
+        <div class="col-12 col-lg-9 col-xl-7">
             <div class="form-container">
 
-                <!-- HEADER -->
                 <div class="form-header">
-
-                    <div class="form-icon">
-
-                        <i class="bi bi-building-add"></i>
-
-                    </div>
-
+                    <div class="form-icon form-icon-crear"><i class="bi bi-building-add"></i></div>
                     <div>
-
-                        <h2 class="form-title">
-                            Agregar Escuela
-                        </h2>
-
-                        <p class="form-subtitle mb-0">
-
-                            Generación {{ view.generacion.anio }}
-
-                        </p>
-
+                        <h2 class="form-title">Agregar escuela</h2>
+                        <p class="form-subtitle mb-0">a la generación {{ generacion.anio }}</p>
                     </div>
-
                 </div>
 
-                <!-- FORM -->
-                <form method="post">
-
+                <form method="post" novalidate>
                     {% csrf_token %}
 
-                    <!-- OPTION 1 -->
-                    <div class="selection-card mb-4">
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger py-2">{{ form.non_field_errors|join:" " }}</div>
+                    {% endif %}
 
-                        <div class="selection-header">
-
-                            <div class="selection-badge">
-                                Opción 1
-                            </div>
-
-                            <h5 class="selection-title">
-                                Seleccionar escuela existente
-                            </h5>
-
-                        </div>
-
-                        <div class="mt-3">
-
-                            {{ form.escuela_existente }}
-
-                            <div class="input-help">
-
-                                Selecciona una escuela ya registrada
-                                en el sistema.
-
-                            </div>
-
-                        </div>
-
+                    {% with qs=form.fields.escuela_existente.queryset %}
+                    {% if qs.exists %}
+                    <!-- YA REGISTRADA -->
+                    <div class="form-bloque" id="bloque-existente">
+                        <div class="form-bloque-titulo">¿La escuela ya trabajó con nosotros en otro año?</div>
+                        <p class="input-help mt-0 mb-2">Si es así, elígela aquí y no tienes que volver a escribir sus datos.</p>
+                        <label class="visually-hidden" for="{{ form.escuela_existente.id_for_label }}">{{ form.escuela_existente.label }}</label>
+                        {{ form.escuela_existente }}
+                        {% for e in form.escuela_existente.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
                     </div>
 
-                    <!-- DIVIDER -->
-                    <div class="divider-container">
+                    <div class="form-o">o bien</div>
+                    {% endif %}
+                    {% endwith %}
 
-                        <div class="divider-line"></div>
+                    <!-- NUEVA -->
+                    <div class="form-bloque" id="bloque-nueva">
+                        <div class="form-bloque-titulo mb-3">Registrar una escuela nueva</div>
 
-                        <div class="divider-text">
-                            O
-                        </div>
-
-                        <div class="divider-line"></div>
-
-                    </div>
-
-                    <!-- OPTION 2 -->
-                    <div class="selection-card">
-
-                        <div class="selection-header">
-
-                            <div class="selection-badge secondary">
-                                Opción 2
-                            </div>
-
-                            <h5 class="selection-title">
-                                Crear nueva escuela
-                            </h5>
-
-                        </div>
-
-                        <!-- NOMBRE -->
-                        <div class="mb-4 mt-4">
-
-                            <label class="custom-label">
-                                Nombre
-                            </label>
-
+                        <div class="mb-3">
+                            <label class="custom-label" for="{{ form.nombre_escuela.id_for_label }}">{{ form.nombre_escuela.label }}</label>
                             {{ form.nombre_escuela }}
-
+                            {% for e in form.nombre_escuela.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
                         </div>
 
-                        <!-- NIVEL -->
-                        <div class="mb-4">
-
-                            <label class="custom-label">
-                                Nivel académico
-                            </label>
-
+                        <div class="mb-3">
+                            <label class="custom-label" for="{{ form.nivel.id_for_label }}">{{ form.nivel.label }}</label>
                             {{ form.nivel }}
-
+                            {% for e in form.nivel.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
                             <div class="input-help">
-                                Secundaria y preparatoria precargan solo la panorámica; universidad también diploma, agradecimiento y anillo.
+                                Secundaria y preparatoria: se precarga solo la panorámica.
+                                Universidad: panorámica, diploma, agradecimiento y anillo.
                             </div>
-
                         </div>
 
-                        <!-- DIRECCION -->
-                        <div class="mb-4">
-
-                            <label class="custom-label">
-                                Dirección
-                            </label>
-
-                            {{ form.direccion }}
-
+                        <div class="row g-3">
+                            <div class="col-12 col-md-7">
+                                <label class="custom-label" for="{{ form.direccion.id_for_label }}">{{ form.direccion.label }}</label>
+                                {{ form.direccion }}
+                            </div>
+                            <div class="col-12 col-md-5">
+                                <label class="custom-label" for="{{ form.telefono.id_for_label }}">{{ form.telefono.label }}</label>
+                                {{ form.telefono }}
+                            </div>
                         </div>
-
-                        <!-- TELEFONO -->
-                        <div class="mb-2">
-
-                            <label class="custom-label">
-                                Teléfono
-                            </label>
-
-                            {{ form.telefono }}
-
-                        </div>
-
                     </div>
 
-                    <!-- ACTIONS -->
                     <div class="form-actions">
-
-                        <a href="{% url 'escuelas:generacion_detail' view.generacion.id %}"
-                           class="btn btn-light custom-cancel-btn">
-
-                            Cancelar
-
+                        <a href="{% url 'escuelas:generacion_detail' generacion.id %}" class="btn btn-volver custom-cancel-btn">
+                            <i class="bi bi-arrow-left"></i> Cancelar
                         </a>
-
-                        <button type="submit"
-                                class="btn btn-primary custom-submit-btn">
-
-                            <i class="bi bi-check-lg"></i>
-                            Guardar escuela
-
+                        <button type="submit" class="btn btn-success custom-submit-btn">
+                            <i class="bi bi-check-lg"></i> Agregar escuela
                         </button>
-
                     </div>
-
                 </form>
 
             </div>
-
         </div>
-
     </div>
-
 </div>
+
+<script>
+// Si elige una escuela registrada, se apaga el bloque de "escuela nueva"
+(function () {
+    const sel = document.getElementById("{{ form.escuela_existente.id_for_label }}");
+    if (!sel) return;
+    const nueva = document.getElementById("bloque-nueva");
+    const campos = nueva.querySelectorAll("input, select");
+    const actualizar = () => {
+        const usaExistente = !!sel.value;
+        nueva.classList.toggle("apagado", usaExistente);
+        campos.forEach(c => c.disabled = usaExistente);
+    };
+    sel.addEventListener("change", actualizar);
+    actualizar();
+})();
+</script>
 
 {% endblock %}

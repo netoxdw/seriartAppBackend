@@ -14,77 +14,53 @@
                 <!-- HEADER -->
                 <div class="form-header">
 
-                    <div class="form-icon">
-
+                    <div class="form-icon form-icon-crear">
                         <i class="bi bi-calendar-plus"></i>
-
                     </div>
 
                     <div>
-
-                        <h2 class="form-title">
-                            Nueva Generación
-                        </h2>
-
-                        <p class="form-subtitle mb-0">
-                            Registra una nueva generación escolar
-                        </p>
-
+                        <h2 class="form-title">Nueva generación</h2>
+                        <p class="form-subtitle mb-0">Registra una nueva generación escolar</p>
                     </div>
 
                 </div>
 
                 <!-- FORM -->
-                <form method="post">
+                <form method="post" novalidate>
 
                     {% csrf_token %}
 
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">{{ form.non_field_errors|join:" " }}</div>
+                    {% endif %}
+
                     <!-- NOMBRE -->
                     <div class="mb-4">
-
-                        <label class="custom-label">
-                            Nombre
-                        </label>
-
+                        <label class="custom-label" for="{{ form.nombre_generacion.id_for_label }}">Nombre</label>
                         {{ form.nombre_generacion }}
-
-                        <div class="input-help">
-                            Ejemplo: Generación Ingeniería 2025
-                        </div>
-
+                        {% for e in form.nombre_generacion.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+                        <div class="input-help">Ejemplo: Generación 2027</div>
                     </div>
 
                     <!-- AÑO -->
                     <div class="mb-4">
-
-                        <label class="custom-label">
-                            Año
-                        </label>
-
+                        <label class="custom-label" for="{{ form.anio.id_for_label }}">Año</label>
                         {{ form.anio }}
-
-                        <div class="input-help">
-                            Año correspondiente a la generación
-                        </div>
-
+                        {% for e in form.anio.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+                        <div class="input-help">Año en que egresa la generación. No se puede repetir.</div>
                     </div>
 
                     <!-- ACTIONS -->
                     <div class="form-actions">
 
-                        <a href="{% url 'home' %}"
-                           class="btn btn-light custom-cancel-btn">
-
+                        <a href="{% url 'home' %}" class="btn btn-volver custom-cancel-btn">
+                            <i class="bi bi-arrow-left"></i>
                             Cancelar
-
                         </a>
 
-                        <button type="submit"
-                                class="btn btn-primary custom-submit-btn">
-
+                        <button type="submit" class="btn btn-success custom-submit-btn">
                             <i class="bi bi-check-lg"></i>
                             Guardar generación
-
                         </button>
 
                     </div>

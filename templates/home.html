@@ -1,158 +1,56 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
 
 {% block content %}
 
-<!-- PAGE HEADER -->
-<div class="dashboard-header mb-4">
-
+<!-- ENCABEZADO + NUEVA GENERACIÓN -->
+<div class="home-head">
     <div>
-        <h2 class="dashboard-title">
-            Generaciones
-        </h2>
-
-        <p class="dashboard-subtitle mb-0">
-            Administra las generaciones registradas en el sistema
-        </p>
+        <h2 class="home-title">Generaciones</h2>
+        <p class="home-sub">Elige una generación para ver sus escuelas, grupos y alumnos.</p>
     </div>
-
-    <a href="{% url 'generacion_create' %}"
-       class="btn btn-primary dashboard-btn">
-
-        <i class="bi bi-plus-lg"></i>
-        Nueva Generación
-
+    <a href="{% url 'generacion_create' %}" class="btn btn-success">
+        <i class="bi bi-plus-lg"></i> Nueva generación
     </a>
-
 </div>
 
-<!-- CARD -->
-<div class="home-card">
-
-    <!-- TABLE RESPONSIVE -->
-    <div class="table-responsive">
-
-        <table class="table align-middle home-table">
-
-            <thead>
-                <tr>
-                    <th>
-                        Generación
-                    </th>
-
-                    <th>
-                        Escuelas
-                    </th>
-
-                    <th class="text-end">
-                        Acción
-                    </th>
-                </tr>
-            </thead>
-
-            <tbody>
-
-                {% for g in generaciones %}
-
-                <tr>
-
-                    <!-- GENERACION -->
-                    <td>
-
-                        <div class="d-flex align-items-center gap-3">
-
-                            <div class="table-icon">
-
-                                <i class="bi bi-mortarboard-fill"></i>
-
-                            </div>
-
-                            <div>
-
-                                <a href="{% url 'escuelas:generacion_detail' g.id %}"
-                                   class="table-title">
-
-                                    Generación {{ g.anio }}
-
-                                </a>
-
-                                <div class="table-subtitle">
-                                    Registro académico
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </td>
-
-                    <!-- ESCUELAS -->
-                    <td>
-
-                        <span class="badge bg-primary-subtle text-primary badge-custom">
-
-                            {{ g.num_escuelas }} escuelas
-
-                        </span>
-
-                    </td>
-
-                    <!-- ACTION -->
-                    <td class="text-end">
-
-                        <a href="{% url 'escuelas:generacion_detail' g.id %}"
-                           class="btn btn-light btn-sm action-btn">
-
-                            Ver detalle
-
-                        </a>
-
-                    </td>
-
-                </tr>
-
-                {% empty %}
-
-                <tr>
-
-                    <td colspan="3">
-
-                        <div class="empty-state">
-
-                            <div class="empty-icon">
-
-                                <i class="bi bi-folder2-open"></i>
-
-                            </div>
-
-                            <h5>
-                                No hay generaciones registradas
-                            </h5>
-
-                            <p>
-                                Comienza creando una nueva generación.
-                            </p>
-
-                            <a href="{% url 'generacion_create' %}"
-                               class="btn btn-primary">
-
-                                Crear generación
-
-                            </a>
-
-                        </div>
-
-                    </td>
-
-                </tr>
-
-                {% endfor %}
-
-            </tbody>
-
-        </table>
-
+<!-- BUSCADOR -->
+<form method="get" action="{% url 'buscar' %}" role="search" class="home-search">
+    <div class="input-group">
+        <span class="input-group-text"><i class="bi bi-search"></i></span>
+        <input type="search" name="q" class="form-control"
+               placeholder="Buscar alumno, grupo o escuela…" aria-label="Buscar alumno, grupo o escuela">
+        <button class="btn btn-primary" type="submit">Buscar</button>
     </div>
+</form>
 
+<!-- LISTA DE GENERACIONES -->
+<div class="lista">
+    {% for g in generaciones %}
+    <a href="{% url 'escuelas:generacion_detail' g.id %}" class="lista-row">
+        <div class="lista-icon"><i class="bi bi-calendar2-week"></i></div>
+        <div class="lista-main">
+            <div class="lista-title">
+                Generación {{ g.anio }}
+                {% if forloop.first %}<span class="badge text-bg-primary">Más reciente</span>{% endif %}
+            </div>
+            <div class="lista-sub">
+                {% if g.nombre_generacion %}{{ g.nombre_generacion }} · {% endif %}{{ g.num_escuelas }} escuela{{ g.num_escuelas|pluralize }} · {{ g.num_grupos }} grupo{{ g.num_grupos|pluralize }} · {{ g.num_alumnos }} alumno{{ g.num_alumnos|pluralize }} · {{ g.num_pedidos }} pedido{{ g.num_pedidos|pluralize }}
+            </div>
+        </div>
+        <span class="lista-cta">Abrir <i class="bi bi-chevron-right"></i></span>
+    </a>
+    {% empty %}
+    <div class="lista-vacia">
+        <i class="bi bi-folder2-open"></i>
+        <p class="mb-2">Aún no hay generaciones.</p>
+        <a href="{% url 'generacion_create' %}" class="btn btn-success btn-sm">Crear la primera</a>
+    </div>
+    {% endfor %}
 </div>
 
 {% endblock %}

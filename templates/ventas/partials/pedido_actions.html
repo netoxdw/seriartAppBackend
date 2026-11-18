@@ -15,7 +15,7 @@
     <div class="pedido-actions-list">
 
         <!-- EDITAR -->
-        <a href="{% url 'alumnos:alumno_update' pedido.alumno.id %}"
+        <a href="{% url 'alumnos:alumno_update' pedido.alumno.id %}?next={{ request.get_full_path|urlencode }}"
            class="pedido-action-btn warning">
 
             <i class="bi bi-pencil-square"></i>

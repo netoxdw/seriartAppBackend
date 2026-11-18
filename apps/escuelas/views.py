@@ -7,7 +7,7 @@ from django.views.generic import (
 
 from django.urls import reverse
 from django.shortcuts import get_object_or_404
-from django.db.models import Count
+from django.db.models import Count, Q
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 
@@ -27,11 +27,23 @@ class GeneracionDetailView(LoginRequiredMixin, DetailView):
 
         context = super().get_context_data(**kwargs)
 
-        escuelas = Escuela.objects.filter(
-            generaciones=self.object
+        gen = self.object
+        de_esta_gen = Q(grupos__generacion=gen)
+        escuelas = (
+            Escuela.objects.filter(generaciones=gen)
+            .annotate(
+                num_grupos=Count("grupos", filter=de_esta_gen, distinct=True),
+                num_alumnos=Count("grupos__alumnos", filter=de_esta_gen, distinct=True),
+            )
+            .order_by("nombre_escuela")
         )
 
         context["escuelas"] = escuelas
+        context["totales"] = {
+            "grupos": sum(e.num_grupos for e in escuelas),
+            "alumnos": sum(e.num_alumnos for e in escuelas),
+            "sin_nivel": sum(1 for e in escuelas if e.nivel == Escuela.NIVEL_OTRO),
+        }
 
         return context
 
@@ -44,15 +56,23 @@ class EscuelaCreateView(LoginRequiredMixin, FormView):
 
     def dispatch(self, request, *args, **kwargs):
 
-        self.generacion = Generacion.objects.get(
-            pk=kwargs["pk"]
-        )
+        self.generacion = get_object_or_404(Generacion, pk=kwargs["pk"])
 
         return super().dispatch(
             request,
             *args,
             **kwargs
         )
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["generacion"] = self.generacion
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["generacion"] = self.generacion
+        return context
 
     def form_valid(self, form):
 
@@ -105,9 +125,7 @@ class EscuelaDetailView(LoginRequiredMixin, DetailView):
 
         context = super().get_context_data(**kwargs)
 
-        generacion = Generacion.objects.get(
-            id=self.kwargs["generacion_id"]
-        )
+        generacion = get_object_or_404(Generacion, pk=self.kwargs["generacion_id"])
 
         grupos = Grupo.objects.filter(
             escuela=self.object,
@@ -122,6 +140,8 @@ class EscuelaDetailView(LoginRequiredMixin, DetailView):
         context["generacion"] = generacion
 
         context["grupos"] = grupos
+        context["total_alumnos"] = sum(g.num_alumnos for g in grupos)
+        context["sin_fecha"] = sum(1 for g in grupos if not g.fecha_fotografia)
 
         return context
 
@@ -143,6 +163,12 @@ class GrupoCreateView(LoginRequiredMixin, CreateView):
         kwargs["generacion"] = self.kwargs["generacion_id"]
 
         return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["escuela"] = get_object_or_404(Escuela, pk=self.kwargs["escuela_id"])
+        context["generacion"] = get_object_or_404(Generacion, pk=self.kwargs["generacion_id"])
+        return context
 
     def form_valid(self, form):
 
@@ -180,6 +206,12 @@ class GrupoUpdateView(LoginRequiredMixin, UpdateView):
         kwargs["generacion"] = self.object.generacion_id
 
         return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["escuela"] = self.object.escuela
+        context["generacion"] = self.object.generacion
+        return context
 
     def get_success_url(self):
 

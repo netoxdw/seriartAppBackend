@@ -20,6 +20,7 @@
     <link rel="stylesheet" href="{% static 'css/components.css' %}">
     <link rel="stylesheet" href="{% static 'css/forms.css' %}">
     <link rel="stylesheet" href="{% static 'css/tables.css' %}">
+    <link rel="stylesheet" href="{% static 'css/listas.css' %}">
 
 
     {% block extra_css %}
@@ -48,7 +49,7 @@
                 {% endif %}
 
                 <!-- LOGO -->
-                <div class="logo-container d-flex align-items-center gap-2">
+                <a href="{% url 'home' %}" class="logo-container d-flex align-items-center gap-2" title="Ir al inicio">
 
                     <div class="logo-icon">
                         <i class="bi bi-mortarboard-fill"></i>
@@ -64,7 +65,7 @@
                         </small>
                     </div>
 
-                </div>
+                </a>
 
                 <!-- RIGHT -->
                 <div class="d-none d-md-flex align-items-center gap-3">
@@ -75,18 +76,19 @@
 
                     {% if user.is_authenticated %}
 
-                    <span class="header-text">
+                    <span class="header-user" title="Sesión iniciada">
                         <i class="bi bi-person-circle"></i>
-                        {{ user.username }}
+                        {{ user.get_full_name|default:user.username }}
+                        {% if user.is_staff %}<span class="badge text-bg-primary">Staff</span>{% endif %}
                     </span>
 
                     <form method="post" action="{% url 'logout' %}">
                         {% csrf_token %}
 
-                        <button class="btn btn-outline-dark btn-sm">
+                        <button class="btn btn-outline-dark btn-sm" title="Cerrar sesión">
 
                             <i class="bi bi-box-arrow-right"></i>
-                            Salir
+                            Cerrar sesión
 
                         </button>
 
@@ -111,40 +113,7 @@
             <aside class="col-md-3 col-lg-2 d-none d-md-block sidebar">
 
                 <div class="sidebar-content">
-
-                    <!-- SEARCH -->
-                    <form method="GET" action="{% url 'buscar' %}" class="mb-4" role="search">
-
-                        <div class="input-group">
-
-                            <span class="input-group-text bg-white border-0">
-                                <i class="bi bi-search"></i>
-                            </span>
-
-                            <input type="search" name="q" value="{% if request.resolver_match.url_name == 'buscar' %}{{ request.GET.q }}{% endif %}" class="form-control border-0"
-                                   placeholder="Escuela, grupo o alumno" aria-label="Buscar escuela, grupo o alumno">
-
-                        </div>
-
-                    </form>
-
-                    <!-- MENU -->
-                    <nav class="sidebar-nav">
-
-                        <a href="{% url 'home' %}" class="sidebar-link {% if request.resolver_match.app_name != 'catalogo' %}active{% endif %}">
-                            <i class="bi bi-calendar2-week"></i>
-                            <span>Paquetes de graduación</span>
-                        </a>
-
-                        {% if user.is_staff %}
-                        <a href="{% url 'catalogo:panel' %}" class="sidebar-link {% if request.resolver_match.app_name == 'catalogo' %}active{% endif %}">
-                            <i class="bi bi-grid-3x3-gap"></i>
-                            <span>Catálogo</span>
-                        </a>
-                        {% endif %}
-
-                    </nav>
-
+                    {% include "partials/sidebar_menu.html" with sufijo="desktop" %}
                 </div>
 
             </aside>
@@ -188,6 +157,9 @@
 
             <h5 class="offcanvas-title">
                 SERIART
+                <small class="d-block fw-normal text-secondary fs-6">
+                    {{ user.get_full_name|default:user.username }}{% if user.is_staff %} · Staff{% endif %}
+                </small>
             </h5>
 
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas">
@@ -197,38 +169,7 @@
 
         <div class="offcanvas-body">
 
-            <!-- SEARCH -->
-            <form method="GET" action="{% url 'buscar' %}" class="mb-4" role="search">
-
-                <div class="input-group">
-
-                    <span class="input-group-text bg-white border-0">
-                        <i class="bi bi-search"></i>
-                    </span>
-
-                    <input type="search" name="q" value="{% if request.resolver_match.url_name == 'buscar' %}{{ request.GET.q }}{% endif %}" class="form-control border-0"
-                           placeholder="Escuela, grupo o alumno" aria-label="Buscar escuela, grupo o alumno">
-
-                </div>
-
-            </form>
-
-            <!-- MENU -->
-            <nav class="sidebar-nav">
-
-                <a href="{% url 'home' %}" class="sidebar-link {% if request.resolver_match.app_name != 'catalogo' %}active{% endif %}">
-                    <i class="bi bi-calendar2-week"></i>
-                    <span>Generaciones</span>
-                </a>
-
-                {% if user.is_staff %}
-                <a href="{% url 'catalogo:panel' %}" class="sidebar-link {% if request.resolver_match.app_name == 'catalogo' %}active{% endif %}">
-                    <i class="bi bi-grid-3x3-gap"></i>
-                    <span>Catálogo</span>
-                </a>
-                {% endif %}
-
-            </nav>
+            {% include "partials/sidebar_menu.html" with sufijo="mobile" %}
 
             <!-- MOBILE LOGOUT -->
             <div class="mobile-sidebar-footer">

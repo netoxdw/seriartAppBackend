@@ -1,186 +1,75 @@
 {% extends "base.html" %}
 
+{% block title %}{% if object %}Editar grupo{% else %}Nuevo grupo{% endif %} · SERIART{% endblock %}
+
 {% block content %}
 
 <div class="form-wrapper">
-
     <div class="row justify-content-center">
-
         <div class="col-12 col-lg-8 col-xl-7">
-
-            <!-- ALERT -->
-            {% if form.non_field_errors %}
-
-            <div class="alert custom-alert-danger mb-4">
-
-                <div class="d-flex align-items-start gap-3">
-
-                    <i class="bi bi-exclamation-triangle-fill"></i>
-
-                    <div>
-
-                        <strong>
-                            Ocurrió un error
-                        </strong>
-
-                        <div>
-                            {{ form.non_field_errors }}
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-            {% endif %}
-
-            <!-- FORM CARD -->
             <div class="form-container">
 
-                <!-- HEADER -->
                 <div class="form-header">
-
-                    <div class="form-icon">
-
-                        <i class="bi bi-people-fill"></i>
-
+                    <div class="form-icon {% if object %}form-icon-editar{% else %}form-icon-crear{% endif %}">
+                        <i class="bi {% if object %}bi-pencil{% else %}bi-people{% endif %}"></i>
                     </div>
-
                     <div>
-
-                        <h2 class="form-title">
-
-                            {% if object %}
-                                Editar Grupo
-                            {% else %}
-                                Nuevo Grupo
-                            {% endif %}
-
-                        </h2>
-
-                        <p class="form-subtitle mb-0">
-
-                            Configura la información del grupo
-                            y la sesión fotográfica
-
-                        </p>
-
+                        <h2 class="form-title">{% if object %}Editar grupo {{ object.nombre_grupo }}{% else %}Nuevo grupo{% endif %}</h2>
+                        <p class="form-subtitle mb-0">{{ escuela.nombre_escuela }} · Generación {{ generacion.anio }}</p>
                     </div>
-
                 </div>
 
-                <!-- FORM -->
-                <form method="post">
-
+                <form method="post" novalidate>
                     {% csrf_token %}
 
-                    <!-- NOMBRE -->
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger py-2">{{ form.non_field_errors|join:" " }}</div>
+                    {% endif %}
+
+                    <!-- GRUPO -->
                     <div class="mb-4">
-
-                        <label class="custom-label">
-
-                            Nombre del grupo
-
-                        </label>
-
+                        <label class="custom-label" for="{{ form.nombre_grupo.id_for_label }}">{{ form.nombre_grupo.label }}</label>
                         {{ form.nombre_grupo }}
+                        {% for e in form.nombre_grupo.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                    </div>
 
-                        {% if form.nombre_grupo.errors %}
+                    <!-- SESIÓN DE FOTOS -->
+                    <div class="form-bloque">
+                        <div class="form-bloque-titulo"><i class="bi bi-camera"></i> Sesión de fotografía</div>
+                        <p class="input-help mt-0 mb-3">Opcional. Puedes llenarlo después, cuando se acuerde con la escuela.</p>
 
-                        <div class="field-error">
-
-                            {{ form.nombre_grupo.errors }}
-
+                        <div class="row g-3">
+                            <div class="col-7">
+                                <label class="custom-label" for="{{ form.fecha_fotografia.id_for_label }}">{{ form.fecha_fotografia.label }}</label>
+                                {{ form.fecha_fotografia }}
+                                {% for e in form.fecha_fotografia.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                            </div>
+                            <div class="col-5">
+                                <label class="custom-label" for="{{ form.hora_fotografia.id_for_label }}">{{ form.hora_fotografia.label }}</label>
+                                {{ form.hora_fotografia }}
+                                {% for e in form.hora_fotografia.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                            </div>
+                            <div class="col-12">
+                                <label class="custom-label" for="{{ form.lugar_fotografia.id_for_label }}">{{ form.lugar_fotografia.label }}</label>
+                                {{ form.lugar_fotografia }}
+                                {% for e in form.lugar_fotografia.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                            </div>
                         </div>
-
-                        {% endif %}
-
                     </div>
 
-                    <!-- FECHA -->
-                    <div class="mb-4">
-
-                        <label class="custom-label">
-
-                            Fecha de fotografía
-
-                        </label>
-
-                        {{ form.fecha_fotografia }}
-
-                        <div class="input-help">
-
-                            Fecha programada para la sesión fotográfica
-
-                        </div>
-
-                    </div>
-
-                    <!-- HORA -->
-                    <div class="mb-4">
-
-                        <label class="custom-label">
-
-                            Hora de fotografía
-
-                        </label>
-
-                        {{ form.hora_fotografia }}
-
-                    </div>
-
-                    <!-- LUGAR -->
-                    <div class="mb-2">
-
-                        <label class="custom-label">
-
-                            Lugar de fotografía
-
-                        </label>
-
-                        {{ form.lugar_fotografia }}
-
-                    </div>
-
-                    <!-- ACTIONS -->
                     <div class="form-actions">
-
-                        <a href="{% if object %}
-                                    {% url 'escuelas:escuela_detail' object.generacion.id object.escuela.id %}
-                                 {% else %}
-                                    {% url 'escuelas:escuela_detail' view.kwargs.generacion_id view.kwargs.escuela_id %}
-                                 {% endif %}"
-
-                           class="btn btn-light custom-cancel-btn">
-
-                            Cancelar
-
+                        <a href="{% url 'escuelas:escuela_detail' generacion.id escuela.id %}" class="btn btn-volver custom-cancel-btn">
+                            <i class="bi bi-arrow-left"></i> Cancelar
                         </a>
-
-                        <button type="submit"
-                                class="btn btn-primary custom-submit-btn">
-
-                            <i class="bi bi-check-lg"></i>
-
-                            {% if object %}
-                                Guardar cambios
-                            {% else %}
-                                Guardar grupo
-                            {% endif %}
-
+                        <button type="submit" class="btn btn-success custom-submit-btn">
+                            <i class="bi bi-check-lg"></i> {% if object %}Guardar cambios{% else %}Guardar grupo{% endif %}
                         </button>
-
                     </div>
-
                 </form>
 
             </div>
-
         </div>
-
     </div>
-
 </div>
 
 {% endblock %}

@@ -16,7 +16,10 @@ class HomeView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         generaciones = Generacion.objects.annotate(
-            num_escuelas=Count("escuelas")
+            num_escuelas=Count("escuelas", distinct=True),
+            num_grupos=Count("grupos", distinct=True),
+            num_alumnos=Count("grupos__alumnos", distinct=True),
+            num_pedidos=Count("grupos__alumnos__pedidos", distinct=True),
         )
 
         context["generaciones"] = generaciones

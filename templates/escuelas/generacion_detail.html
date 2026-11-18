@@ -1,264 +1,110 @@
 {% extends "base.html" %}
-{% load static %}
+
+{% block title %}Generación {{ generacion.anio }} · SERIART{% endblock %}
 
 {% block content %}
 
-<!-- PAGE HEADER -->
-<div class="detail-page-header mb-4">
-
+<!-- ENCABEZADO -->
+<div class="page-head">
     <div>
-
-        <div class="breadcrumb-custom mb-2">
-
-            <a href="/">
-                Generaciones
-            </a>
-
-            <span>/</span>
-
-            <span>
-                {{ generacion.anio }}
-            </span>
-
-        </div>
-
-        <h2 class="detail-main-title">
-
-            Generación {{ generacion.anio }}
-
-        </h2>
-
-        <p class="detail-subtitle mb-0">
-
-            Administración de escuelas registradas
-
+        <nav class="page-migas" aria-label="Ruta">
+            <a href="{% url 'home' %}">Generaciones</a> › {{ generacion.anio }}
+        </nav>
+        <h2 class="page-title">Generación {{ generacion.anio }}</h2>
+        <p class="page-sub">
+            {{ escuelas|length }} escuela{{ escuelas|length|pluralize }} ·
+            {{ totales.grupos }} grupo{{ totales.grupos|pluralize }} ·
+            {{ totales.alumnos }} alumno{{ totales.alumnos|pluralize }}
         </p>
-
     </div>
-
-
-    <!-- ACTIONS -->
-<div class="d-flex flex-column flex-sm-row gap-2">
-
-    <!-- NEW -->
-    <a href="{% url 'escuelas:escuela_create' generacion.id %}"
-       class="btn btn-primary detail-main-btn">
-
-        <i class="bi bi-plus-lg"></i>
-
-        Nueva Escuela
-
-    </a>
-
-        <!-- BACK -->
-    <a href="/"
-       class="btn btn-light custom-back-btn">
-
-        <i class="bi bi-arrow-left"></i>
-
-        Volver
-
-    </a>
-
+    <div class="page-acciones">
+        <a href="{% url 'home' %}" class="btn btn-volver">
+            <i class="bi bi-arrow-left"></i> Volver
+        </a>
+        <a href="{% url 'escuelas:escuela_create' generacion.id %}" class="btn btn-success">
+            <i class="bi bi-plus-lg"></i> Nueva escuela
+        </a>
+    </div>
 </div>
 
+{% if totales.sin_nivel %}
+<div class="alert alert-warning d-flex align-items-start gap-2 py-2">
+    <i class="bi bi-exclamation-triangle mt-1"></i>
+    <div>
+        {{ totales.sin_nivel }} escuela{{ totales.sin_nivel|pluralize }} sin nivel académico.
+        Usa el lápiz <i class="bi bi-pencil"></i> para indicar si es secundaria, preparatoria o universidad:
+        así la captura de pedidos precarga los artículos correctos.
+    </div>
 </div>
+{% endif %}
 
-<!-- KPI CARD -->
-<div class="row g-3 mb-4">
+{% if escuelas|length > 5 %}
+<div class="input-group lista-filtro mb-3">
+    <span class="input-group-text bg-white"><i class="bi bi-funnel"></i></span>
+    <input type="search" id="filtro-escuelas" class="form-control" placeholder="Filtrar escuelas…"
+           aria-label="Filtrar escuelas de esta generación">
+</div>
+{% endif %}
 
-    <div class="col-12 col-md-6 col-lg-4">
-
-        <div class="stats-card">
-
-            <div class="stats-icon">
-
-                <i class="bi bi-building"></i>
-
+<!-- LISTA DE ESCUELAS -->
+<div class="lista" id="lista-escuelas">
+    {% for escuela in escuelas %}
+    <div class="lista-row" data-nombre="{{ escuela.nombre_escuela|lower }}">
+        <div class="lista-icon"><i class="bi bi-building"></i></div>
+        <div class="lista-main">
+            <div class="lista-title">
+                <a href="{% url 'escuelas:escuela_detail' generacion.id escuela.id %}" class="stretched-link text-reset">
+                    {{ escuela.nombre_escuela }}
+                </a>
+                <span class="nivel nivel-{{ escuela.nivel }}">
+                    {% if escuela.nivel == 'otro' %}Nivel sin definir{% else %}{{ escuela.get_nivel_display }}{% endif %}
+                </span>
             </div>
-
-            <div>
-
-                <div class="stats-value">
-                    {{ escuelas|length }}
-                </div>
-
-                <div class="stats-label">
-                    Escuelas registradas
-                </div>
-
+            <div class="lista-sub">
+                {{ escuela.num_grupos }} grupo{{ escuela.num_grupos|pluralize }} ·
+                {{ escuela.num_alumnos }} alumno{{ escuela.num_alumnos|pluralize }}
+                {% if escuela.telefono %} · <i class="bi bi-telephone"></i> {{ escuela.telefono }}{% endif %}
+                {% if escuela.direccion %} · <i class="bi bi-geo-alt"></i> {{ escuela.direccion }}{% endif %}
             </div>
-
         </div>
-
+        <div class="lista-acciones">
+            <a href="{% url 'escuelas:escuela_update' generacion.id escuela.id %}"
+               class="btn btn-sm btn-volver" title="Editar datos de la escuela" aria-label="Editar {{ escuela.nombre_escuela }}">
+                <i class="bi bi-pencil"></i>
+            </a>
+            <span class="lista-cta">Abrir <i class="bi bi-chevron-right"></i></span>
+        </div>
     </div>
-
+    {% empty %}
+    <div class="lista-vacia">
+        <i class="bi bi-building-add"></i>
+        <p class="mb-2">Esta generación todavía no tiene escuelas.</p>
+        <a href="{% url 'escuelas:escuela_create' generacion.id %}" class="btn btn-success btn-sm">
+            <i class="bi bi-plus-lg"></i> Agregar la primera escuela
+        </a>
+    </div>
+    {% endfor %}
+    <div class="lista-vacia d-none" id="filtro-vacio">Ninguna escuela coincide con el filtro.</div>
 </div>
 
-<!-- TABLE CARD -->
-<div class="home-card">
-
-    <div class="d-flex justify-content-between align-items-center mb-4">
-
-        <div>
-
-            <h4 class="section-title mb-1">
-                Escuelas
-            </h4>
-
-            <p class="section-subtitle mb-0">
-                Listado de escuelas asociadas a la generación
-            </p>
-
-        </div>
-
-    </div>
-
-    <!-- TABLE -->
-    <div class="table-responsive">
-
-        <table class="table align-middle home-table">
-
-            <thead>
-
-                <tr>
-
-                    <th>
-                        Escuela
-                    </th>
-
-                    <th>
-                        Dirección
-                    </th>
-
-                    <th>
-                        Teléfono
-                    </th>
-
-                    <th class="text-end">
-                        Acción
-                    </th>
-
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                {% for escuela in escuelas %}
-
-                <tr>
-
-                    <!-- ESCUELA -->
-                    <td>
-
-                        <div class="d-flex align-items-center gap-3">
-
-                            <div class="table-icon">
-
-                                <i class="bi bi-building"></i>
-
-                            </div>
-
-                            <div>
-
-                                <a href="{% url 'escuelas:escuela_detail' generacion.id escuela.id %}"
-                                   class="table-title">
-
-                                    {{ escuela.nombre_escuela }}
-
-                                </a>
-
-                                <div class="table-subtitle">
-                                    {{ escuela.get_nivel_display }}
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </td>
-
-                    <!-- DIRECCION -->
-                    <td>
-
-                        <span class="text-muted">
-
-                            {{ escuela.direccion }}
-
-                        </span>
-
-                    </td>
-
-                    <!-- TELEFONO -->
-                    <td>
-
-                        <span class="badge bg-success-subtle text-success badge-custom">
-
-                            {{ escuela.telefono }}
-
-                        </span>
-
-                    </td>
-
-                    <!-- ACTION -->
-                    <td class="text-end">
-
-                        <a href="{% url 'escuelas:escuela_detail' generacion.id escuela.id %}"
-                           class="btn btn-light btn-sm action-btn">
-
-                            Ver detalle
-
-                        </a>
-
-                    </td>
-
-                </tr>
-
-                {% empty %}
-
-                <tr>
-
-                    <td colspan="4">
-
-                        <div class="empty-state">
-
-                            <div class="empty-icon">
-
-                                <i class="bi bi-building-x"></i>
-
-                            </div>
-
-                            <h5>
-                                No hay escuelas registradas
-                            </h5>
-
-                            <p>
-                                Comienza agregando la primera escuela.
-                            </p>
-
-                            <a href="{% url 'escuelas:escuela_create' generacion.id %}"
-                               class="btn btn-primary">
-
-                                Agregar escuela
-
-                            </a>
-
-                        </div>
-
-                    </td>
-
-                </tr>
-
-                {% endfor %}
-
-            </tbody>
-
-        </table>
-
-    </div>
-
-</div>
-
+{% if escuelas|length > 5 %}
+<script>
+(function () {
+    const input = document.getElementById("filtro-escuelas");
+    const filas = document.querySelectorAll("#lista-escuelas .lista-row");
+    const vacio = document.getElementById("filtro-vacio");
+    input.addEventListener("input", () => {
+        const q = input.value.trim().toLowerCase();
+        let visibles = 0;
+        filas.forEach(f => {
+            const ok = f.dataset.nombre.includes(q);
+            f.classList.toggle("d-none", !ok);
+            if (ok) visibles++;
+        });
+        vacio.classList.toggle("d-none", visibles > 0);
+    });
+})();
+</script>
+{% endif %}
 
 {% endblock %}

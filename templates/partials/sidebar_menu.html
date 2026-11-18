@@ -1,0 +1,57 @@
+{% with rm=request.resolver_match %}
+<!-- BUSCADOR -->
+<div class="sidebar-section">
+    <label class="sidebar-label" for="buscar-{{ sufijo }}">
+        <i class="bi bi-search"></i> Buscar
+    </label>
+    <form method="GET" action="{% url 'buscar' %}" class="sidebar-search" role="search">
+        <div class="input-group">
+            <input type="search" name="q" id="buscar-{{ sufijo }}"
+                   value="{% if rm.url_name == 'buscar' %}{{ request.GET.q }}{% endif %}"
+                   class="form-control" placeholder="Escribe aquí…"
+                   aria-label="Buscar alumno, grupo o escuela">
+            <button class="btn btn-primary" type="submit" aria-label="Buscar">
+                <i class="bi bi-arrow-right"></i>
+            </button>
+        </div>
+    </form>
+    <div class="sidebar-hint">Escribe un nombre, teléfono o folio y presiona Enter.</div>
+</div>
+
+<!-- MENÚ -->
+<div class="sidebar-section">
+    <div class="sidebar-label"><i class="bi bi-compass"></i> Ir a</div>
+    <nav class="sidebar-nav">
+
+        <a href="{% url 'home' %}"
+           class="sidebar-link {% if rm.app_name != 'catalogo' and rm.url_name != 'buscar' and rm.url_name != 'pedido_entrega_list' %}active{% endif %}">
+            <i class="bi bi-calendar2-week"></i>
+            <span>
+                <span class="sidebar-link-title">Generaciones</span>
+                <span class="sidebar-link-desc">Escuelas, grupos y alumnos</span>
+            </span>
+        </a>
+
+        <a href="{% url 'ventas:pedido_entrega_list' %}"
+           class="sidebar-link {% if rm.url_name == 'pedido_entrega_list' %}active{% endif %}">
+            <i class="bi bi-box-seam"></i>
+            <span>
+                <span class="sidebar-link-title">Entregas</span>
+                <span class="sidebar-link-desc">Pedidos por estado</span>
+            </span>
+        </a>
+
+        {% if user.is_staff %}
+        <a href="{% url 'catalogo:panel' %}"
+           class="sidebar-link {% if rm.app_name == 'catalogo' %}active{% endif %}">
+            <i class="bi bi-grid-3x3-gap"></i>
+            <span>
+                <span class="sidebar-link-title">Catálogo</span>
+                <span class="sidebar-link-desc">Bases, anillos y precios</span>
+            </span>
+        </a>
+        {% endif %}
+
+    </nav>
+</div>
+{% endwith %}

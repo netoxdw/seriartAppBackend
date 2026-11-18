@@ -469,3 +469,79 @@ a {
 
     font-size: 16px;
 }
+
+/* ========================================
+   SIDEBAR: secciones con nombre (staff novato)
+======================================== */
+
+.logo-container { color: inherit; }
+
+.header-user {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text);
+    font-weight: 500;
+}
+
+.sidebar-section { margin-bottom: 26px; }
+
+.sidebar-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #9ca3af;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    padding-left: 4px;
+}
+
+.sidebar-search .input-group {
+    background: white;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, .35);
+}
+
+.sidebar-search .form-control {
+    border: none;
+    box-shadow: none;
+    padding: 12px 14px;
+}
+
+.sidebar-search .btn {
+    border: none;
+    border-radius: 0;
+    padding: 0 14px;
+}
+
+.sidebar-hint {
+    color: #9ca3af;
+    font-size: 12px;
+    margin-top: 8px;
+    padding-left: 4px;
+    line-height: 1.35;
+}
+
+.sidebar-link { align-items: flex-start; }
+.sidebar-link > i { margin-top: 2px; }
+
+.sidebar-link-title {
+    display: block;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.sidebar-link-desc {
+    display: block;
+    font-size: 12px;
+    font-weight: 400;
+    color: #9ca3af;
+    margin-top: 2px;
+}
+
+.sidebar-link.active .sidebar-link-desc,
+.sidebar-link:hover .sidebar-link-desc { color: rgba(255, 255, 255, .8); }

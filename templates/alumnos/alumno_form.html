@@ -1,159 +1,79 @@
 {% extends "base.html" %}
 
+{% block title %}{% if object %}Editar alumno{% else %}Nuevo alumno{% endif %} · SERIART{% endblock %}
+
 {% block content %}
 
 <div class="form-wrapper">
-
     <div class="row justify-content-center">
-
         <div class="col-12 col-lg-8 col-xl-7">
-
-            <!-- FORM CARD -->
             <div class="form-container">
 
-                <!-- HEADER -->
                 <div class="form-header">
-
-                    <div class="form-icon">
-
-                        <i class="bi bi-person-fill-add"></i>
-
+                    <div class="form-icon {% if object %}form-icon-editar{% else %}form-icon-crear{% endif %}">
+                        <i class="bi {% if object %}bi-pencil{% else %}bi-person-plus{% endif %}"></i>
                     </div>
-
                     <div>
-
-                        <h2 class="form-title">
-
-                            {% if object %}
-                                Editar Alumno
-                            {% else %}
-                                Nuevo Alumno
-                            {% endif %}
-
-                        </h2>
-
+                        <h2 class="form-title">{% if object %}Editar alumno{% else %}Nuevo alumno{% endif %}</h2>
                         <p class="form-subtitle mb-0">
-
-                            Registra la información del alumno
-                            y su folio fotográfico
-
+                            Grupo {{ grupo.nombre_grupo }} · {{ grupo.escuela.nombre_escuela }} · Generación {{ grupo.generacion.anio }}
                         </p>
-
                     </div>
-
                 </div>
 
-                <!-- FORM -->
-                <form method="post">
-
+                <form method="post" novalidate>
                     {% csrf_token %}
+                    {% if siguiente %}<input type="hidden" name="next" value="{{ siguiente }}">{% endif %}
+
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger py-2">{{ form.non_field_errors|join:" " }}</div>
+                    {% endif %}
 
                     <!-- NOMBRE -->
                     <div class="mb-4">
-
-                        <label class="custom-label">
-
-                            Nombre completo
-
-                        </label>
-
+                        <label class="custom-label" for="{{ form.nombre_alumno.id_for_label }}">{{ form.nombre_alumno.label }}</label>
                         {{ form.nombre_alumno }}
-
-                        {% if form.nombre_alumno.errors %}
-
-                        <div class="field-error">
-
-                            {{ form.nombre_alumno.errors }}
-
-                        </div>
-
-                        {% endif %}
-
-                        <div class="input-help">
-
-                            Nombre completo del alumno
-
-                        </div>
-
+                        {% for e in form.nombre_alumno.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
                     </div>
 
-                    <!-- TELEFONO -->
-                    <div class="mb-4">
-
-                        <label class="custom-label">
-
-                            Teléfono
-
-                        </label>
-
-                        {{ form.telefono }}
-
-                        <div class="input-help">
-
-                            Número de contacto del alumno
-                            o tutor
-
+                    <div class="row g-3">
+                        <!-- TELÉFONO -->
+                        <div class="col-12 col-md-6">
+                            <label class="custom-label" for="{{ form.telefono.id_for_label }}">{{ form.telefono.label }}</label>
+                            {{ form.telefono }}
+                            {% for e in form.telefono.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                            <div class="input-help">Del alumno o de su mamá/papá.</div>
                         </div>
-
+                        <!-- FOLIO -->
+                        <div class="col-12 col-md-6">
+                            <label class="custom-label" for="{{ form.folio_fotos.id_for_label }}">{{ form.folio_fotos.label }}</label>
+                            {{ form.folio_fotos }}
+                            {% for e in form.folio_fotos.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+                            <div class="input-help">Número de las fotos que se le tomaron.</div>
+                        </div>
                     </div>
 
-                    <!-- FOLIO -->
-                    <div class="mb-2">
-
-                        <label class="custom-label">
-
-                            Folio fotográfico
-
-                        </label>
-
-                        {{ form.folio_fotos }}
-
-                        <div class="input-help">
-
-                            Identificador único de fotografías
-
-                        </div>
-
+                    {% if not object %}
+                    <div class="input-help mt-4 mb-0">
+                        <i class="bi bi-arrow-right-circle"></i>
+                        Al guardar pasarás directo a capturar su pedido.
                     </div>
+                    {% endif %}
 
-                    <!-- ACTIONS -->
                     <div class="form-actions">
-
-                        <a href="{% if object %}
-                                    {% url 'alumnos:grupo_detail' object.grupo.id %}
-                                 {% else %}
-                                    {% url 'alumnos:grupo_detail' view.kwargs.grupo_id %}
-                                 {% endif %}"
-
-                           class="btn btn-light custom-cancel-btn">
-
-                            Cancelar
-
+                        <a href="{{ cancelar }}" class="btn btn-volver custom-cancel-btn">
+                            <i class="bi bi-arrow-left"></i> Cancelar
                         </a>
-
-                        <button type="submit"
-                                class="btn btn-primary custom-submit-btn">
-
+                        <button type="submit" class="btn btn-success custom-submit-btn">
                             <i class="bi bi-check-lg"></i>
-
-                            {% if object %}
-                                Guardar cambios
-                            {% else %}
-                                Guardar alumno
-                            {% endif %}
-
+                            {% if object %}Guardar cambios{% else %}Guardar y capturar pedido{% endif %}
                         </button>
-
                     </div>
-
                 </form>
 
             </div>
-
         </div>
-
     </div>
-
 </div>
 
 {% endblock %}
