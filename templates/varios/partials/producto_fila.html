@@ -1,0 +1,38 @@
+<div class="varios-producto">
+    {% for h in f.hidden_fields %}{{ h }}{% endfor %}
+    <div class="d-none">{{ f.DELETE }}</div>
+    <div class="row g-2 align-items-start">
+        <div class="col-12 col-md-4">
+            <label class="form-label small fw-semibold mb-1">Producto</label>
+            {{ f.producto }}
+            {% for e in f.producto.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+        </div>
+        <div class="col-4 col-md-2">
+            <label class="form-label small fw-semibold mb-1">Cantidad</label>
+            {{ f.cantidad }}
+            {% for e in f.cantidad.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+        </div>
+        <div class="col-8 col-md-2">
+            <label class="form-label small fw-semibold mb-1">Precio unitario</label>
+            {{ f.precio_unitario }}
+            {% for e in f.precio_unitario.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+        </div>
+        <div class="col-7 col-md-2">
+            <label class="form-label small fw-semibold mb-1">Elaborar el</label>
+            {{ f.fecha_elaboracion }}
+        </div>
+        <div class="col-5 col-md-2 text-end">
+            <label class="form-label small fw-semibold mb-1 d-block">Importe</label>
+            <div class="d-flex align-items-center justify-content-end gap-2">
+                <span class="varios-importe">$0.00</span>
+                <button type="button" class="btn btn-sm btn-outline-danger varios-quitar" title="Quitar producto" aria-label="Quitar producto">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+        </div>
+        <div class="col-12">
+            {{ f.descripcion }}
+        </div>
+    </div>
+    {% for e in f.non_field_errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+</div>

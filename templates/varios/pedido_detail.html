@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ pedido.folio }} · {{ pedido.cliente }} · SERIART{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pedido.css' %}?{% now 'U' %}">
+<link rel="stylesheet" href="{% static 'css/varios.css' %}?{% now 'U' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- ENCABEZADO (secundario) -->
+<div class="pedido-header-card grupo-head mb-4">
+    <div class="pedido-header-top">
+        <div>
+            <div class="breadcrumb-custom mb-3">
+                <a href="{% url 'varios:pedido_list' %}">Pedidos varios</a>
+                <span>/</span>
+                <span>{{ pedido.folio }}</span>
+            </div>
+            <div class="d-flex align-items-center gap-4 flex-wrap">
+                <div class="pedido-avatar"><i class="bi bi-printer"></i></div>
+                <div>
+                    <h1 class="pedido-title">{{ pedido.cliente }}</h1>
+                    <div class="pedido-subtitle">
+                        Pedido {{ pedido.folio }}
+                        <span class="badge rounded-pill text-bg-{{ pedido.color_estado }} ms-1">{{ pedido.get_estado_display }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="pedido-header-actions">
+            <a href="{% url 'varios:pedido_update' pedido.pk %}" class="btn btn-primary custom-action-btn">
+                <i class="bi bi-pencil"></i> Editar
+            </a>
+            <a href="{% url 'varios:pedido_list' %}" class="btn btn-light custom-action-btn">
+                <i class="bi bi-arrow-left"></i> Volver
+            </a>
+        </div>
+    </div>
+
+    <div class="pedido-info-grid">
+        <div class="pedido-meta-item">
+            <span class="pedido-meta-label">Entrega:</span>
+            <span class="pedido-meta-value {% if pedido.atrasado %}text-danger{% endif %}">
+                {{ pedido.fecha_entrega|date:"l d \d\e F \d\e Y" }}{% if pedido.atrasado %} · atrasado{% endif %}
+            </span>
+        </div>
+        <div class="pedido-meta-item">
+            <span class="pedido-meta-label">Teléfono:</span>
+            <span class="pedido-meta-value">{{ pedido.telefono|default:"—" }}</span>
+        </div>
+        <div class="pedido-meta-item">
+            <span class="pedido-meta-label">Capturado:</span>
+            <span class="pedido-meta-value">{{ pedido.creado|date:"d/m/Y H:i" }}</span>
+        </div>
+    </div>
+
+    <!-- CAMBIAR ESTADO -->
+    <form method="post" action="{% url 'varios:pedido_estado' pedido.pk %}" class="varios-estados">
+        {% csrf_token %}
+        <span class="pedido-meta-label">Estado:</span>
+        {% for clave, nombre in estados %}
+        <button type="submit" name="estado" value="{{ clave }}"
+                class="estado-op{% if clave == pedido.estado %} activo{% endif %}{% if clave == 'devolucion' %} alerta{% endif %}"
+                {% if clave == pedido.estado %}aria-pressed="true" disabled{% endif %}>
+            {{ nombre }}
+        </button>
+        {% endfor %}
+    </form>
+</div>
+
+{% if pedido.notas %}
+<div class="table-section-card panel-compacto obs-alerta mb-4">
+    <div class="table-section-header">
+        <div>
+            <h4 class="section-title mb-1">Notas del pedido</h4>
+            <p class="section-subtitle mb-0" style="white-space: pre-line">{{ pedido.notas }}</p>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- PRODUCTOS (principal) -->
+<div class="table-section-card panel-principal mb-4">
+    <div class="table-section-header">
+        <div>
+            <h4 class="section-title mb-1">Productos</h4>
+            <p class="section-subtitle mb-0">{{ productos|length }} producto{{ productos|length|pluralize }} en el pedido</p>
+        </div>
+        <a href="{% url 'varios:pedido_update' pedido.pk %}" class="btn btn-outline-secondary custom-table-btn">
+            <i class="bi bi-pencil"></i> Editar productos
+        </a>
+    </div>
+    <div class="table-responsive">
+        <table class="table align-middle modern-table items-tabla">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Elaborar el</th>
+                    <th class="text-end">Precio</th>
+                    <th class="text-end">Cant.</th>
+                    <th class="text-end">Importe</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for prod in productos %}
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="table-product-icon"><i class="bi bi-box-seam"></i></div>
+                            <div>
+                                <div class="table-product-title">{{ prod.producto }}</div>
+                                {% if prod.descripcion %}<div class="table-product-subtitle" style="white-space: pre-line">{{ prod.descripcion }}</div>{% endif %}
+                            </div>
+                        </div>
+                    </td>
+                    <td class="text-nowrap">{{ prod.fecha_elaboracion|date:"d M Y"|default:"—" }}</td>
+                    <td class="text-end"><span class="money-value">${{ prod.precio_unitario|floatformat:2 }}</span></td>
+                    <td class="text-end"><span class="quantity-badge">{{ prod.cantidad }}</span></td>
+                    <td class="text-end"><span class="subtotal-value">${{ prod.importe|floatformat:2 }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr class="items-total">
+                    <td colspan="4" class="text-end">Total</td>
+                    <td class="text-end">${{ pedido.total|floatformat:2 }}</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+<!-- PAGOS (principal) -->
+<div class="table-section-card panel-principal pagos mb-4">
+    <div class="table-section-header">
+        <div>
+            <h4 class="section-title mb-1">Pagos</h4>
+            <p class="section-subtitle mb-0">
+                Pagado ${{ pagado|floatformat:2 }} de ${{ pedido.total|floatformat:2 }} ·
+                {% if saldo %}<span class="saldo-debe">debe ${{ saldo|floatformat:2 }}</span>{% else %}<span class="saldo-ok">liquidado</span>{% endif %}
+            </p>
+        </div>
+        {% if saldo %}
+        <a href="{% url 'varios:pago_create' pedido.pk %}" class="btn btn-success custom-table-btn">
+            <i class="bi bi-cash-stack"></i> Registrar pago
+        </a>
+        {% endif %}
+    </div>
+    <div class="table-responsive">
+        <table class="table align-middle modern-table">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Forma de pago</th>
+                    <th>Referencia</th>
+                    <th class="text-end">Monto</th>
+                    <th class="text-end">Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pago in pagos %}
+                <tr>
+                    <td>{{ pago.fecha|date:"d M Y" }}</td>
+                    <td>{{ pago.get_forma_pago_display }}</td>
+                    <td>{{ pago.referencia|default:"—" }}</td>
+                    <td class="text-end"><span class="money-value">${{ pago.monto|floatformat:2 }}</span></td>
+                    <td>
+                        <div class="table-actions">
+                            <a href="{% url 'varios:pago_delete' pago.pk %}" class="table-action-btn danger" title="Eliminar pago"><i class="bi bi-trash"></i></a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5">
+                        <div class="empty-table-state">
+                            <div class="empty-table-icon"><i class="bi bi-cash-stack"></i></div>
+                            <h5>Sin pagos todavía</h5>
+                            <p>Registra el anticipo para pasar el pedido a “Hacer”.</p>
+                            <a href="{% url 'varios:pago_create' pedido.pk %}" class="btn btn-success"><i class="bi bi-cash-stack"></i> Registrar pago</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="text-end mb-4">
+    <a href="{% url 'varios:pedido_delete' pedido.pk %}" class="btn btn-link text-danger btn-sm"><i class="bi bi-trash"></i> Eliminar pedido</a>
+</div>
+
+{% endblock %}

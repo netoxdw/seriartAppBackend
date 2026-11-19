@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'apps.alumnos',
     'apps.catalogo',
     'apps.ventas',
+    'apps.varios',
     'apps.core',
 ]
 

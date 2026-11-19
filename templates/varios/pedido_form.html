@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{% if pedido %}Editar {{ pedido.folio }}{% else %}Nuevo pedido vario{% endif %} · SERIART{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/forms.css' %}?{% now 'U' %}">
+<link rel="stylesheet" href="{% static 'css/varios.css' %}?{% now 'U' %}">
+{% endblock %}
+
+{% block content %}
+<div class="form-wrapper">
+<div class="row justify-content-center">
+<div class="col-12 col-xxl-10">
+<div class="form-container">
+
+    <div class="form-header">
+        <div class="form-icon"><i class="bi bi-printer"></i></div>
+        <div>
+            <h2 class="form-title">{% if pedido %}Editar pedido {{ pedido.folio }}{% else %}Nuevo pedido vario{% endif %}</h2>
+            <p class="form-subtitle mb-0">Imprenta, serigrafía y artículos publicitarios</p>
+        </div>
+    </div>
+
+    <form method="post" novalidate id="pedido-form">
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors|join:" " }}</div>{% endif %}
+
+        <!-- CLIENTE -->
+        <div class="selection-card mb-4">
+            <div class="selection-header mb-3">
+                <span class="selection-badge">Cliente</span>
+                <h5 class="selection-title">Datos del pedido</h5>
+            </div>
+            <div class="row g-3">
+                <div class="col-12 col-md-5">
+                    <label class="custom-label" for="{{ form.cliente.id_for_label }}">Cliente</label>
+                    {{ form.cliente }}
+                    {% for e in form.cliente.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+                </div>
+                <div class="col-12 col-md-3">
+                    <label class="custom-label" for="{{ form.telefono.id_for_label }}">Teléfono</label>
+                    {{ form.telefono }}
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="custom-label" for="{{ form.fecha_entrega.id_for_label }}">Entrega</label>
+                    {{ form.fecha_entrega }}
+                    {% for e in form.fecha_entrega.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+                </div>
+                {% if form.estado %}
+                <div class="col-6 col-md-2">
+                    <label class="custom-label" for="{{ form.estado.id_for_label }}">Estado</label>
+                    {{ form.estado }}
+                </div>
+                {% endif %}
+                <div class="col-12">
+                    <label class="custom-label" for="{{ form.notas.id_for_label }}">Notas</label>
+                    {{ form.notas }}
+                </div>
+            </div>
+        </div>
+
+        <!-- PRODUCTOS -->
+        <div class="selection-card mb-4">
+            <div class="selection-header mb-3">
+                <span class="selection-badge secondary">Productos</span>
+                <h5 class="selection-title">Qué se va a hacer</h5>
+            </div>
+
+            {{ formset.management_form }}
+            {% if formset.non_form_errors %}
+            <div class="alert alert-danger py-2">
+                {% for e in formset.non_form_errors %}{% if 'at least' in e or 'al menos' in e %}Agrega al menos un producto.{% else %}{{ e }}{% endif %} {% endfor %}
+            </div>
+            {% endif %}
+
+            <div id="productos" class="d-grid gap-3">
+                {% for f in formset %}
+                {% include "varios/partials/producto_fila.html" with f=f %}
+                {% endfor %}
+            </div>
+
+            <template id="producto-vacio">
+                {% include "varios/partials/producto_fila.html" with f=formset.empty_form %}
+            </template>
+
+            <button type="button" id="agregar-producto" class="btn btn-outline-primary mt-3">
+                <i class="bi bi-plus-lg"></i> Agregar otro producto
+            </button>
+        </div>
+
+        <!-- ANTICIPO (solo al crear) -->
+        {% if form.anticipo %}
+        <div class="selection-card mb-4">
+            <div class="selection-header mb-3">
+                <span class="selection-badge secondary">Pago</span>
+                <h5 class="selection-title">Anticipo</h5>
+            </div>
+            <div class="row g-3 align-items-end">
+                <div class="col-6 col-md-3">
+                    <label class="custom-label" for="{{ form.anticipo.id_for_label }}">Monto</label>
+                    {{ form.anticipo }}
+                    {% for e in form.anticipo.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+                </div>
+                <div class="col-6 col-md-3">
+                    <label class="custom-label" for="{{ form.forma_anticipo.id_for_label }}">Forma de pago</label>
+                    {{ form.forma_anticipo }}
+                </div>
+                <div class="col-12 col-md-6 input-help">
+                    Si deja anticipo, el pedido queda en <strong>Hacer</strong>; si no, en <strong>Sin anticipo</strong>.
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="varios-total-barra d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div>
+                <div class="text-muted small">Total del pedido</div>
+                <div class="fs-4 fw-bold" id="total-pedido">$0.00</div>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{% if pedido %}{% url 'varios:pedido_detail' pedido.pk %}{% else %}{% url 'varios:pedido_list' %}{% endif %}" class="btn btn-light border">Cancelar</a>
+                <button type="submit" class="btn btn-primary px-4"><i class="bi bi-check2-circle"></i> {% if pedido %}Guardar cambios{% else %}Crear pedido{% endif %}</button>
+            </div>
+        </div>
+    </form>
+
+</div>
+</div>
+</div>
+</div>
+
+<script>
+(function () {
+    const cont = document.getElementById("productos");
+    const total = document.getElementById("total-pedido");
+    const totalForms = document.getElementById("id_productos-TOTAL_FORMS");
+    const dinero = n => "$" + Number(n).toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    function recalcular() {
+        let suma = 0;
+        cont.querySelectorAll(".varios-producto").forEach(fila => {
+            const borrar = fila.querySelector('input[name$="-DELETE"]');
+            const quitada = borrar && borrar.checked;
+            fila.classList.toggle("quitada", !!quitada);
+            const cant = parseFloat(fila.querySelector('[data-campo="cantidad"]').value) || 0;
+            const precio = parseFloat(fila.querySelector('[data-campo="precio"]').value) || 0;
+            const importe = cant * precio;
+            fila.querySelector(".varios-importe").textContent = dinero(importe);
+            if (!quitada) suma += importe;
+        });
+        total.textContent = dinero(suma);
+    }
+
+    function prepararFila(fila) {
+        fila.querySelectorAll("input, textarea").forEach(i => i.addEventListener("input", recalcular));
+        const borrar = fila.querySelector('input[name$="-DELETE"]');
+        const quitar = fila.querySelector(".varios-quitar");
+        quitar.addEventListener("click", () => {
+            if (fila.dataset.nueva) {
+                fila.remove();  // aún no existe en la base: se quita sin más
+            } else {
+                borrar.checked = !borrar.checked;  // existente: se marca para borrar al guardar
+                quitar.title = borrar.checked ? "Recuperar producto" : "Quitar producto";
+            }
+            recalcular();
+        });
+    }
+
+    document.getElementById("agregar-producto").addEventListener("click", () => {
+        const n = Number(totalForms.value);
+        const html = document.getElementById("producto-vacio").innerHTML.replaceAll("__prefix__", n);
+        const tmp = document.createElement("div");
+        tmp.innerHTML = html.trim();
+        const fila = tmp.firstElementChild;
+        fila.dataset.nueva = "1";
+        cont.append(fila);
+        totalForms.value = n + 1;
+        prepararFila(fila);
+        fila.querySelector('[data-campo="producto"]').focus();
+        recalcular();
+    });
+
+    cont.querySelectorAll(".varios-producto").forEach(prepararFila);
+    // Pedido nuevo sin filas: arranca con una
+    if (!cont.querySelector(".varios-producto")) document.getElementById("agregar-producto").click();
+    recalcular();
+})();
+</script>
+{% endblock %}

@@ -545,3 +545,40 @@ a {
 
 .sidebar-link.active .sidebar-link-desc,
 .sidebar-link:hover .sidebar-link-desc { color: rgba(255, 255, 255, .8); }
+
+
+/* ========================================
+   MENÚ POR SECCIONES
+   1. Generaciones (con Entregas y Catálogo dentro) · 2. Pedidos varios
+======================================== */
+.sidebar-grupo {
+    border-radius: 16px;
+    padding: 2px;
+}
+.sidebar-grupo.abierto { background: rgba(255, 255, 255, .04); }
+
+.sidebar-sub {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 4px 0 6px 26px;
+    padding-left: 12px;
+    border-left: 1px solid rgba(255, 255, 255, .14);
+}
+
+.sidebar-sublink {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    color: #9ca3af;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: var(--transition);
+}
+.sidebar-sublink i { font-size: 15px; }
+.sidebar-sublink:hover { background: #1f2937; color: #fff; }
+.sidebar-sublink.active { background: var(--primary); color: #fff; }
+.sidebar-mobile .sidebar-sublink { color: #9ca3af; }

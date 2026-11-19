@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Registrar pago · {{ pedido.folio }} · SERIART{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/forms.css' %}?{% now 'U' %}">
+{% endblock %}
+
+{% block content %}
+<div class="form-wrapper">
+<div class="row justify-content-center">
+<div class="col-12 col-lg-7 col-xl-6">
+<div class="form-container payment-form-container">
+
+    <div class="form-header">
+        <div class="form-icon payment-form-icon"><i class="bi bi-cash-stack"></i></div>
+        <div>
+            <h2 class="form-title">Registrar pago</h2>
+            <p class="form-subtitle mb-0">{{ pedido.folio }} · {{ pedido.cliente }}</p>
+        </div>
+    </div>
+
+    <div class="selection-card payment-info-card mb-4">
+        <div class="d-flex justify-content-between flex-wrap gap-2">
+            <span>Total <strong>${{ pedido.total|floatformat:2 }}</strong></span>
+            <span>Pagado <strong>${{ pedido.pagado|floatformat:2 }}</strong></span>
+            <span>Saldo <strong class="text-danger">${{ pedido.saldo|floatformat:2 }}</strong></span>
+        </div>
+    </div>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="row g-3">
+            <div class="col-6">
+                <label class="custom-label" for="{{ form.monto.id_for_label }}">Monto</label>
+                {{ form.monto }}
+                {% for e in form.monto.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="col-6">
+                <label class="custom-label" for="{{ form.fecha.id_for_label }}">Fecha</label>
+                {{ form.fecha }}
+                {% for e in form.fecha.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="col-6">
+                <label class="custom-label" for="{{ form.forma_pago.id_for_label }}">Forma de pago</label>
+                {{ form.forma_pago }}
+            </div>
+            <div class="col-6">
+                <label class="custom-label" for="{{ form.referencia.id_for_label }}">Folio / referencia</label>
+                {{ form.referencia }}
+            </div>
+        </div>
+        {% if pedido.estado == 'sin_anticipo' %}
+        <div class="input-help mt-3">Con este pago el pedido pasa a <strong>Hacer</strong>.</div>
+        {% endif %}
+
+        <div class="form-actions">
+            <a href="{% url 'varios:pedido_detail' pedido.pk %}" class="btn btn-light custom-cancel-btn">Cancelar</a>
+            <button type="submit" class="btn btn-success custom-submit-btn"><i class="bi bi-check-lg"></i> Guardar pago</button>
+        </div>
+    </form>
+
+</div>
+</div>
+</div>
+</div>
+{% endblock %}

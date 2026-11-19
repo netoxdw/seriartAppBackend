@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Pedidos varios · SERIART{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pedido.css' %}?{% now 'U' %}">
+<link rel="stylesheet" href="{% static 'css/varios.css' %}?{% now 'U' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- ENCABEZADO (secundario) -->
+<div class="pedido-header-card grupo-head mb-4">
+    <div class="pedido-header-top">
+        <div class="d-flex align-items-center gap-4 flex-wrap">
+            <div class="pedido-avatar"><i class="bi bi-printer"></i></div>
+            <div>
+                <h1 class="pedido-title">Pedidos varios</h1>
+                <div class="pedido-subtitle">Imprenta, serigrafía y artículos publicitarios</div>
+            </div>
+        </div>
+        <div class="pedido-header-actions">
+            <a href="{% url 'varios:pedido_create' %}" class="btn btn-success custom-action-btn">
+                <i class="bi bi-plus-lg"></i> Nuevo pedido
+            </a>
+        </div>
+    </div>
+
+    <form method="get" class="varios-filtros">
+        <input type="hidden" name="estado" value="{{ estado_actual }}">
+        <div class="input-group varios-buscar">
+            <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+            <input type="search" name="q" value="{{ busqueda }}" class="form-control"
+                   placeholder="Cliente, teléfono, producto o folio" aria-label="Buscar pedidos varios">
+        </div>
+        <div class="estados-linea" role="group" aria-label="Filtrar por estado">
+            {% for clave, nombre, n in filtros %}
+            <a href="?estado={{ clave }}{% if busqueda %}&q={{ busqueda|urlencode }}{% endif %}"
+               class="estado-op text-decoration-none{% if clave == estado_actual %} activo{% endif %}{% if clave == 'devolucion' and n %} alerta{% endif %}">
+                {{ nombre }} <b>{{ n }}</b>
+            </a>
+            {% endfor %}
+        </div>
+    </form>
+</div>
+
+<!-- LISTA (panel principal) -->
+<div class="table-section-card panel-principal mb-4">
+    <div class="table-section-header">
+        <div>
+            <h4 class="section-title mb-1">
+                {% for clave, nombre, n in filtros %}{% if clave == estado_actual %}{{ nombre }}{% endif %}{% endfor %}
+            </h4>
+            <p class="section-subtitle mb-0">
+                {{ pedidos|length }} pedido{{ pedidos|length|pluralize }}{% if estado_actual == 'pendientes' %}, ordenados por fecha de entrega{% endif %}{% if busqueda %} · búsqueda “{{ busqueda }}”{% endif %}
+            </p>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table align-middle modern-table grupo-tabla">
+            <thead>
+                <tr>
+                    <th>Pedido</th>
+                    <th>Productos</th>
+                    <th>Entrega</th>
+                    <th class="text-end">Total</th>
+                    <th class="text-end">Saldo</th>
+                    <th>Estado</th>
+                    <th class="text-end">Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in pedidos %}
+                <tr>
+                    <td>
+                        <a href="{% url 'varios:pedido_detail' p.pk %}" class="table-product-title text-reset text-decoration-none">{{ p.cliente }}</a>
+                        <div class="table-product-subtitle">{{ p.folio }}{% if p.telefono %} · <i class="bi bi-telephone"></i> {{ p.telefono }}{% endif %}</div>
+                    </td>
+                    <td class="varios-productos-celda">
+                        {% for prod in p.productos.all|slice:":3" %}
+                        <div><span class="quantity-badge">{{ prod.cantidad }}</span> {{ prod.producto }}</div>
+                        {% endfor %}
+                        {% with n=p.productos.all|length %}{% if n > 3 %}<div class="table-product-subtitle">y {{ n|add:"-3" }} más</div>{% endif %}{% endwith %}
+                    </td>
+                    <td class="text-nowrap">
+                        <span class="{% if p.atrasado %}text-danger fw-semibold{% elif p.fecha_entrega == hoy %}text-warning-emphasis fw-semibold{% endif %}">
+                            {{ p.fecha_entrega|date:"d M Y" }}
+                        </span>
+                        {% if p.atrasado %}<div class="small text-danger">Atrasado</div>{% elif p.fecha_entrega == hoy and p.estado != 'entregado' %}<div class="small text-warning-emphasis">Hoy</div>{% endif %}
+                    </td>
+                    <td class="text-end"><span class="money-value">${{ p.total|floatformat:2 }}</span></td>
+                    <td class="text-end">
+                        {% if p.saldo_pend > 0 %}
+                        <span class="saldo-debe">${{ p.saldo_pend|floatformat:2 }}</span>
+                        {% elif p.total %}
+                        <span class="saldo-ok"><i class="bi bi-check2"></i> Pagado</span>
+                        {% endif %}
+                    </td>
+                    <td><span class="badge rounded-pill text-bg-{{ p.color_estado }}">{{ p.get_estado_display }}</span></td>
+                    <td>
+                        <div class="table-actions">
+                            <a href="{% url 'varios:pedido_detail' p.pk %}" class="btn btn-dark btn-sm grupo-ver">Ver <i class="bi bi-chevron-right"></i></a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7">
+                        <div class="empty-table-state">
+                            <div class="empty-table-icon"><i class="bi bi-printer"></i></div>
+                            <h5>{% if busqueda %}No hay pedidos que coincidan{% else %}No hay pedidos en esta vista{% endif %}</h5>
+                            <p>Captura un pedido de imprenta, serigrafía o artículos publicitarios.</p>
+                            <a href="{% url 'varios:pedido_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Nuevo pedido</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,49 @@
+/* ========================================
+   PEDIDOS VARIOS (imprenta, serigrafía, publicitarios)
+   Se apoya en pedido.css / forms.css / listas.css.
+======================================== */
+
+/* Lista: buscador + filtros por estado dentro del encabezado */
+.varios-filtros {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 20px;
+    margin-top: 18px;
+}
+.varios-buscar { max-width: 360px; }
+.varios-productos-celda { font-size: 14px; line-height: 1.6; }
+.varios-productos-celda .quantity-badge { min-width: 28px; padding: 1px 6px; font-size: 12px; }
+
+/* Detalle: botones de estado */
+.varios-estados {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 6px;
+    margin-top: 16px;
+    font-size: 14px;
+}
+.varios-estados .estado-op { border: 1px solid #e2e8f0; background: #fff; }
+.varios-estados .estado-op.activo { background: #111827; border-color: #111827; color: #fff; opacity: 1; }
+
+/* Formulario: cada producto en su tarjeta */
+.varios-producto {
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 12px 14px;
+    background: #fff;
+}
+.varios-producto.quitada { opacity: .45; background: #fef2f2; }
+.varios-producto.quitada .varios-quitar { background: #dc3545; color: #fff; }
+.varios-importe { font-weight: 700; white-space: nowrap; }
+
+.varios-total-barra {
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
+    background: #fff;
+    border-top: 1px solid #e5e7eb;
+    padding: 1rem 0;
+    margin-top: 1.5rem;
+}

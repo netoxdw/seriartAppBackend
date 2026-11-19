@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ titulo }} · SERIART{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/forms.css' %}?{% now 'U' %}">
+{% endblock %}
+
+{% block content %}
+<div class="form-wrapper">
+<div class="row justify-content-center">
+<div class="col-12 col-lg-7 col-xl-6">
+<div class="form-container">
+    <div class="form-header">
+        <div class="form-icon bg-danger-subtle text-danger"><i class="bi bi-trash"></i></div>
+        <div>
+            <h2 class="form-title">{{ titulo }}</h2>
+            <p class="form-subtitle mb-0">{{ mensaje }}</p>
+        </div>
+    </div>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-actions">
+            <a href="{% url 'varios:pedido_detail' volver.pk %}" class="btn btn-light custom-cancel-btn">Cancelar</a>
+            <button type="submit" class="btn btn-danger custom-submit-btn"><i class="bi bi-trash"></i> Eliminar</button>
+        </div>
+    </form>
+</div>
+</div>
+</div>
+</div>
+{% endblock %}

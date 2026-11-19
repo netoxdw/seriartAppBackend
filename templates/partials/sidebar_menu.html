@@ -18,39 +18,47 @@
     <div class="sidebar-hint">Escribe un nombre, teléfono o folio y presiona Enter.</div>
 </div>
 
-<!-- MENÚ -->
+<!-- MENÚ: 1. Generaciones (1.1 Entregas, 1.2 Catálogo) · 2. Pedidos varios -->
 <div class="sidebar-section">
     <div class="sidebar-label"><i class="bi bi-compass"></i> Ir a</div>
     <nav class="sidebar-nav">
 
-        <a href="{% url 'home' %}"
-           class="sidebar-link {% if rm.app_name != 'catalogo' and rm.url_name != 'buscar' and rm.url_name != 'pedido_entrega_list' %}active{% endif %}">
-            <i class="bi bi-calendar2-week"></i>
-            <span>
-                <span class="sidebar-link-title">Generaciones</span>
-                <span class="sidebar-link-desc">Escuelas, grupos y alumnos</span>
-            </span>
-        </a>
+        <!-- 1. GENERACIONES -->
+        <div class="sidebar-grupo {% if rm.app_name != 'varios' and rm.url_name != 'buscar' %}abierto{% endif %}">
+            <a href="{% url 'home' %}"
+               class="sidebar-link {% if rm.app_name != 'catalogo' and rm.app_name != 'varios' and rm.url_name != 'buscar' and rm.url_name != 'pedido_entrega_list' %}active{% endif %}">
+                <i class="bi bi-calendar2-week"></i>
+                <span>
+                    <span class="sidebar-link-title">Generaciones</span>
+                    <span class="sidebar-link-desc">Paquetes de graduación</span>
+                </span>
+            </a>
 
-        <a href="{% url 'ventas:pedido_entrega_list' %}"
-           class="sidebar-link {% if rm.url_name == 'pedido_entrega_list' %}active{% endif %}">
-            <i class="bi bi-box-seam"></i>
-            <span>
-                <span class="sidebar-link-title">Entregas</span>
-                <span class="sidebar-link-desc">Pedidos por estado</span>
-            </span>
-        </a>
+            <div class="sidebar-sub">
+                <a href="{% url 'ventas:pedido_entrega_list' %}"
+                   class="sidebar-sublink {% if rm.url_name == 'pedido_entrega_list' %}active{% endif %}">
+                    <i class="bi bi-box-seam"></i> Entregas
+                </a>
+                {% if user.is_staff %}
+                <a href="{% url 'catalogo:panel' %}"
+                   class="sidebar-sublink {% if rm.app_name == 'catalogo' %}active{% endif %}">
+                    <i class="bi bi-grid-3x3-gap"></i> Catálogo
+                </a>
+                {% endif %}
+            </div>
+        </div>
 
-        {% if user.is_staff %}
-        <a href="{% url 'catalogo:panel' %}"
-           class="sidebar-link {% if rm.app_name == 'catalogo' %}active{% endif %}">
-            <i class="bi bi-grid-3x3-gap"></i>
-            <span>
-                <span class="sidebar-link-title">Catálogo</span>
-                <span class="sidebar-link-desc">Bases, anillos y precios</span>
-            </span>
-        </a>
-        {% endif %}
+        <!-- 2. PEDIDOS VARIOS -->
+        <div class="sidebar-grupo {% if rm.app_name == 'varios' %}abierto{% endif %}">
+            <a href="{% url 'varios:pedido_list' %}"
+               class="sidebar-link {% if rm.app_name == 'varios' %}active{% endif %}">
+                <i class="bi bi-printer"></i>
+                <span>
+                    <span class="sidebar-link-title">Pedidos varios</span>
+                    <span class="sidebar-link-desc">Imprenta y publicitarios</span>
+                </span>
+            </a>
+        </div>
 
     </nav>
 </div>
