@@ -362,6 +362,13 @@ class PedidoItemBase(models.Model):
 
     cantidad = models.PositiveIntegerField(default=1)
 
+    texto_agradecimiento = models.TextField(
+        "texto de agradecimiento",
+        blank=True,
+        default="",
+        help_text="Solo para agradecimientos: el texto que va impreso."
+    )
+
     precio_unitario = models.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -398,6 +405,9 @@ class PedidoItemBase(models.Model):
             if not self.producto.seccion.lleva_placa:
                 self.placa = None
                 self.color_placa = None
+        if self.concepto != self.CONCEPTO_AGRADECIMIENTO:
+            self.texto_agradecimiento = ""
+        self.texto_agradecimiento = (self.texto_agradecimiento or "").strip()
 
     def _producto_cambio(self):
         anterior = (

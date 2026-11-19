@@ -34,11 +34,11 @@ urlpatterns = [
     path('pedidos/<int:pedido_id>/add-base/', PedidoItemBaseCreateView.as_view(), name='itembase_create'),
     path('pedidos/<int:pk>/captura/', views.pedido_captura, name='pedido_captura'),
     path('alumnos/<int:alumno_id>/pedido/', alumno_pedido_redirect, name='alumno_pedido'),
-    path('itembase/<int:pk>/editar/', PedidoItemBaseUpdateView.as_view(), name='itembase_update'),
+    path('itembase/<int:pk>/editar/', views.itembase_editar, name='itembase_update'),
     path('itembase/<int:pk>/eliminar/', PedidoItemBaseDeleteView.as_view(), name='itembase_delete'),
 
-    path('pedidos/<int:pedido_id>/add-anillo/', PedidoItemAnilloCreateView.as_view(), name='itemanillo_create'),
-    path('itemanillo/<int:pk>/editar/', PedidoItemAnilloUpdateView.as_view(), name='itemanillo_update'),
+    path('pedidos/<int:pedido_id>/add-anillo/', views.itemanillo_agregar, name='itemanillo_create'),
+    path('itemanillo/<int:pk>/editar/', views.itemanillo_editar, name='itemanillo_update'),
     path('itemanillo/<int:pk>/eliminar/', PedidoItemAnilloDeleteView.as_view(), name='itemanillo_delete'),
 
     path('pedidos/<int:pedido_id>/add-extra/', PedidoItemExtraCreateView.as_view(), name='itemextra_create'),

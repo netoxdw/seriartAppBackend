@@ -8,7 +8,10 @@ class PedidoItemBaseForm(forms.ModelForm):
 
     class Meta:
         model = PedidoItemBase
-        fields = ["concepto", "producto", "placa", "color_placa", "cantidad"]
+        fields = ["concepto", "producto", "placa", "color_placa", "cantidad", "texto_agradecimiento"]
+        widgets = {
+            "texto_agradecimiento": forms.Textarea(attrs={"rows": 3, "class": "form-control"}),
+        }
 
     def __init__(self, *args, **kwargs):
         pedido = kwargs.pop("pedido", None)
@@ -179,6 +182,7 @@ class CapturaItemForm(forms.Form):
     placa = forms.ModelChoiceField(queryset=Placa.objects.none(), required=False)
     color_placa = forms.CharField(max_length=50, required=False)
     cantidad = forms.IntegerField(min_value=1, max_value=99, initial=1)
+    texto_agradecimiento = forms.CharField(max_length=1000, required=False)
 
     def __init__(self, *args, productos=None, **kwargs):
         super().__init__(*args, **kwargs)

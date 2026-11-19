@@ -14,7 +14,6 @@
     .captura-fila.completa { border-color: #86efac; box-shadow: 0 0 0 3px rgba(34,197,94,.08); }
     .captura-fila.con-error { border-color: #fca5a5; }
     .captura-fila .form-select, .captura-fila .form-control { min-height: 44px; }
-    .captura-concepto { font-weight: 600; min-width: 190px; }
     .captura-subtotal { font-weight: 700; font-size: 1.05rem; white-space: nowrap; }
     .captura-aviso { font-size: .85rem; }
     .captura-total {
@@ -36,7 +35,7 @@
     <div class="form-header">
         <div class="form-icon"><i class="bi bi-lightning-charge"></i></div>
         <div>
-            <h2 class="form-title">Captura rápida</h2>
+            <h2 class="form-title">{% if editando %}Editar artículo{% elif editando_anillo %}Editar anillo{% elif solo_anillos %}Agregar anillo{% else %}Captura rápida{% endif %}</h2>
             <p class="form-subtitle mb-0">
                 <span class="badge text-bg-primary me-1">{{ pedido.alumno.grupo.escuela.get_nivel_display }}</span>
                 {{ pedido.alumno.nombre_alumno }} · {{ pedido.alumno.grupo.escuela.nombre_escuela }}
@@ -68,10 +67,17 @@
     </div>
     {% endif %}
 
+    {% if solo_anillos %}
+    <p class="input-help mb-3">Elige el modelo y metal, la talla y la cantidad.</p>
+    {% else %}
     <p class="input-help mb-3">
-        Elige sección y modelo de la panorámica: el diploma y el agradecimiento se llenan solos con el mismo
-        modelo. Las filas sin modelo no se guardan.
+        Elige en orden: <strong>concepto</strong>, <strong>sección</strong>, <strong>modelo</strong>,
+        <strong>tamaño</strong> (en foto panorámica, estándar o ampliada; corrediza, libro y colegial
+        tienen tamaño único y se llena solo), <strong>cantidad</strong> y, si lleva, el <strong>tipo de placa</strong>.
+        Diploma y agradecimiento se pueden llenar solos con el mismo modelo de la panorámica.
+        Las filas sin tamaño no se guardan.
     </p>
+    {% endif %}
 
     <form method="post" id="captura-form" novalidate>
         {% csrf_token %}
@@ -85,27 +91,33 @@
         <input type="hidden" name="anillo-MIN_NUM_FORMS" value="0">
         <input type="hidden" name="anillo-MAX_NUM_FORMS" value="10">
 
+        {% if not solo_anillos %}
         <h5 class="selection-title mb-3"><i class="bi bi-image"></i> Cuadros</h5>
 
         <div id="captura-filas" class="d-grid gap-3"></div>
 
+        {% if not editando %}
         <button type="button" id="agregar-fila" class="btn btn-outline-primary mt-3">
             <i class="bi bi-plus-lg"></i> Agregar otro cuadro
         </button>
+        {% endif %}
+        {% endif %}
 
-        <h5 class="selection-title mt-5 mb-3"><i class="bi bi-gem"></i> Anillos</h5>
+        {% if not editando %}
+        <h5 class="selection-title {% if not solo_anillos %}mt-5 {% endif %}mb-3"><i class="bi bi-gem"></i> Anillos</h5>
 
         <div id="captura-anillos" class="d-grid gap-3"></div>
 
-        {% if catalogo.anillos %}
+        {% if catalogo.anillos and not editando_anillo %}
         <button type="button" id="agregar-anillo" class="btn btn-outline-dark mt-3">
             <i class="bi bi-plus-lg"></i> Agregar anillo
         </button>
-        {% else %}
+        {% elif not catalogo.anillos %}
         <div class="input-help">
             No hay anillos con precio para la generación {{ pedido.alumno.grupo.generacion.anio }}.
             Cárgalos en el admin (Anillos → precio por generación) para poder agregarlos aquí.
         </div>
+        {% endif %}
         {% endif %}
 
         <div class="captura-total d-flex flex-wrap align-items-center justify-content-between gap-3">
@@ -166,17 +178,30 @@
     }
 
     // ---------- Fila ----------
+    // Orden: concepto -> sección -> modelo -> tamaño -> cantidad (-> placa).
+    // El selector de tamaño es el que da el producto (sección + modelo + tamaño).
     function crearFila(datos) {
         const f = { vinculada: false };
         const prodIni = datos.producto ? productoPorId.get(Number(datos.producto)) : null;
+        f.tamPreferido = prodIni ? prodIni.tamano : Number(datos.tamano) || null;
 
-        f.concepto = el("select", { class: "form-select captura-concepto", "data-campo": "concepto" });
-        CAT.conceptos.forEach(c => f.concepto.add(new Option(c.nombre, c.id)));
-        f.concepto.value = datos.concepto || "otro";
+        f.concepto = el("select", { class: "form-select", "data-campo": "concepto", "aria-label": "Concepto" });
+        const conceptos = CAT.conceptos.filter(c => c.id !== "otro" || datos.concepto === "otro");
+        opciones(f.concepto, conceptos, "Concepto", datos.concepto || "panoramica");
+        if (!f.concepto.value) f.concepto.value = "panoramica";
 
-        f.tamano = el("select", { class: "form-select", "aria-label": "Tamaño" });
+        f.texto = el("textarea", { class: "form-control", rows: "2", maxlength: "1000",
+                                   "data-campo": "texto_agradecimiento", id: "txt-" + Math.random().toString(36).slice(2),
+                                   placeholder: "Ej.: Gracias mamá y papá por su apoyo…" });
+        f.texto.value = datos.texto_agradecimiento || "";
+        f.textoWrap = el("div", { class: "col-12" },
+            el("label", { class: "form-label small fw-semibold mb-1", for: f.texto.id, text: "Texto de agradecimiento" }),
+            f.texto);
+
         f.seccion = el("select", { class: "form-select", "aria-label": "Sección" });
-        f.producto = el("select", { class: "form-select", "data-campo": "producto", "aria-label": "Modelo" });
+        f.modelo = el("select", { class: "form-select", "aria-label": "Modelo" });
+        f.variante = el("select", { class: "form-select", "aria-label": "Variante" });
+        f.producto = el("select", { class: "form-select", "data-campo": "producto", "aria-label": "Tamaño" });
         f.placa = el("select", { class: "form-select", "data-campo": "placa", "aria-label": "Placa" });
         f.colorPlaca = el("input", { class: "form-control", "data-campo": "color_placa", placeholder: "Color de placa", maxlength: "50" });
         f.cantidad = el("input", { class: "form-control", type: "number", min: "1", max: "99", "data-campo": "cantidad", "aria-label": "Cantidad" });
@@ -194,6 +219,7 @@
 
         const quitar = el("button", { type: "button", class: "btn btn-sm btn-outline-danger", title: "Quitar fila" });
         quitar.append(el("i", { class: "bi bi-x-lg" }));
+        if (CAT.editando) quitar.classList.add("d-none");  // al editar hay una sola fila
 
         f.placaCol = el("div", { class: "col-12 col-md-6" },
             el("div", { class: "row g-2" },
@@ -202,29 +228,50 @@
 
         f.nodo = el("div", { class: "captura-fila" },
             el("div", { class: "d-flex flex-wrap align-items-center gap-2 mb-3" },
-                f.concepto, f.vinculoWrap, el("div", { class: "ms-auto" }), f.subtotal, quitar),
+                f.vinculoWrap, el("div", { class: "ms-auto" }), f.subtotal, quitar),
             el("div", { class: "row g-2 align-items-start" },
-                el("div", { class: "col-6 col-md-2" }, f.tamano),
-                el("div", { class: "col-6 col-md-3" }, f.seccion),
-                el("div", { class: "col-9 col-md-5" }, f.producto),
-                el("div", { class: "col-3 col-md-2" }, f.cantidad),
-                f.placaCol),
+                el("div", { class: "col-6 col-md-2" }, f.concepto),
+                el("div", { class: "col-6 col-md-2" }, f.seccion),
+                f.modeloCol = el("div", { class: "col-12 col-md-3" }, f.modelo),
+                f.varianteCol = el("div", { class: "col-6 col-md-2" }, f.variante),
+                f.tamanoCol = el("div", { class: "col-8 col-md-3" }, f.producto),
+                el("div", { class: "col-4 col-md-2" }, f.cantidad),
+                f.placaCol,
+                f.textoWrap),
             f.aviso, f.errores);
 
         // Valores iniciales
-        opciones(f.tamano, CAT.tamanos, "Tamaño", prodIni ? prodIni.tamano : datos.tamano);
-        cargarSecciones(f, prodIni ? prodIni.seccion : null);
-        cargarProductos(f, prodIni ? prodIni.id : null);
+        fijar(f, prodIni ? prodIni.seccion : null, prodIni ? claveModelo(prodIni) : null,
+              prodIni ? prodIni.variante || "" : null, prodIni ? prodIni.id : null);
         opciones(f.placa, CAT.placas, "Placa", datos.placa);
 
         // Las filas de diploma/agradecimiento nuevas arrancan vinculadas
         f.vinculo.checked = VINCULABLES.includes(f.concepto.value) && !prodIni;
 
         // Eventos
-        f.concepto.addEventListener("change", () => { actualizarVinculoVisible(f); sincronizar(); });
-        f.tamano.addEventListener("change", () => { cargarSecciones(f); cargarProductos(f); trasCambioManual(f); });
-        f.seccion.addEventListener("change", () => { cargarProductos(f); trasCambioManual(f); f.producto.focus(); });
-        f.producto.addEventListener("change", () => trasCambioManual(f));
+        f.concepto.addEventListener("change", () => {
+            fijar(f, f.seccion.value, f.modelo.value, f.variante.value, null);
+            trasCambioManual(f);
+            (f.seccion.value ? f.modelo : f.seccion).focus();
+        });
+        f.seccion.addEventListener("change", () => {
+            cargarModelos(f); cargarVariantes(f); cargarTamanos(f); trasCambioManual(f); f.modelo.focus();
+        });
+        const siguiente = () => {
+            if (f.producto.options.length > 2 && !f.sinTamano) f.producto.focus();
+            else if (f.producto.value) { f.cantidad.focus(); f.cantidad.select(); }
+        };
+        f.modelo.addEventListener("change", () => {
+            cargarVariantes(f); cargarTamanos(f); trasCambioManual(f);
+            if (f.varianteCol.style.display !== "none" && !f.variante.value) f.variante.focus();
+            else siguiente();
+        });
+        f.variante.addEventListener("change", () => { cargarTamanos(f); trasCambioManual(f); siguiente(); });
+        f.producto.addEventListener("change", () => {
+            f.tamPreferido = (productoPorId.get(Number(f.producto.value)) || {}).tamano || f.tamPreferido;
+            trasCambioManual(f);
+            if (f.producto.value) { f.cantidad.focus(); f.cantidad.select(); }
+        });
         f.placa.addEventListener("change", () => trasCambioManual(f));
         f.colorPlaca.addEventListener("input", () => trasCambioManual(f));
         f.cantidad.addEventListener("input", recalcular);
@@ -241,19 +288,105 @@
         return f;
     }
 
+    // Cada tamaño tiene su concepto (columna CONCEPTO del Excel):
+    // foto panorámica -> tamaños "panoramica"; diploma y agradecimiento -> "diploma_agradecimiento".
+    const tamanoPorId = new Map(CAT.tamanos.map((t, i) => [t.id, { ...t, pos: i }]));
+    function conceptoDeTamanos(concepto) {
+        if (concepto === "panoramica") return "panoramica";
+        if (concepto === "diploma" || concepto === "agradecimiento") return "diploma_agradecimiento";
+        return null;  // "otro": cualquier tamaño
+    }
+    function productosDelConcepto(f) {
+        const ct = conceptoDeTamanos(f.concepto.value);
+        return CAT.productos.filter(p => !ct || (tamanoPorId.get(p.tamano) || {}).concepto === ct);
+    }
+    // Modelo = modelo + color. La variante (corrediza: ESTANDAR / ESCULTURAS) se elige aparte.
+    const claveModelo = p => `${p.modelo}|${p.color || ""}`;
+    const claveVariante = p => String(p.variante || "");
+
     function cargarSecciones(f, valor) {
-        const t = Number(f.tamano.value);
-        const ids = new Set(CAT.productos.filter(p => p.tamano === t).map(p => p.seccion));
+        const ids = new Set(productosDelConcepto(f).map(p => p.seccion));
         opciones(f.seccion, CAT.secciones.filter(s => ids.has(s.id)), "Sección", valor ?? f.seccion.value);
     }
 
-    function cargarProductos(f, valor) {
-        const t = Number(f.tamano.value), s = Number(f.seccion.value);
-        const lista = CAT.productos
-            .filter(p => p.tamano === t && p.seccion === s)
-            .map(p => ({ id: p.id, nombre: `${p.nombre} — ${dinero(p.precio)}` }));
-        opciones(f.producto, lista, s ? "Modelo" : "Elige sección", valor ?? f.producto.value);
-        f.producto.disabled = !s;
+    function cargarModelos(f, valor) {
+        const s = Number(f.seccion.value);
+        const vistos = new Map();
+        productosDelConcepto(f).filter(p => p.seccion === s).forEach(p => {
+            const k = claveModelo(p);
+            if (!vistos.has(k)) vistos.set(k, { id: k, nombre: p.nombre_modelo });
+        });
+        const lista = [...vistos.values()].sort((a, b) => a.nombre.localeCompare(b.nombre));
+        opciones(f.modelo, lista, s ? "Modelo" : "Elige sección", valor ?? f.modelo.value);
+        f.modelo.disabled = !s;
+    }
+
+    // Variantes del modelo elegido; el selector solo aparece si el modelo tiene variantes.
+    function cargarVariantes(f, valor) {
+        const s = Number(f.seccion.value), k = f.modelo.value;
+        const porVariante = new Map();  // variante -> productos (uno por tamaño)
+        productosDelConcepto(f).filter(p => p.seccion === s && claveModelo(p) === k).forEach(p => {
+            const v = claveVariante(p);
+            if (!porVariante.has(v)) porVariante.set(v, []);
+            porVariante.get(v).push(p);
+        });
+        const conVariantes = [...porVariante.keys()].some(v => v !== "");
+        // Si cada variante tiene un solo tamaño (corrediza), no se pregunta el tamaño:
+        // el precio va en la variante y el tamaño se toma solo.
+        const sinTamano = conVariantes && [...porVariante.values()].every(ps => ps.length === 1);
+        const lista = [...porVariante.entries()].map(([v, ps]) => {
+            const nombre = ps[0].nombre_variante || "Sin variante";
+            return { id: v, nombre: sinTamano ? `${nombre} — ${dinero(ps[0].precio)}` : nombre };
+        });
+        opciones(f.variante, lista, "Variante", valor ?? f.variante.value);
+        if (!f.variante.value && lista.length === 1) f.variante.value = lista[0].id;
+        if (!conVariantes) { f.variante.replaceChildren(new Option("", "")); f.variante.value = ""; }
+        // Con variante: modelo, variante y tamaño se reparten el espacio
+        f.varianteCol.style.display = conVariantes ? "" : "none";
+        f.tamanoCol.style.display = sinTamano ? "none" : "";
+        f.modeloCol.className = conVariantes && !sinTamano ? "col-6 col-md-2" : "col-12 col-md-3";
+        f.varianteCol.className = sinTamano ? "col-8 col-md-3" : "col-6 col-md-2";
+        f.tamanoCol.className = conVariantes ? "col-8 col-md-2" : "col-8 col-md-3";
+        f.conVariantes = conVariantes;
+        f.sinTamano = sinTamano;
+    }
+
+    // Tamaños del modelo (y variante) elegidos. Si solo hay uno (corrediza, libro, colegial...) se toma directo.
+    function cargarTamanos(f, valor) {
+        const s = Number(f.seccion.value), k = f.modelo.value;
+        const falta = !k || (f.conVariantes && !f.variante.value);
+        const prods = !falta
+            ? productosDelConcepto(f)
+                .filter(p => p.seccion === s && claveModelo(p) === k && claveVariante(p) === f.variante.value)
+                .sort((a, b) => (tamanoPorId.get(a.tamano) || {}).pos - (tamanoPorId.get(b.tamano) || {}).pos)
+            : [];
+        const unico = prods.length === 1;
+        const lista = prods.map(p => {
+            const nombre = (tamanoPorId.get(p.tamano) || {}).nombre || "";
+            const texto = unico ? (nombre === "ÚNICO" ? "Tamaño único" : `Tamaño único (${nombre})`) : nombre;
+            return { id: p.id, nombre: `${texto} — ${dinero(p.precio)}` };
+        });
+        opciones(f.producto, lista, !k ? "Elige modelo" : falta ? "Elige variante" : "Tamaño", valor ?? f.producto.value);
+        if (!f.producto.value && prods.length) {
+            // El tamaño de antes (o el de la precarga) si existe; si no, el primero (estándar / carta)
+            const pref = prods.find(p => p.tamano === f.tamPreferido) || prods[0];
+            f.producto.value = pref.id;
+        }
+        f.producto.disabled = falta;
+    }
+
+    function actualizarConcepto(f) {
+        f.textoWrap.style.display = f.concepto.value === "agradecimiento" ? "" : "none";
+        actualizarVinculoVisible(f);
+    }
+
+    // Fija sección, modelo y tamaño de una fila respetando el orden de selección
+    function fijar(f, seccion, modelo, variante, producto) {
+        cargarSecciones(f, seccion);
+        cargarModelos(f, modelo);
+        cargarVariantes(f, variante);
+        cargarTamanos(f, producto);
+        actualizarConcepto(f);
     }
 
     function panoramica() {
@@ -281,23 +414,21 @@
             if (!pano) { f.aviso.textContent = "Elige primero el modelo de la panorámica."; return; }
 
             const base = productoPorId.get(Number(pano.producto.value));
-            const t = Number(f.tamano.value);
-            const candidatos = CAT.productos.filter(p => p.tamano === t && p.seccion === base.seccion && p.modelo === base.modelo);
-            const match = candidatos.find(p => p.color === base.color && p.variante === base.variante)
-                       || candidatos.find(p => p.color === base.color)
-                       || candidatos[0];
+            const candidatos = productosDelConcepto(f).filter(p => p.seccion === base.seccion && p.modelo === base.modelo);
+            const mismoColor = candidatos.filter(p => p.color === base.color);
+            const mismos = mismoColor.filter(p => p.variante === base.variante);
+            const grupo = mismos.length ? mismos : mismoColor.length ? mismoColor : candidatos;
+            const match = grupo.find(p => p.tamano === f.tamPreferido) || grupo[0];
 
             f._sincronizando = true;
             if (match) {
-                cargarSecciones(f, match.seccion);
-                cargarProductos(f, match.id);
+                fijar(f, match.seccion, claveModelo(match), claveVariante(match), match.id);
                 f.placa.value = pano.placa.value;
                 f.colorPlaca.value = pano.colorPlaca.value;
             } else {
-                const tam = CAT.tamanos.find(x => x.id === t);
-                f.aviso.textContent = `Este modelo no existe en ${tam ? tam.nombre : "este tamaño"}: elige otro.`;
-                cargarSecciones(f, "");
-                cargarProductos(f, "");
+                const concepto = f.concepto.options[f.concepto.selectedIndex].text.toLowerCase();
+                f.aviso.textContent = `Este modelo no se hace en ${concepto}: elige otro.`;
+                fijar(f, "", "", "", "");
             }
             f._sincronizando = false;
         });
@@ -323,6 +454,7 @@
 
         const quitar = el("button", { type: "button", class: "btn btn-sm btn-outline-danger", title: "Quitar anillo" });
         quitar.append(el("i", { class: "bi bi-x-lg" }));
+        if (CAT.editando) quitar.classList.add("d-none");  // al editar hay una sola fila
 
         a.nodo = el("div", { class: "captura-fila" },
             el("div", { class: "row g-2 align-items-center" },
@@ -386,7 +518,8 @@
         const btn = document.getElementById("guardar");
         btn.disabled = completas === 0 || incompletas > 0;
         document.getElementById("guardar-texto").textContent =
-            completas ? `Guardar ${completas} artículo${completas > 1 ? "s" : ""}` : "Guardar";
+            CAT.editando ? "Guardar cambios"
+            : completas ? `Guardar ${completas} artículo${completas > 1 ? "s" : ""}` : "Guardar";
     }
 
     // Antes de enviar: numerar las filas como formset de Django
@@ -413,9 +546,10 @@
         recalcular();
     });
 
-    document.getElementById("agregar-fila").addEventListener("click", () => {
-        const f = crearFila({ concepto: "otro", cantidad: 1 });
-        f.tamano.focus();
+    const btnFila = document.getElementById("agregar-fila");
+    if (btnFila) btnFila.addEventListener("click", () => {
+        const f = crearFila({ concepto: "panoramica", cantidad: 1 });
+        f.concepto.focus();
         recalcular();
     });
 
@@ -424,7 +558,7 @@
     if (CAT.anillos.length) FILAS_ANILLO.forEach(crearFilaAnillo);
     sincronizar();
     const primera = filas.find(f => !f.producto.value);
-    if (primera) (primera.seccion.options.length > 1 ? primera.seccion : primera.tamano).focus();
+    if (primera) primera.seccion.focus();
 })();
 </script>
 {% endblock %}

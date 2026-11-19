@@ -258,6 +258,22 @@
 
                         </div>
 
+                        <!-- TEXTO DE AGRADECIMIENTO (solo si el concepto es agradecimiento) -->
+                        <div class="mt-4" id="texto-agradecimiento-row">
+                            <label class="custom-label" for="{{ form.texto_agradecimiento.id_for_label }}">Texto de agradecimiento</label>
+                            {{ form.texto_agradecimiento }}
+                            {% for e in form.texto_agradecimiento.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+                        </div>
+                        <script>
+                        (function () {
+                            const concepto = document.getElementById("{{ form.concepto.id_for_label }}");
+                            const fila = document.getElementById("texto-agradecimiento-row");
+                            const mostrar = () => { fila.style.display = concepto.value === "agradecimiento" ? "" : "none"; };
+                            concepto.addEventListener("change", mostrar);
+                            mostrar();
+                        })();
+                        </script>
+
                     </div>
 
                     <!-- ACTIONS -->

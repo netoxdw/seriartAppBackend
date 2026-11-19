@@ -77,6 +77,9 @@
                             <div class="config-item"><span class="config-label">Color:</span> <span class="config-value">{{ item.color_placa|default:"-" }}</span></div>
                         </div>
                         <span class="badge text-bg-light border mt-1">{{ item.get_concepto_display }}</span>
+                        {% if item.texto_agradecimiento %}
+                        <div class="item-texto mt-2"><span class="config-label">Texto:</span> “{{ item.texto_agradecimiento }}”</div>
+                        {% endif %}
                     </td>
                     <td class="text-end"><span class="money-value">${{ item.precio_unitario }}</span></td>
                     <td class="text-end"><span class="quantity-badge">{{ item.cantidad }}</span></td>

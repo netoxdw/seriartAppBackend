@@ -1717,3 +1717,11 @@
 }
 .panel-principal.pagos { border-top-color: #16a34a; }
 .panel-principal .section-title { font-size: 24px; }
+
+/* Texto impreso del agradecimiento en la tabla de artículos */
+.item-texto {
+    max-width: 320px;
+    font-size: 13px;
+    color: #334155;
+    white-space: pre-line;
+}

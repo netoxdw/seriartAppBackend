@@ -630,7 +630,7 @@ class PedidoCambiarEstadoView(LoginRequiredMixin, View):
 # Lo que se precarga depende del nivel académico de la escuela.
 # ==============================
 
-_PANO = (PedidoItemBase.CONCEPTO_PANORAMICA, "PANORAMICA")
+_PANO = (PedidoItemBase.CONCEPTO_PANORAMICA, "ESTANDAR")  # la foto panorámica va en tamaño estándar
 _DIPLOMA = (PedidoItemBase.CONCEPTO_DIPLOMA, "CARTA")
 _AGRADEC = (PedidoItemBase.CONCEPTO_AGRADECIMIENTO, "CARTA")
 
@@ -641,6 +641,10 @@ CAPTURA_POR_NIVEL = {
     Escuela.NIVEL_UNIVERSIDAD: ([_PANO, _DIPLOMA, _AGRADEC], True),
     Escuela.NIVEL_OTRO: ([_PANO, _DIPLOMA, _AGRADEC], False),
 }
+
+# La captura va: concepto -> sección -> modelo -> tamaño -> cantidad (-> placa).
+# Las secciones se muestran en el orden en que suelen comprarlas; las no listadas van al final.
+ORDEN_SECCIONES = ["COLEGIAL", "CRISTAL", "ACANALADA", "MOLDURA", "DE LUX", "CORREDIZA", "LIBRO"]
 
 
 def _anillos_con_precio(generacion):
@@ -666,6 +670,9 @@ def _catalogo_captura(generacion):
             "color": p.color_id,
             "variante": p.variante_id,
             "nombre": p.descripcion,
+            # Para la captura: el modelo sin la variante, y la variante aparte
+            "nombre_modelo": " · ".join(x.nombre for x in (p.modelo, p.color) if x),
+            "nombre_variante": p.variante.nombre if p.variante_id else "",
             "precio": str(p.precio_para(generacion)),
         }
         for p in productos
@@ -675,7 +682,7 @@ def _catalogo_captura(generacion):
     return productos, anillos, {
         "productos": data_productos,
         "tamanos": [
-            {"id": t.id, "nombre": t.nombre}
+            {"id": t.id, "nombre": t.nombre, "concepto": t.concepto}
             for t in Tamano.objects.filter(id__in=tamanos_ids)
         ],
         "secciones": [
@@ -736,6 +743,7 @@ def _filas_desde_formset(formset, productos):
             "placa": form.data.get(form.add_prefix("placa")) or None,
             "color_placa": form.data.get(form.add_prefix("color_placa"), ""),
             "cantidad": form.data.get(form.add_prefix("cantidad"), 1),
+            "texto_agradecimiento": form.data.get(form.add_prefix("texto_agradecimiento"), ""),
             "errores": _errores(form),
         })
     return filas
@@ -755,13 +763,65 @@ def _anillos_desde_formset(formset):
 
 
 @login_required
+def itembase_editar(request, pk):
+    """Editar un cuadro del pedido se hace en la captura rápida."""
+    item = get_object_or_404(PedidoItemBase, pk=pk)
+    url = reverse("ventas:pedido_captura", kwargs={"pk": item.pedido_id})
+    return redirect(f"{url}?item={item.pk}")
+
+
+@login_required
+def itemanillo_agregar(request, pedido_id):
+    """Agregar un anillo se hace en la captura rápida, solo con la parte de anillos."""
+    url = reverse("ventas:pedido_captura", kwargs={"pk": pedido_id})
+    return redirect(f"{url}?solo=anillos")
+
+
+@login_required
+def itemanillo_editar(request, pk):
+    item = get_object_or_404(PedidoItemAnillo, pk=pk)
+    url = reverse("ventas:pedido_captura", kwargs={"pk": item.pedido_id})
+    return redirect(f"{url}?anillo={item.pk}")
+
+
+def _fila_de_item(item):
+    return {
+        "concepto": item.concepto,
+        "tamano": item.producto.tamano_id,
+        "producto": item.producto_id,
+        "placa": item.placa_id,
+        "color_placa": item.color_placa or "",
+        "cantidad": item.cantidad,
+        "texto_agradecimiento": item.texto_agradecimiento,
+    }
+
+
+@login_required
 def pedido_captura(request, pk):
+    """
+    Captura rápida.
+      ?item=<id>      edita ese cuadro (una sola fila, sin anillos).
+      ?anillo=<id>    edita ese anillo (una sola fila, sin cuadros).
+      ?solo=anillos   agrega solo anillos.
+    """
     pedido = get_object_or_404(
         Pedido.objects.select_related("alumno__grupo__generacion", "alumno__grupo__escuela"),
         pk=pk,
     )
+    item_id = request.GET.get("item", "")
+    anillo_id = request.GET.get("anillo", "")
+    editando = (
+        get_object_or_404(PedidoItemBase, pk=item_id, pedido=pedido) if item_id.isdigit() else None
+    )
+    editando_anillo = (
+        get_object_or_404(PedidoItemAnillo, pk=anillo_id, pedido=pedido)
+        if anillo_id.isdigit() and not editando else None
+    )
+    solo_anillos = bool(editando_anillo) or request.GET.get("solo") == "anillos"
     generacion = pedido.alumno.grupo.generacion
     productos, anillos, catalogo = _catalogo_captura(generacion)
+    posicion = {nombre: i for i, nombre in enumerate(ORDEN_SECCIONES)}
+    catalogo["secciones"].sort(key=lambda s: posicion.get(s["nombre"].upper(), len(posicion)))
     error_general = None
 
     if request.method == "POST":
@@ -774,6 +834,39 @@ def pedido_captura(request, pk):
             aros = [f.cleaned_data for f in formset_anillos if f.cleaned_data.get("anillo")]
             if not bases and not aros:
                 error_general = "Selecciona al menos un artículo."
+            elif editando and (len(bases) != 1 or aros):
+                error_general = "Al editar se guarda un solo cuadro."
+            elif editando_anillo and (len(aros) != 1 or bases):
+                error_general = "Al editar se guarda un solo anillo."
+            elif editando_anillo:
+                datos = aros[0]
+                editando_anillo.anillo = datos["anillo"]
+                editando_anillo.tamano_anillo = datos["tamano_anillo"]
+                editando_anillo.cantidad = datos["cantidad"]
+                try:
+                    editando_anillo.full_clean()
+                    editando_anillo.save()
+                except ValidationError as exc:
+                    error_general = " ".join(exc.messages)
+                else:
+                    messages.success(request, "Se actualizó el anillo.")
+                    return redirect("ventas:pedido_detail", pk=pedido.pk)
+            elif editando:
+                datos = bases[0]
+                editando.concepto = datos["concepto"]
+                editando.producto = datos["producto"]
+                editando.placa = datos.get("placa")
+                editando.color_placa = datos.get("color_placa") or None
+                editando.cantidad = datos["cantidad"]
+                editando.texto_agradecimiento = datos.get("texto_agradecimiento") or ""
+                try:
+                    editando.full_clean()
+                    editando.save()
+                except ValidationError as exc:
+                    error_general = " ".join(exc.messages)
+                else:
+                    messages.success(request, "Se actualizó el artículo.")
+                    return redirect("ventas:pedido_detail", pk=pedido.pk)
             else:
                 try:
                     with transaction.atomic():
@@ -785,6 +878,7 @@ def pedido_captura(request, pk):
                                 placa=datos.get("placa"),
                                 color_placa=datos.get("color_placa") or None,
                                 cantidad=datos["cantidad"],
+                                texto_agradecimiento=datos.get("texto_agradecimiento") or "",
                             )
                             item.full_clean()
                             item.save()
@@ -808,18 +902,34 @@ def pedido_captura(request, pk):
             error_general = " ".join(str(e) for e in errores) or None
         filas = _filas_desde_formset(formset, productos)
         filas_anillo = _anillos_desde_formset(formset_anillos)
+    elif editando:
+        filas, filas_anillo = [_fila_de_item(editando)], []
+    elif editando_anillo:
+        filas, filas_anillo = [], [{
+            "anillo": editando_anillo.anillo_id,
+            "tamano_anillo": str(editando_anillo.tamano_anillo),
+            "cantidad": editando_anillo.cantidad,
+        }]
+    elif solo_anillos:
+        filas, filas_anillo = [], [{"cantidad": 1}]
     else:
         filas, filas_anillo = _filas_iniciales(pedido)
 
+    catalogo["editando"] = bool(editando or editando_anillo)
     return render(request, "ventas/pedido_captura.html", {
         "pedido": pedido,
+        "editando": editando,
+        "editando_anillo": editando_anillo,
+        "solo_anillos": solo_anillos,
         "catalogo": catalogo,
         "filas": filas,
         "filas_anillo": filas_anillo,
         "error_general": error_general,
-        "items_existentes": pedido.items_base.select_related(
+        "items_existentes": pedido.items_base.exclude(pk=editando.pk if editando else None).select_related(
             "producto__seccion", "producto__modelo", "producto__tamano",
             "producto__color", "producto__variante",
         ),
-        "anillos_existentes": pedido.items_anillo.select_related("anillo"),
+        "anillos_existentes": pedido.items_anillo.exclude(
+            pk=editando_anillo.pk if editando_anillo else None
+        ).select_related("anillo"),
     })

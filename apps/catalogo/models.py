@@ -33,9 +33,21 @@ class Seccion(models.Model):
 
 
 class Tamano(models.Model):
-    """CARTA, DOBLE ESPACIO, PANORAMICA, AMPLIADA..."""
+    """CARTA, DOBLE ESPACIO, ESTANDAR, AMPLIADA, ÚNICO (secciones sin tamaño)..."""
+
+    CONCEPTO_DIPLOMA = "diploma_agradecimiento"
+    CONCEPTO_PANORAMICA = "panoramica"
+    CONCEPTO_CHOICES = [
+        ("", "Sin definir"),
+        (CONCEPTO_DIPLOMA, "Diploma / agradecimiento"),
+        (CONCEPTO_PANORAMICA, "Foto panorámica"),
+    ]
 
     nombre = models.CharField(max_length=50, unique=True)
+    concepto = models.CharField(
+        max_length=30, choices=CONCEPTO_CHOICES, blank=True, default="",
+        help_text="Qué va en este tamaño; decide las opciones de la captura (columna CONCEPTO del Excel).",
+    )
     orden = models.PositiveIntegerField(default=0)
     activo = models.BooleanField(default=True)
 

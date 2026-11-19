@@ -3,11 +3,14 @@ Importación del catálogo desde el Excel (hoja "TABLA UNICA").
 
 Lo usan el comando `importar_catalogo` y el panel de catálogo.
 
-Columnas esperadas, en este orden:
-    SECCION | MODELO | COLOR | TAMAÑO | VARIANTE | PRECIO <año> | PLACA (opcional)
+Columnas (se buscan por nombre en el encabezado, en cualquier orden):
+    CONCEPTO (opcional) | SECCION | MODELO | COLOR | TAMAÑO | VARIANTE | PRECIO <año> | PLACA (opcional)
 
 - Idempotente: se puede correr varias veces; actualiza precios y no duplica.
 - "N/A" o vacío en COLOR / VARIANTE = sin color / sin variante.
+- "N/A" o vacío en TAMAÑO = tamaño ÚNICO (secciones como CORREDIZA o LIBRO).
+- CONCEPTO: DIPLOMA/AGRADECIMIENTO o FOTO PANORAMICA. Se guarda en el tamaño y
+  decide cómo se ofrece en la captura. Un tamaño no puede tener dos conceptos.
 - PLACA: SI / NO por sección. Vacío = no cambia la sección (si es nueva, queda sin placa).
 - Precios: si todos los productos de una Sección + Tamaño (+ Variante) cuestan
   lo mismo, se guarda un solo PrecioBase. Si algún modelo cuesta distinto, se
@@ -25,7 +28,22 @@ from .models import Color, Modelo, PrecioBase, PrecioEspecial, Producto, Seccion
 
 HOJA = "TABLA UNICA"
 VACIOS = {"", "N/A", "NA", "-", "NONE"}
-ORDEN_TAMANOS = ["CARTA", "DOBLE ESPACIO", "PANORAMICA", "AMPLIADA"]
+TAMANO_UNICO = "ÚNICO"  # productos sin tamaño en el Excel
+ORDEN_TAMANOS = ["CARTA", "DOBLE ESPACIO", "ESTANDAR", "AMPLIADA", TAMANO_UNICO]
+# Nombres viejos de tamaño en el Excel -> nombre actual
+TAMANOS_ALIAS = {"PANORAMICA": "ESTANDAR"}
+# Columna CONCEPTO del Excel -> Tamano.concepto
+CONCEPTOS = {
+    "DIPLOMA/AGRADECIMIENTO": Tamano.CONCEPTO_DIPLOMA,
+    "DIPLOMA / AGRADECIMIENTO": Tamano.CONCEPTO_DIPLOMA,
+    "DIPLOMA": Tamano.CONCEPTO_DIPLOMA,
+    "AGRADECIMIENTO": Tamano.CONCEPTO_DIPLOMA,
+    "FOTO PANORAMICA": Tamano.CONCEPTO_PANORAMICA,
+    "FOTO PANORÁMICA": Tamano.CONCEPTO_PANORAMICA,
+    "PANORAMICA": Tamano.CONCEPTO_PANORAMICA,
+}
+COLUMNAS = ["CONCEPTO", "SECCION", "MODELO", "COLOR", "TAMANO", "VARIANTE", "PRECIO", "PLACA"]
+OBLIGATORIAS = ["SECCION", "MODELO", "COLOR", "TAMANO", "VARIANTE", "PRECIO"]
 
 
 class ImportacionError(Exception):
@@ -45,6 +63,23 @@ def limpiar(valor):
         return None
     texto = re.sub(r"\s+", " ", str(valor)).strip().upper()
     return None if texto in VACIOS else texto
+
+
+def _columnas(encabezado):
+    """{"SECCION": 1, "PRECIO": 6, ...} según los nombres del encabezado."""
+    sin_acentos = str.maketrans("ÁÉÍÓÚÑ", "AEIOUN")
+    indices = {}
+    for i, celda in enumerate(encabezado):
+        nombre = (limpiar(celda) or "").translate(sin_acentos)
+        for col in COLUMNAS:
+            if col not in indices and (nombre == col or (col == "PRECIO" and nombre.startswith("PRECIO"))):
+                indices[col] = i
+    return indices
+
+
+def _celda(fila, indices, col):
+    i = indices.get(col)
+    return fila[i] if i is not None and i < len(fila) else None
 
 
 def importar_catalogo(archivo, anio=None, hoja=HOJA, dry_run=False):
@@ -71,18 +106,24 @@ def importar_catalogo(archivo, anio=None, hoja=HOJA, dry_run=False):
     if not filas:
         raise ImportacionError("La hoja está vacía.")
     encabezado, filas = filas[0], filas[1:]
-    if len(encabezado) < 6:
-        raise ImportacionError("Se esperaban 6 columnas: SECCION, MODELO, COLOR, TAMAÑO, VARIANTE, PRECIO.")
+    indices = _columnas(encabezado)
+    faltan = [c for c in OBLIGATORIAS if c not in indices]
+    if faltan:
+        raise ImportacionError(
+            "Faltan columnas en el encabezado: " + ", ".join("TAMAÑO" if c == "TAMANO" else c for c in faltan)
+            + ". Se esperan SECCION, MODELO, COLOR, TAMAÑO, VARIANTE y PRECIO <año> (CONCEPTO y PLACA opcionales)."
+        )
 
     if anio is None:
-        m = re.search(r"(\d{4})", str(encabezado[5] or ""))
+        m = re.search(r"(\d{4})", str(encabezado[indices["PRECIO"]] or ""))
         if not m:
             raise ImportacionError("No encontré el año en el encabezado de precio (ej. 'PRECIO 2027').")
         anio = int(m.group(1))
 
-    registros, errores = _leer(filas)
-    placas, errores_placa = _placas_por_seccion(filas)
-    errores += errores_placa
+    registros, errores = _leer(filas, indices)
+    placas, errores_placa = _placas_por_seccion(filas, indices)
+    conceptos, errores_concepto = _conceptos_por_tamano(registros)
+    errores += errores_placa + errores_concepto
     if errores:
         raise ImportacionError(f"{len(errores)} fila(s) con errores; no se importó nada.", errores)
 
@@ -91,6 +132,7 @@ def importar_catalogo(archivo, anio=None, hoja=HOJA, dry_run=False):
         with transaction.atomic():
             resumen = _importar(registros, anio)
             resumen.update(_aplicar_placas(placas, avisos))
+            resumen.update(_aplicar_conceptos(conceptos))
             if dry_run:
                 raise _DryRun
     except _DryRun:
@@ -98,17 +140,29 @@ def importar_catalogo(archivo, anio=None, hoja=HOJA, dry_run=False):
     return anio, resumen, avisos
 
 
-def _leer(filas):
+def _leer(filas, indices):
     registros, errores = [], []
     vistos = set()
     for n, fila in enumerate(filas, start=2):
-        if not fila or all(c is None for c in fila[:6]):
+        if not fila or all(_celda(fila, indices, c) is None for c in OBLIGATORIAS):
             continue
-        seccion, modelo, color, tamano, variante = (limpiar(c) for c in fila[:5])
-        precio_raw = fila[5] if len(fila) > 5 else None
-        if not (seccion and modelo and tamano):
-            errores.append(f"Fila {n}: faltan SECCION, MODELO o TAMAÑO.")
+        seccion, modelo, color, tamano, variante = (
+            limpiar(_celda(fila, indices, c)) for c in ("SECCION", "MODELO", "COLOR", "TAMANO", "VARIANTE")
+        )
+        tamano = TAMANOS_ALIAS.get(tamano, tamano) or TAMANO_UNICO
+        precio_raw = _celda(fila, indices, "PRECIO")
+        concepto_raw = limpiar(_celda(fila, indices, "CONCEPTO"))
+        if not (seccion and modelo):
+            errores.append(f"Fila {n}: faltan SECCION o MODELO.")
             continue
+        concepto = None
+        if concepto_raw:
+            concepto = CONCEPTOS.get(concepto_raw)
+            if concepto is None:
+                errores.append(
+                    f"Fila {n}: CONCEPTO debe ser DIPLOMA/AGRADECIMIENTO o FOTO PANORAMICA ({concepto_raw!r})."
+                )
+                continue
         try:
             precio = Decimal(str(precio_raw)).quantize(Decimal("0.01"))
             if precio <= 0:
@@ -121,22 +175,55 @@ def _leer(filas):
             errores.append(f"Fila {n}: producto repetido {clave}.")
             continue
         vistos.add(clave)
-        registros.append(dict(seccion=seccion, modelo=modelo, color=color,
-                              tamano=tamano, variante=variante, precio=precio))
+        registros.append(dict(seccion=seccion, modelo=modelo, color=color, tamano=tamano,
+                              variante=variante, precio=precio, concepto=concepto, fila=n))
     return registros, errores
 
 
-def _placas_por_seccion(filas):
-    """Lee la columna PLACA (7ª). Devuelve {seccion: True/False} y errores."""
+def _conceptos_por_tamano(registros):
+    """{tamaño: concepto} desde la columna CONCEPTO; error si un tamaño tiene dos."""
     valores, errores = {}, []
-    for n, fila in enumerate(filas, start=2):
-        if not fila or len(fila) < 7 or not limpiar(fila[0]):
+    for r in registros:
+        if r["concepto"] is None:
             continue
-        seccion, crudo = limpiar(fila[0]), limpiar(fila[6])
+        previo = valores.setdefault(r["tamano"], r["concepto"])
+        if previo != r["concepto"]:
+            errores.append(
+                f"Fila {r['fila']}: el tamaño {r['tamano']} aparece con dos conceptos distintos."
+            )
+    return valores, errores
+
+
+def _aplicar_conceptos(conceptos):
+    cambios = 0
+    for tamano in Tamano.objects.filter(nombre__in=conceptos):
+        if tamano.concepto != conceptos[tamano.nombre]:
+            tamano.concepto = conceptos[tamano.nombre]
+            tamano.save(update_fields=["concepto"])
+            cambios += 1
+    etiquetas = dict(Tamano.CONCEPTO_CHOICES)
+    return {
+        "Concepto por tamaño": ", ".join(
+            f"{t.nombre}: {etiquetas.get(t.concepto) or 'sin definir'}" for t in Tamano.objects.all()
+        ),
+        "Tamaños con concepto actualizado": cambios,
+    }
+
+
+def _placas_por_seccion(filas, indices):
+    """Lee la columna PLACA. Devuelve {seccion: True/False} y errores."""
+    valores, errores = {}, []
+    if "PLACA" not in indices:
+        return valores, errores
+    for n, fila in enumerate(filas, start=2):
+        seccion = limpiar(_celda(fila, indices, "SECCION")) if fila else None
+        if not seccion:
+            continue
+        crudo = limpiar(_celda(fila, indices, "PLACA"))
         if crudo is None:
             continue
         if crudo not in ("SI", "SÍ", "NO"):
-            errores.append(f"Fila {n}: PLACA debe ser SI o NO ({fila[6]!r}).")
+            errores.append(f"Fila {n}: PLACA debe ser SI o NO ({_celda(fila, indices, 'PLACA')!r}).")
             continue
         valor = crudo != "NO"
         if valores.setdefault(seccion, valor) != valor:
@@ -197,6 +284,7 @@ def _importar(registros, anio):
         por_seccion_tamano[(s, t)].extend(items)
 
     bases, especiales = 0, 0
+    bases_ids, productos_ids = set(), set()
     for (s, t), items in por_seccion_tamano.items():
         if len({p for _, p in items}) == 1:
             subgrupos = {None: items}
@@ -207,12 +295,14 @@ def _importar(registros, anio):
 
         for variante, sub in subgrupos.items():
             comun = Counter(p for _, p in sub).most_common(1)[0][0]
-            PrecioBase.objects.update_or_create(
+            base, _ = PrecioBase.objects.update_or_create(
                 generacion=generacion, seccion=s, tamano=t, variante=variante,
                 defaults={"precio": comun},
             )
             bases += 1
+            bases_ids.add(base.pk)
             for producto, precio in sub:
+                productos_ids.add(producto.pk)
                 if precio != comun:
                     PrecioEspecial.objects.update_or_create(
                         generacion=generacion, producto=producto, defaults={"precio": precio}
@@ -220,6 +310,14 @@ def _importar(registros, anio):
                     especiales += 1
                 else:
                     PrecioEspecial.objects.filter(generacion=generacion, producto=producto).delete()
+
+    # El Excel es la lista completa del año: los precios de esa generación que ya no
+    # vienen en él se quitan (los productos se quedan, pero sin precio no se ofrecen;
+    # los pedidos guardan su propio precio y no cambian).
+    quitados = PrecioBase.objects.filter(generacion=generacion).exclude(pk__in=bases_ids).delete()[0]
+    quitados += (
+        PrecioEspecial.objects.filter(generacion=generacion).exclude(producto_id__in=productos_ids).delete()[0]
+    )
 
     return {
         "Filas leídas": len(registros),
@@ -232,4 +330,5 @@ def _importar(registros, anio):
         "Variantes": Variante.objects.count(),
         f"Precios base ({anio})": bases,
         f"Precios especiales ({anio})": especiales,
+        f"Precios quitados ({anio}, ya no están en el Excel)": quitados,
     }

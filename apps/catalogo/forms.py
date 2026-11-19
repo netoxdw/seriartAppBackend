@@ -36,8 +36,13 @@ class SeccionForm(_NombreMayusculasMixin, forms.ModelForm):
 class TamanoForm(_NombreMayusculasMixin, forms.ModelForm):
     class Meta:
         model = Tamano
-        fields = ["nombre", "orden", "activo"]
-        widgets = {"nombre": _W_TEXTO, "orden": _W_NUM, "activo": _W_CHECK}
+        fields = ["nombre", "concepto", "orden", "activo"]
+        widgets = {
+            "nombre": _W_TEXTO,
+            "concepto": forms.Select(attrs={"class": "form-select form-select-sm"}),
+            "orden": _W_NUM,
+            "activo": _W_CHECK,
+        }
 
 
 class ModeloForm(_NombreMayusculasMixin, forms.ModelForm):
@@ -72,7 +77,9 @@ class PlacaForm(forms.ModelForm):
 DIMENSIONES = {
     "secciones": (Seccion, SeccionForm, "Secciones",
                   "Líneas de producto. 'Lleva placa' muestra el tipo y color de placa al capturar."),
-    "tamanos": (Tamano, TamanoForm, "Tamaños", "El orden define las columnas de la tabla de precios."),
+    "tamanos": (Tamano, TamanoForm, "Tamaños",
+                "El orden define las columnas de la tabla de precios. El concepto decide si en la "
+                "captura se ofrece como diploma/agradecimiento o como foto panorámica."),
     "modelos": (Modelo, ModeloForm, "Modelos", "Un modelo puede estar en varias secciones."),
     "colores": (Color, ColorForm, "Colores", "Color del marco."),
     "variantes": (Variante, VarianteForm, "Variantes", "Pueden tener precio propio (ej. ESCULTURAS)."),
