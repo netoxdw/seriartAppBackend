@@ -145,10 +145,14 @@ SESSION_SAVE_EVERY_REQUEST = True
 # SECURITY PRODUCTION
 # =========================
 
-CSRF_COOKIE_SECURE = False
-SESSION_COOKIE_SECURE = False
+# HTTPS=True en el .env cuando el sitio se sirve con certificado (nginx hace la redirección)
+HTTPS = config('HTTPS', default=False, cast=bool)
+CSRF_COOKIE_SECURE = HTTPS
+SESSION_COOKIE_SECURE = HTTPS
 
-# Cambiar a True después de instalar SSL
+# Ej.: CSRF_TRUSTED_ORIGINS=https://seriartapp.tech,https://www.seriartapp.tech
+CSRF_TRUSTED_ORIGINS = [o for o in config('CSRF_TRUSTED_ORIGINS', default='').split(',') if o]
+
 SECURE_SSL_REDIRECT = False
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
