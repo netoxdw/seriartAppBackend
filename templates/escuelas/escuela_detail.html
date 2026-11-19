@@ -1,42 +1,75 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}{{ escuela.nombre_escuela }} · SERIART{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pedido.css' %}?{% now 'U' %}">
+{% endblock %}
+
 {% block content %}
 
-<!-- ENCABEZADO -->
-<div class="page-head">
-    <div>
-        <nav class="page-migas" aria-label="Ruta">
-            <a href="{% url 'home' %}">Generaciones</a> ›
-            <a href="{% url 'escuelas:generacion_detail' generacion.id %}">{{ generacion.anio }}</a> ›
-            {{ escuela.nombre_escuela }}
-        </nav>
-        <h2 class="page-title d-flex align-items-center flex-wrap gap-2">
-            {{ escuela.nombre_escuela }}
-            <span class="nivel nivel-{{ escuela.nivel }}">
-                {% if escuela.nivel == 'otro' %}Nivel sin definir{% else %}{{ escuela.get_nivel_display }}{% endif %}
-            </span>
-        </h2>
-        <p class="page-sub">
-            Generación {{ generacion.anio }} ·
-            {{ grupos|length }} grupo{{ grupos|length|pluralize }} ·
-            {{ total_alumnos }} alumno{{ total_alumnos|pluralize }}
-            {% if escuela.telefono %} · <i class="bi bi-telephone"></i> {{ escuela.telefono }}{% endif %}
-            {% if escuela.direccion %} · <i class="bi bi-geo-alt"></i> {{ escuela.direccion }}{% endif %}
-        </p>
+<!-- ========================================
+     ENCABEZADO DE LA ESCUELA (secundario)
+======================================== -->
+<div class="pedido-header-card grupo-head mb-4">
+
+    <div class="pedido-header-top">
+        <div>
+            <div class="breadcrumb-custom mb-3">
+                <a href="{% url 'home' %}">Generaciones</a>
+                <span>/</span>
+                <a href="{% url 'escuelas:generacion_detail' generacion.id %}">{{ generacion.anio }}</a>
+                <span>/</span>
+                <span>{{ escuela.nombre_escuela }}</span>
+            </div>
+
+            <div class="d-flex align-items-center gap-4 flex-wrap">
+                <div class="pedido-avatar"><i class="bi bi-building"></i></div>
+                <div>
+                    <h1 class="pedido-title">{{ escuela.nombre_escuela }}</h1>
+                    <div class="pedido-subtitle d-flex align-items-center flex-wrap gap-2">
+                        Generación {{ generacion.anio }}
+                        <span class="nivel nivel-{{ escuela.nivel }}">
+                            {% if escuela.nivel == 'otro' %}Nivel sin definir{% else %}{{ escuela.get_nivel_display }}{% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="pedido-header-actions">
+            <a href="{% url 'escuelas:grupo_create' generacion.id escuela.id %}" class="btn btn-success custom-action-btn">
+                <i class="bi bi-plus-lg"></i> Nuevo grupo
+            </a>
+            <a href="{% url 'escuelas:escuela_update' generacion.id escuela.id %}" class="btn btn-light custom-action-btn">
+                <i class="bi bi-pencil"></i> Editar escuela
+            </a>
+            <a href="{% url 'escuelas:generacion_detail' generacion.id %}" class="btn btn-light custom-action-btn">
+                <i class="bi bi-arrow-left"></i> Volver
+            </a>
+        </div>
     </div>
-    <div class="page-acciones">
-        <a href="{% url 'escuelas:generacion_detail' generacion.id %}" class="btn btn-volver">
-            <i class="bi bi-arrow-left"></i> Volver
-        </a>
-        <a href="{% url 'escuelas:escuela_update' generacion.id escuela.id %}" class="btn btn-volver">
-            <i class="bi bi-pencil"></i> Editar escuela
-        </a>
-        <a href="{% url 'escuelas:grupo_create' generacion.id escuela.id %}" class="btn btn-success">
-            <i class="bi bi-plus-lg"></i> Nuevo grupo
-        </a>
+
+    <div class="pedido-info-grid">
+        <div class="pedido-meta-item">
+            <span class="pedido-meta-label">Grupos:</span>
+            <span class="pedido-meta-value">{{ grupos|length }}</span>
+        </div>
+        <div class="pedido-meta-item">
+            <span class="pedido-meta-label">Alumnos:</span>
+            <span class="pedido-meta-value">{{ total_alumnos }}</span>
+        </div>
+        <div class="pedido-meta-item">
+            <span class="pedido-meta-label">Teléfono:</span>
+            <span class="pedido-meta-value">{{ escuela.telefono|default:"Sin teléfono" }}</span>
+        </div>
+        <div class="pedido-meta-item">
+            <span class="pedido-meta-label">Dirección:</span>
+            <span class="pedido-meta-value">{{ escuela.direccion|default:"Sin dirección" }}</span>
+        </div>
     </div>
+
 </div>
 
 {% if escuela.nivel == 'otro' %}
@@ -50,44 +83,83 @@
 </div>
 {% endif %}
 
-<!-- LISTA DE GRUPOS -->
-<div class="lista">
-    {% for grupo in grupos %}
-    <div class="lista-row">
-        <div class="lista-icon"><i class="bi bi-people"></i></div>
-        <div class="lista-main">
-            <div class="lista-title">
-                <a href="{% url 'alumnos:grupo_detail' grupo.id %}" class="stretched-link text-reset">
-                    Grupo {{ grupo.nombre_grupo }}
-                </a>
-            </div>
-            <div class="lista-sub">
-                {{ grupo.num_alumnos }} alumno{{ grupo.num_alumnos|pluralize }} ·
-                {% if grupo.fecha_fotografia %}
-                    <i class="bi bi-camera"></i> {{ grupo.fecha_fotografia|date:"D d/m/Y" }}{% if grupo.hora_fotografia %}, {{ grupo.hora_fotografia|time:"H:i" }}{% endif %}
-                {% else %}
-                    <span class="aviso-pendiente"><i class="bi bi-camera"></i> Sin fecha de fotografía</span>
-                {% endif %}
-                {% if grupo.lugar_fotografia %} · <i class="bi bi-geo-alt"></i> {{ grupo.lugar_fotografia }}{% endif %}
-            </div>
-        </div>
-        <div class="lista-acciones">
-            <a href="{% url 'escuelas:grupo_update' grupo.id %}" class="btn btn-sm btn-volver"
-               title="Editar grupo y sesión de fotos" aria-label="Editar grupo {{ grupo.nombre_grupo }}">
-                <i class="bi bi-pencil"></i>
-            </a>
-            <span class="lista-cta">Ver alumnos <i class="bi bi-chevron-right"></i></span>
+<!-- ========================================
+     GRUPOS (panel principal)
+======================================== -->
+<div class="table-section-card panel-principal mb-4">
+
+    <div class="table-section-header">
+        <div>
+            <h4 class="section-title mb-1">Grupos</h4>
+            <p class="section-subtitle mb-0">
+                {% if grupos %}Abre un grupo para ver a sus alumnos y sus pedidos.{% else %}Agrega los grupos de esta escuela para la generación {{ generacion.anio }}.{% endif %}
+            </p>
         </div>
     </div>
-    {% empty %}
-    <div class="lista-vacia">
-        <i class="bi bi-people"></i>
-        <p class="mb-2">Esta escuela todavía no tiene grupos en la generación {{ generacion.anio }}.</p>
-        <a href="{% url 'escuelas:grupo_create' generacion.id escuela.id %}" class="btn btn-success btn-sm">
-            <i class="bi bi-plus-lg"></i> Agregar el primer grupo
-        </a>
+
+    <div class="table-responsive">
+        <table class="table align-middle modern-table grupo-tabla">
+            <thead>
+                <tr>
+                    <th>Grupo</th>
+                    <th>Alumnos</th>
+                    <th>Fotografía</th>
+                    <th>Lugar</th>
+                    <th class="text-end">Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for grupo in grupos %}
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="table-product-icon"><i class="bi bi-people"></i></div>
+                            <a href="{% url 'alumnos:grupo_detail' grupo.id %}" class="table-product-title text-reset text-decoration-none">
+                                Grupo {{ grupo.nombre_grupo }}
+                            </a>
+                        </div>
+                    </td>
+                    <td><span class="quantity-badge">{{ grupo.num_alumnos }}</span></td>
+                    <td>
+                        {% if grupo.fecha_fotografia %}
+                            <i class="bi bi-camera text-muted"></i> {{ grupo.fecha_fotografia|date:"D d/m/Y" }}{% if grupo.hora_fotografia %}, {{ grupo.hora_fotografia|time:"H:i" }}{% endif %}
+                        {% else %}
+                            <span class="aviso-pendiente"><i class="bi bi-camera"></i> Sin fecha</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if grupo.lugar_fotografia %}{{ grupo.lugar_fotografia }}{% else %}<span class="payment-empty">Sin lugar</span>{% endif %}
+                    </td>
+                    <td>
+                        <div class="table-actions">
+                            <a href="{% url 'escuelas:grupo_update' grupo.id %}" class="table-action-btn warning"
+                               title="Editar grupo y sesión de fotos" aria-label="Editar grupo {{ grupo.nombre_grupo }}">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'alumnos:grupo_detail' grupo.id %}" class="btn btn-dark btn-sm grupo-ver">
+                                Ver alumnos <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5">
+                        <div class="empty-table-state">
+                            <div class="empty-table-icon"><i class="bi bi-people"></i></div>
+                            <h5>Esta escuela todavía no tiene grupos</h5>
+                            <p>Agrega el primero para la generación {{ generacion.anio }}.</p>
+                            <a href="{% url 'escuelas:grupo_create' generacion.id escuela.id %}" class="btn btn-success">
+                                <i class="bi bi-plus-lg"></i> Agregar el primer grupo
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
-    {% endfor %}
+
 </div>
 
 {% endblock %}

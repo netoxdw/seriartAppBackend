@@ -20,7 +20,7 @@ class HomeView(LoginRequiredMixin, TemplateView):
             num_grupos=Count("grupos", distinct=True),
             num_alumnos=Count("grupos__alumnos", distinct=True),
             num_pedidos=Count("grupos__alumnos__pedidos", distinct=True),
-        )
+        ).order_by("-anio")  # con annotate Django ignora Meta.ordering
 
         context["generaciones"] = generaciones
 

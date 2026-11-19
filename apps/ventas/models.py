@@ -220,22 +220,40 @@ class Pedido(models.Model):
                 f"No se puede {accion} un pedido en estado «{self.get_estado_display()}»."
             )
 
+    @property
+    def listo_tras_devolucion(self):
+        """True si el pedido está «Listo» porque se corrigió después de una devolución."""
+        if self.estado != self.LISTO:
+            return False
+        ultimo = (
+            self.historial_estados.filter(estado_nuevo=self.LISTO)
+            .order_by("-fecha", "-id")
+            .first()
+        )
+        return bool(ultimo and ultimo.estado_anterior == self.DEVOLUCION)
+
     def marcar_listo(self, usuario, nota=""):
-        self._exigir(self.ESTADOS_AUTOMATICOS, "marcar como listo")
+        # Desde producción, o desde una devolución ya corregida (para volver a entregar)
+        self._exigir(self.ESTADOS_AUTOMATICOS + (self.DEVOLUCION,), "marcar como listo")
         anterior = self.estado
         self.estado = self.LISTO
         self.save(update_fields=["estado", "actualizado"])
+        if anterior == self.DEVOLUCION:
+            nota = "Corregido tras devolución" + (f". {nota}" if nota else "")
         self._registrar(anterior, usuario, nota)
 
     def regresar_a_produccion(self, usuario, nota=""):
+        """Deshace «Listo»: vuelve a Devolución si de ahí venía; si no, al estado según anticipo."""
         self._exigir((self.LISTO,), "regresar a producción")
+        tras_devolucion = self.listo_tras_devolucion
         anterior = self.estado
-        self.estado = self.estado_por_anticipo()
+        self.estado = self.DEVOLUCION if tras_devolucion else self.estado_por_anticipo()
         self.save(update_fields=["estado", "actualizado"])
         self._registrar(anterior, usuario, nota or "Se deshizo 'Listo para entregar'")
 
     def marcar_entregado(self, usuario, recibido_por, nota=""):
         self._exigir((self.LISTO, self.DEVOLUCION), "marcar como entregado")
+        reentrega = self.estado == self.DEVOLUCION or self.listo_tras_devolucion
         recibido_por = (recibido_por or "").strip()
         if not recibido_por:
             raise ValidationError("Debes indicar quién recibe el pedido.")
@@ -247,7 +265,7 @@ class Pedido(models.Model):
             self.notas_entrega = nota
         self.save(update_fields=["estado", "recibido_por", "fecha_entrega", "notas_entrega", "actualizado"])
         texto = f"Recibió: {recibido_por}" + (f". {nota}" if nota else "")
-        if anterior == self.DEVOLUCION:
+        if reentrega:
             texto = "Reentrega tras devolución. " + texto
         self._registrar(anterior, usuario, texto)
 

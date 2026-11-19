@@ -19,20 +19,21 @@
 {% include "ventas/partials/pedido_stats.html" %}
 
 
-<!-- ITEMS BASE -->
-{% include "ventas/partials/items_base_table.html" %}
+<!-- NOTAS: si existen van antes de los artículos para que se lean -->
+{% if observaciones %}
+{% include "ventas/partials/observaciones_list.html" %}
+{% endif %}
 
-<!-- ANILLOS -->
-{% include "ventas/partials/items_anillo_table.html" %}
+<!-- ARTÍCULOS: bases, anillos y extras -->
+{% include "ventas/partials/items_table.html" %}
 
 <!-- PAGOS -->
 {% include "ventas/partials/pagos_table.html" %}
 
-<!-- EXTRAS -->
-{% include "ventas/partials/items_extra_table.html" %}
-
-<!-- OBSERVACIONES -->
+<!-- OBSERVACIONES (sin notas: solo el botón para agregar) -->
+{% if not observaciones %}
 {% include "ventas/partials/observaciones_list.html" %}
+{% endif %}
 
 <!-- DESCUENTOS -->
 {% include "ventas/partials/descuentos_table.html" %}

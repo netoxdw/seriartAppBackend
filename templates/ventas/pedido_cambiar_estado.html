@@ -1,182 +1,197 @@
 {% extends "base.html" %}
-{% load static %}
+
+{% block title %}Estado del pedido #{{ pedido.id }} · SERIART{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/forms.css' %}?{% now 'U' %}">
 <style>
-    .estado-flujo { display:flex; flex-wrap:wrap; gap:.35rem; align-items:center; font-size:.8rem; }
-    .estado-flujo .paso { padding:.25rem .6rem; border-radius:999px; background:#f1f5f9; color:#64748b; }
-    .estado-flujo .paso.actual { font-weight:700; color:#fff; }
-    .estado-flujo i { color:#cbd5e1; }
-    .accion-card { border:1px solid #e5e7eb; border-radius:14px; padding:1rem 1.1rem; margin-bottom:1rem; }
-    .accion-card h6 { font-weight:700; margin-bottom:.75rem; }
-    .historial-item { border-left:3px solid #e5e7eb; padding:.35rem 0 .35rem .8rem; margin-bottom:.4rem; }
-    .progress { height:10px; }
+    .estado-caja { max-width: 640px; }
+    .estado-actual {
+        display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px;
+        padding: 20px 24px; background: #fff; border: 1px solid var(--border);
+        border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); margin-bottom: 18px;
+    }
+    .estado-actual .badge { font-size: 15px; padding: 6px 12px; }
+    .estado-actual .dato { color: var(--muted); font-size: 14px; }
+    .estado-actual .dato b { color: var(--text); }
+    .estado-nota { font-size: 14px; color: var(--muted); margin: -8px 0 18px; }
+
+    .acciones-titulo { font-weight: 700; margin-bottom: 10px; }
+    .accion-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+    .accion-btns .btn { padding: 12px 18px; font-weight: 600; border-radius: 14px; }
+    .accion-btns .btn:hover { transform: translateY(-1px); }
+
+    .accion-form {
+        background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm); padding: 22px 24px; margin-top: 14px;
+    }
+    .accion-form .form-check { font-size: 14px; }
+    .accion-form .btn, .estado-caja > .d-flex .btn { border-radius: 14px; padding: 10px 18px; font-weight: 600; }
+    .historial-item { border-left: 3px solid var(--border); padding: 4px 0 4px 10px; margin-bottom: 6px; font-size: 13px; }
+    details.historial summary { cursor: pointer; color: var(--muted); font-size: 14px; }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="form-wrapper">
-<div class="row justify-content-center">
-<div class="col-12 col-lg-9 col-xl-8">
-<div class="form-container delivery-form-container">
+<div class="estado-caja">
 
-    <div class="form-header">
-        <div class="form-icon delivery-form-icon"><i class="bi bi-signpost-split"></i></div>
-        <div>
-            <h2 class="form-title">Estado del pedido #{{ pedido.id }}</h2>
-            <p class="form-subtitle mb-0">
-                {{ pedido.alumno.nombre_alumno }} · {{ pedido.alumno.grupo.escuela.nombre_escuela }} {{ pedido.alumno.grupo.nombre_grupo }}
-            </p>
-        </div>
+<!-- ENCABEZADO -->
+<div class="page-head">
+    <div>
+        <h2 class="page-title">Estado del pedido #{{ pedido.id }}</h2>
+        <p class="page-sub">
+            {{ pedido.alumno.nombre_alumno }} · {{ pedido.alumno.grupo.escuela.nombre_escuela }} {{ pedido.alumno.grupo.nombre_grupo }}
+        </p>
     </div>
+</div>
 
-    <!-- RESUMEN -->
-    <div class="selection-card delivery-info-card mb-4">
-        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-            <div class="fs-5">{% include "ventas/partials/estado_badge.html" %}</div>
-            <a href="{% url 'ventas:pedido_detail' pedido.id %}" class="btn btn-sm btn-light border"><i class="bi bi-receipt"></i> Ver pedido</a>
-        </div>
+<!-- ESTADO ACTUAL -->
+<div class="estado-actual">
+    {% include "ventas/partials/estado_badge.html" %}
+    <span class="dato">Pagado <b>${{ pedido.total_pagado|floatformat:2 }}</b> de ${{ pedido.total|floatformat:2 }} ({{ pedido.porcentaje_pagado }} %)</span>
+    {% if pedido.saldo_pendiente > 0 %}<span class="dato aviso-pendiente">Debe ${{ pedido.saldo_pendiente|floatformat:2 }}</span>{% endif %}
+</div>
 
-        <div class="estado-flujo mb-3">
-            {% for valor, nombre in pedido.ESTADO_CHOICES %}
-            <span class="paso {% if valor == pedido.estado %}actual text-bg-{{ pedido.color_estado }}{% endif %}">{{ nombre }}</span>
-            {% if not forloop.last %}<i class="bi bi-chevron-right"></i>{% endif %}
-            {% endfor %}
-        </div>
+{% if pedido.motivo_devolucion and pedido.estado == "devolucion" or pedido.motivo_devolucion and pedido.listo_tras_devolucion %}
+<p class="estado-nota"><i class="bi bi-arrow-return-left text-danger"></i> Devuelto: {{ pedido.motivo_devolucion }}</p>
+{% elif pedido.estado == "entregado" %}
+<p class="estado-nota"><i class="bi bi-check2-circle text-success"></i> Lo recibió {{ pedido.recibido_por }} el {{ pedido.fecha_entrega|date:"d/m/Y" }}</p>
+{% elif pedido.estado in pedido.ESTADOS_AUTOMATICOS %}
+<p class="estado-nota"><i class="bi bi-info-circle"></i> Este estado cambia solo con los pagos (50 % o más = Hacer).</p>
+{% endif %}
 
-        <div class="row g-3">
-            <div class="col-6 col-md-3"><div class="small text-muted">Total</div><div class="fw-bold">${{ pedido.total|floatformat:2 }}</div></div>
-            <div class="col-6 col-md-3"><div class="small text-muted">Pagado</div><div class="fw-bold">${{ pedido.total_pagado|floatformat:2 }}</div></div>
-            <div class="col-6 col-md-3"><div class="small text-muted">Saldo</div><div class="fw-bold {% if pedido.saldo_pendiente > 0 %}text-danger{% endif %}">${{ pedido.saldo_pendiente|floatformat:2 }}</div></div>
-            <div class="col-6 col-md-3"><div class="small text-muted">Anticipo</div><div class="fw-bold">{{ pedido.porcentaje_pagado }} %</div></div>
-        </div>
-        <div class="progress mt-2" role="progressbar" aria-label="Porcentaje pagado">
-            <div class="progress-bar {% if pedido.anticipo_suficiente %}bg-success{% else %}bg-warning{% endif %}" style="width: {{ pedido.porcentaje_pagado|stringformat:'s' }}%"></div>
-        </div>
-        {% if pedido.estado == "devolucion" and pedido.motivo_devolucion %}
-        <div class="alert alert-danger mt-3 mb-0 small">
-            <strong>Motivo de la devolución:</strong> {{ pedido.motivo_devolucion }}
-            {% if pedido.fecha_devolucion %}<span class="text-muted">({{ pedido.fecha_devolucion|date:"d/m/Y H:i" }})</span>{% endif %}
-        </div>
-        {% endif %}
-        {% if pedido.estado == "entregado" %}
-        <div class="small text-muted mt-3">
-            Entregado a <strong>{{ pedido.recibido_por }}</strong> el {{ pedido.fecha_entrega|date:"d/m/Y H:i" }}
-            {% if pedido.notas_entrega %}· {{ pedido.notas_entrega }}{% endif %}
-        </div>
-        {% endif %}
-    </div>
-
-    <!-- ACCIONES SEGÚN EL ESTADO -->
+<!-- ¿QUÉ SIGUE? -->
+<div class="acciones-titulo">¿Qué quieres hacer?</div>
+<div class="accion-btns">
     {% if pedido.estado in pedido.ESTADOS_AUTOMATICOS %}
-    <div class="input-help mb-3">
-        <i class="bi bi-info-circle"></i> Sin anticipo, Poco anticipo (menos del 50 %) y Hacer (50 % o más) cambian solos al registrar pagos.
-    </div>
-    <div class="accion-card">
-        <h6><i class="bi bi-box-seam"></i> Marcar como listo para entregar</h6>
-        <form method="post" novalidate>
-            {% csrf_token %}
-            <input type="hidden" name="accion" value="listo">
-            <input type="hidden" name="next" value="{{ siguiente }}">
-            {% if not pedido.anticipo_suficiente %}
-            <div class="alert alert-warning py-2 small">
-                <i class="bi bi-exclamation-triangle"></i> Este pedido lleva {{ pedido.porcentaje_pagado }} % pagado (menos del 50 %).
-            </div>
-            <div class="form-check mb-2">
-                {{ form_listo.confirmar_anticipo }}
-                <label class="form-check-label" for="{{ form_listo.confirmar_anticipo.id_for_label }}">{{ form_listo.confirmar_anticipo.label }}</label>
-                {% for e in form_listo.confirmar_anticipo.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
-            </div>
-            {% endif %}
-            <label class="custom-label" for="{{ form_listo.nota.id_for_label }}">{{ form_listo.nota.label }}</label>
-            {{ form_listo.nota }}
-            <div class="d-flex justify-content-end mt-3">
-                <button class="btn btn-info text-white"><i class="bi bi-check2-circle"></i> Marcar listo</button>
-            </div>
-        </form>
-    </div>
+        <button type="button" class="btn btn-info text-white" data-abre="listo"><i class="bi bi-box-seam"></i> Marcar listo para entregar</button>
+    {% elif pedido.estado == "listo" %}
+        <button type="button" class="btn btn-success" data-abre="entregado"><i class="bi bi-hand-thumbs-up"></i> Marcar entregado</button>
+    {% elif pedido.estado == "entregado" %}
+        <button type="button" class="btn btn-outline-danger" data-abre="devolucion"><i class="bi bi-arrow-return-left"></i> Registrar devolución</button>
+    {% elif pedido.estado == "devolucion" %}
+        <button type="button" class="btn btn-info text-white" data-abre="listo"><i class="bi bi-box-seam"></i> Ya está corregido: listo para entregar</button>
+        <button type="button" class="btn btn-success" data-abre="entregado"><i class="bi bi-hand-thumbs-up"></i> Ya se entregó corregido</button>
     {% endif %}
+</div>
 
-    {% if pedido.estado == "listo" or pedido.estado == "devolucion" %}
-    <div class="accion-card">
-        <h6><i class="bi bi-hand-thumbs-up"></i> {% if pedido.estado == "devolucion" %}Marcar como entregado (corregido){% else %}Marcar como entregado{% endif %}</h6>
-        <form method="post" novalidate>
-            {% csrf_token %}
-            <input type="hidden" name="accion" value="entregado">
-            <input type="hidden" name="next" value="{{ siguiente }}">
-            <div class="mb-3">
-                <label class="custom-label" for="{{ form_entregado.recibido_por.id_for_label }}">{{ form_entregado.recibido_por.label }}</label>
-                {{ form_entregado.recibido_por }}
-                {% for e in form_entregado.recibido_por.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
-            </div>
-            <label class="custom-label" for="{{ form_entregado.nota.id_for_label }}">{{ form_entregado.nota.label }}</label>
-            {{ form_entregado.nota }}
-            {% if pedido.saldo_pendiente > 0 %}
-            <div class="alert alert-warning py-2 small mt-3 mb-2">
-                <i class="bi bi-exclamation-triangle"></i> Tiene saldo pendiente de <strong>${{ pedido.saldo_pendiente|floatformat:2 }}</strong>.
-            </div>
-            <div class="form-check">
-                {{ form_entregado.confirmar_saldo }}
-                <label class="form-check-label" for="{{ form_entregado.confirmar_saldo.id_for_label }}">{{ form_entregado.confirmar_saldo.label }}</label>
-                {% for e in form_entregado.confirmar_saldo.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
-            </div>
-            {% endif %}
-            <div class="d-flex justify-content-end mt-3">
-                <button class="btn btn-success"><i class="bi bi-check2-circle"></i> Marcar entregado</button>
-            </div>
-        </form>
+<!-- FORMULARIOS (se abre uno a la vez) -->
+{% if pedido.estado in pedido.ESTADOS_AUTOMATICOS or pedido.estado == "devolucion" %}
+<form method="post" novalidate class="accion-form" data-form="listo" {% if abierta != "listo" %}hidden{% endif %}>
+    {% csrf_token %}
+    <input type="hidden" name="accion" value="listo">
+    <input type="hidden" name="next" value="{{ siguiente }}">
+    {% if not pedido.anticipo_suficiente %}
+    <div class="form-check mb-3">
+        {{ form_listo.confirmar_anticipo }}
+        <label class="form-check-label" for="{{ form_listo.confirmar_anticipo.id_for_label }}">
+            Lleva solo {{ pedido.porcentaje_pagado }} % pagado. Confirmo que está listo de todos modos.
+        </label>
+        {% for e in form_listo.confirmar_anticipo.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
     </div>
     {% endif %}
+    <label class="custom-label" for="{{ form_listo.nota.id_for_label }}">{{ form_listo.nota.label }}</label>
+    {{ form_listo.nota }}
+    <div class="d-flex justify-content-end gap-2 mt-3">
+        <button type="button" class="btn btn-volver" data-cierra>Cancelar</button>
+        <button class="btn btn-info text-white"><i class="bi bi-check2"></i> Confirmar: listo</button>
+    </div>
+</form>
+{% endif %}
 
-    {% if pedido.estado == "listo" %}
-    <form method="post" class="mb-3 text-end">
-        {% csrf_token %}
-        <input type="hidden" name="accion" value="regresar">
-        <input type="hidden" name="next" value="{{ siguiente }}">
-        <button class="btn btn-sm btn-outline-secondary" onclick="return confirm('¿Regresar el pedido a producción?')">
-            <i class="bi bi-arrow-counterclockwise"></i> Regresar a producción (deshacer «Listo»)
-        </button>
-    </form>
-    {% endif %}
-
-    {% if pedido.estado == "entregado" %}
-    <div class="accion-card border-danger-subtle">
-        <h6 class="text-danger"><i class="bi bi-arrow-return-left"></i> Registrar devolución</h6>
-        <form method="post" novalidate>
-            {% csrf_token %}
-            <input type="hidden" name="accion" value="devolucion">
-            <input type="hidden" name="next" value="{{ siguiente }}">
-            <label class="custom-label" for="{{ form_devolucion.motivo.id_for_label }}">{{ form_devolucion.motivo.label }}</label>
-            {{ form_devolucion.motivo }}
-            {% for e in form_devolucion.motivo.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
-            <div class="d-flex justify-content-end mt-3">
-                <button class="btn btn-outline-danger"><i class="bi bi-arrow-return-left"></i> Registrar devolución</button>
-            </div>
-        </form>
+{% if pedido.estado == "listo" or pedido.estado == "devolucion" %}
+<form method="post" novalidate class="accion-form" data-form="entregado" {% if abierta != "entregado" %}hidden{% endif %}>
+    {% csrf_token %}
+    <input type="hidden" name="accion" value="entregado">
+    <input type="hidden" name="next" value="{{ siguiente }}">
+    <div class="mb-3">
+        <label class="custom-label" for="{{ form_entregado.recibido_por.id_for_label }}">¿Quién lo recibe?</label>
+        {{ form_entregado.recibido_por }}
+        {% for e in form_entregado.recibido_por.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+    </div>
+    {% if pedido.saldo_pendiente > 0 %}
+    <div class="form-check mb-3">
+        {{ form_entregado.confirmar_saldo }}
+        <label class="form-check-label" for="{{ form_entregado.confirmar_saldo.id_for_label }}">
+            Todavía debe ${{ pedido.saldo_pendiente|floatformat:2 }}. Confirmo la entrega de todos modos.
+        </label>
+        {% for e in form_entregado.confirmar_saldo.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
     </div>
     {% endif %}
+    <label class="custom-label" for="{{ form_entregado.nota.id_for_label }}">{{ form_entregado.nota.label }}</label>
+    {{ form_entregado.nota }}
+    <div class="d-flex justify-content-end gap-2 mt-3">
+        <button type="button" class="btn btn-volver" data-cierra>Cancelar</button>
+        <button class="btn btn-success"><i class="bi bi-check2"></i> Confirmar entrega</button>
+    </div>
+</form>
+{% endif %}
 
-    <!-- HISTORIAL -->
-    <h6 class="fw-bold mt-4 mb-2"><i class="bi bi-clock-history"></i> Historial</h6>
-    {% for h in historial %}
-    <div class="historial-item">
-        <div class="small">
-            <strong>{{ h.get_estado_anterior_display|default:"—" }}</strong> <i class="bi bi-arrow-right"></i> <strong>{{ h.get_estado_nuevo_display }}</strong>
+{% if pedido.estado == "entregado" %}
+<form method="post" novalidate class="accion-form" data-form="devolucion" {% if abierta != "devolucion" %}hidden{% endif %}>
+    {% csrf_token %}
+    <input type="hidden" name="accion" value="devolucion">
+    <input type="hidden" name="next" value="{{ siguiente }}">
+    <label class="custom-label" for="{{ form_devolucion.motivo.id_for_label }}">¿Por qué lo devolvieron?</label>
+    {{ form_devolucion.motivo }}
+    {% for e in form_devolucion.motivo.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+    <div class="d-flex justify-content-end gap-2 mt-3">
+        <button type="button" class="btn btn-volver" data-cierra>Cancelar</button>
+        <button class="btn btn-danger"><i class="bi bi-check2"></i> Confirmar devolución</button>
+    </div>
+</form>
+{% endif %}
+
+{% if pedido.estado == "listo" %}
+<form method="post" class="mt-3">
+    {% csrf_token %}
+    <input type="hidden" name="accion" value="regresar">
+    <input type="hidden" name="next" value="{{ siguiente }}">
+    <button class="btn btn-link btn-sm text-muted p-0"
+            onclick="return confirm('{% if pedido.listo_tras_devolucion %}¿Regresar el pedido a Devolución?{% else %}¿Regresar el pedido a producción?{% endif %}')">
+        <i class="bi bi-arrow-counterclockwise"></i>
+        Me equivoqué, todavía no está listo{% if pedido.listo_tras_devolucion %} (regresa a Devolución){% endif %}
+    </button>
+</form>
+{% endif %}
+
+<!-- HISTORIAL (plegado) -->
+<details class="historial mt-4" {% if not historial %}hidden{% endif %}>
+    <summary>Ver historial de cambios ({{ historial|length }})</summary>
+    <div class="mt-2">
+        {% for h in historial %}
+        <div class="historial-item">
+            <strong>{{ h.get_estado_anterior_display|default:"—" }}</strong> → <strong>{{ h.get_estado_nuevo_display }}</strong>
             <span class="text-muted">· {{ h.fecha|date:"d/m/Y H:i" }} · {% if h.usuario %}{{ h.usuario.get_full_name|default:h.usuario.username }}{% else %}Sistema{% endif %}</span>
+            {% if h.nota %}<div class="text-muted">{{ h.nota }}</div>{% endif %}
         </div>
-        {% if h.nota %}<div class="small text-muted">{{ h.nota }}</div>{% endif %}
+        {% endfor %}
     </div>
-    {% empty %}
-    <div class="small text-muted">Sin cambios registrados todavía.</div>
-    {% endfor %}
+</details>
 
-    <div class="form-actions mt-4">
-        <a href="{% if siguiente %}{{ siguiente }}{% else %}{% url 'ventas:pedido_entrega_list' %}{% endif %}" class="btn btn-light custom-cancel-btn">Volver</a>
-    </div>
+<div class="d-flex gap-2 mt-4">
+    <a href="{% if siguiente %}{{ siguiente }}{% else %}{% url 'ventas:pedido_entrega_list' %}{% endif %}" class="btn btn-volver">
+        <i class="bi bi-arrow-left"></i> Volver
+    </a>
+    <a href="{% url 'ventas:pedido_detail' pedido.id %}" class="btn btn-volver">
+        <i class="bi bi-receipt"></i> Ver pedido
+    </a>
+</div>
 
 </div>
-</div>
-</div>
-</div>
+
+<script>
+// Un botón abre su formulario (solo uno a la vez); "Cancelar" lo cierra.
+(function () {
+    const forms = document.querySelectorAll(".accion-form");
+    const botones = document.querySelectorAll("[data-abre]");
+    function mostrar(nombre) {
+        forms.forEach(f => f.hidden = f.dataset.form !== nombre);
+        botones.forEach(b => b.classList.toggle("active", b.dataset.abre === nombre));
+        const f = document.querySelector(`.accion-form[data-form="${nombre}"]`);
+        if (f) { const campo = f.querySelector("input[type=text], textarea"); if (campo) campo.focus(); }
+    }
+    botones.forEach(b => b.addEventListener("click", () => mostrar(b.dataset.abre)));
+    document.querySelectorAll("[data-cierra]").forEach(b => b.addEventListener("click", () => mostrar("")));
+})();
+</script>
 {% endblock %}

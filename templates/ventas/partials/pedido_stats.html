@@ -1,205 +1,74 @@
 <!-- ========================================
-     PEDIDO STATS
+     RESUMEN DE PAGOS
+     Total del pedido, lo pagado/abonado y lo que falta.
 ======================================== -->
+<section class="resumen-pagos mb-4" aria-labelledby="titulo-resumen-pagos">
 
-<div class="row g-3 mb-4">
-
-    <!-- SUBTOTAL -->
-    <div class="col-12 col-md-6 col-xl">
-
-        <div class="pedido-stat-card">
-
-            <div class="pedido-stat-icon primary">
-
-                <i class="bi bi-receipt"></i>
-
-            </div>
-
-            <div>
-
-                <div class="pedido-stat-label">
-                    Subtotal
-                </div>
-
-                <div class="pedido-stat-value">
-
-                    ${{ subtotal|floatformat:2 }}
-
-                </div>
-
-            </div>
-
-        </div>
-
+    <div class="resumen-pagos-head">
+        <h3 id="titulo-resumen-pagos" class="resumen-pagos-titulo">
+            <i class="bi bi-wallet2"></i> Resumen de pagos
+        </h3>
+        {% if total and not saldo_pendiente %}
+        <span class="resumen-pagos-chip liquidado"><i class="bi bi-check2-circle"></i> Liquidado</span>
+        {% elif total_pagado %}
+        <span class="resumen-pagos-chip abonando">Abonando</span>
+        {% elif total %}
+        <span class="resumen-pagos-chip sin-pago">Sin pagos</span>
+        {% endif %}
     </div>
 
-    <!-- DESCUENTOS -->
-    <div class="col-12 col-md-6 col-xl">
+    <div class="resumen-pagos-grid">
 
-        <div class="pedido-stat-card">
-
-            <div class="pedido-stat-icon warning">
-
-                <i class="bi bi-percent"></i>
-
-            </div>
-
+        <!-- TOTAL -->
+        <div class="rp-dato">
+            <div class="pedido-stat-icon primary"><i class="bi bi-receipt"></i></div>
             <div>
-
-                <div class="pedido-stat-label">
-                    Descuentos
+                <div class="pedido-stat-label">Total del pedido</div>
+                <div class="pedido-stat-value">${{ total|floatformat:2 }}</div>
+                <div class="rp-nota">
+                    {% if total_descuentos %}
+                        ${{ subtotal|floatformat:2 }} − <span class="warning-text">${{ total_descuentos|floatformat:2 }} de descuento</span>
+                    {% else %}
+                        Sin descuentos
+                    {% endif %}
                 </div>
-
-                <div class="pedido-stat-value warning-text">
-
-                    - ${{ total_descuentos|floatformat:2 }}
-
-                </div>
-
             </div>
-
         </div>
 
-    </div>
-
-    <!-- TOTAL -->
-    <div class="col-12 col-md-6 col-xl">
-
-        <div class="pedido-stat-card">
-
-            <div class="pedido-stat-icon primary">
-
-                <i class="bi bi-cash-stack"></i>
-
-            </div>
-
+        <!-- PAGADO -->
+        <div class="rp-dato">
+            <div class="pedido-stat-icon success"><i class="bi bi-cash-stack"></i></div>
             <div>
-
-                <div class="pedido-stat-label">
-                    Total
+                <div class="pedido-stat-label">Pagado / abonado</div>
+                <div class="pedido-stat-value success-text">${{ total_pagado|floatformat:2 }}</div>
+                <div class="rp-nota">
+                    {% with n=pagos|length %}{{ n }} pago{{ n|pluralize }}{% endwith %}
                 </div>
-
-                <div class="pedido-stat-value">
-
-                    ${{ total|floatformat:2 }}
-
-                </div>
-
             </div>
-
         </div>
 
-    </div>
-
-    <!-- TOTAL PAGADO -->
-    <div class="col-12 col-md-6 col-xl">
-
-        <div class="pedido-stat-card">
-
-            <div class="pedido-stat-icon success">
-
-                <i class="bi bi-check-circle-fill"></i>
-
+        <!-- SALDO -->
+        <div class="rp-dato">
+            <div class="pedido-stat-icon {% if saldo_pendiente %}danger{% elif total %}success{% else %}warning{% endif %}">
+                <i class="bi {% if saldo_pendiente %}bi-exclamation-circle{% elif total %}bi-check2-circle{% else %}bi-hourglass{% endif %}"></i>
             </div>
-
             <div>
-
-                <div class="pedido-stat-label">
-                    Total pagado
-                </div>
-
-                <div class="pedido-stat-value success-text">
-
-                    ${{ total_pagado|floatformat:2 }}
-
-                </div>
-
+                <div class="pedido-stat-label">Saldo pendiente</div>
+                <div class="pedido-stat-value {% if saldo_pendiente %}danger-text{% elif total %}success-text{% endif %}">${{ saldo_pendiente|floatformat:2 }}</div>
+                <div class="rp-nota">{% if saldo_pendiente %}Falta por pagar{% elif total %}No debe nada{% else %}Sin artículos todavía{% endif %}</div>
             </div>
-
-        </div>
-
-    </div>
-
-    <!-- SALDO -->
-    <div class="col-12 col-md-6 col-xl">
-
-        <div class="pedido-stat-card">
-
-            <div class="pedido-stat-icon danger">
-
-                <i class="bi bi-exclamation-circle-fill"></i>
-
-            </div>
-
-            <div>
-
-                <div class="pedido-stat-label">
-                    Saldo pendiente
-                </div>
-
-                <div class="pedido-stat-value danger-text">
-
-                    ${{ saldo_pendiente|floatformat:2 }}
-
-                </div>
-
-            </div>
-
         </div>
 
     </div>
 
     <!-- PROGRESO -->
-    <div class="col-12">
-
-        <div class="pedido-stat-card progress-card">
-
-            <div class="w-100">
-
-                <!-- TOP -->
-                <div class="d-flex justify-content-between mb-2">
-
-                    <div class="pedido-stat-label">
-
-                        Progreso de pago
-
-                    </div>
-
-                    <div class="progress-percent">
-
-                        {{ porcentaje_pagado }}%
-
-                    </div>
-
-                </div>
-
-                <!-- BAR -->
-                <div class="progress modern-progress">
-
-                    <div class="progress-bar progress-bar-custom"
-
-                         style="width: {{ porcentaje_pagado }}%;">
-
-                    </div>
-
-                </div>
-
-                <!-- FOOT -->
-                <div class="progress-footer mt-2">
-
-                    Pagado:
-                    ${{ total_pagado|floatformat:2 }}
-
-                    de
-
-                    ${{ total|floatformat:2 }}
-
-                </div>
-
-            </div>
-
+    <div class="rp-progreso">
+        <div class="progress modern-progress" role="progressbar" aria-valuenow="{{ porcentaje_pagado }}" aria-valuemin="0" aria-valuemax="100" aria-label="Porcentaje pagado">
+            <div class="progress-bar rp-barra" style="width: {{ porcentaje_pagado }}%;"></div>
         </div>
-
+        <div class="progress-footer mt-2">
+            Lleva <strong>{{ porcentaje_pagado }} %</strong> pagado: ${{ total_pagado|floatformat:2 }} de ${{ total|floatformat:2 }}
+        </div>
     </div>
 
-</div>
+</section>

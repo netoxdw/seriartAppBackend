@@ -1,30 +1,61 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Generación {{ generacion.anio }} · SERIART{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pedido.css' %}?{% now 'U' %}">
+{% endblock %}
+
 {% block content %}
 
-<!-- ENCABEZADO -->
-<div class="page-head">
-    <div>
-        <nav class="page-migas" aria-label="Ruta">
-            <a href="{% url 'home' %}">Generaciones</a> › {{ generacion.anio }}
-        </nav>
-        <h2 class="page-title">Generación {{ generacion.anio }}</h2>
-        <p class="page-sub">
-            {{ escuelas|length }} escuela{{ escuelas|length|pluralize }} ·
-            {{ totales.grupos }} grupo{{ totales.grupos|pluralize }} ·
-            {{ totales.alumnos }} alumno{{ totales.alumnos|pluralize }}
-        </p>
+<!-- ========================================
+     ENCABEZADO DE LA GENERACIÓN (secundario)
+======================================== -->
+<div class="pedido-header-card grupo-head mb-4">
+
+    <div class="pedido-header-top">
+        <div>
+            <div class="breadcrumb-custom mb-3">
+                <a href="{% url 'home' %}">Generaciones</a>
+                <span>/</span>
+                <span>{{ generacion.anio }}</span>
+            </div>
+
+            <div class="d-flex align-items-center gap-4 flex-wrap">
+                <div class="pedido-avatar"><i class="bi bi-calendar2-week"></i></div>
+                <div>
+                    <h1 class="pedido-title">Generación {{ generacion.anio }}</h1>
+                    <div class="pedido-subtitle">{{ generacion.nombre_generacion|default:"Escuelas, grupos y alumnos de esta generación" }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="pedido-header-actions">
+            <a href="{% url 'escuelas:escuela_create' generacion.id %}" class="btn btn-success custom-action-btn">
+                <i class="bi bi-plus-lg"></i> Nueva escuela
+            </a>
+            <a href="{% url 'home' %}" class="btn btn-light custom-action-btn">
+                <i class="bi bi-arrow-left"></i> Volver
+            </a>
+        </div>
     </div>
-    <div class="page-acciones">
-        <a href="{% url 'home' %}" class="btn btn-volver">
-            <i class="bi bi-arrow-left"></i> Volver
-        </a>
-        <a href="{% url 'escuelas:escuela_create' generacion.id %}" class="btn btn-success">
-            <i class="bi bi-plus-lg"></i> Nueva escuela
-        </a>
+
+    <div class="pedido-info-grid">
+        <div class="pedido-meta-item">
+            <span class="pedido-meta-label">Escuelas:</span>
+            <span class="pedido-meta-value">{{ escuelas|length }}</span>
+        </div>
+        <div class="pedido-meta-item">
+            <span class="pedido-meta-label">Grupos:</span>
+            <span class="pedido-meta-value">{{ totales.grupos }}</span>
+        </div>
+        <div class="pedido-meta-item">
+            <span class="pedido-meta-label">Alumnos:</span>
+            <span class="pedido-meta-value">{{ totales.alumnos }}</span>
+        </div>
     </div>
+
 </div>
 
 {% if totales.sin_nivel %}
@@ -38,60 +69,106 @@
 </div>
 {% endif %}
 
-{% if escuelas|length > 5 %}
-<div class="input-group lista-filtro mb-3">
-    <span class="input-group-text bg-white"><i class="bi bi-funnel"></i></span>
-    <input type="search" id="filtro-escuelas" class="form-control" placeholder="Filtrar escuelas…"
-           aria-label="Filtrar escuelas de esta generación">
-</div>
-{% endif %}
+<!-- ========================================
+     ESCUELAS (panel principal)
+======================================== -->
+<div class="table-section-card panel-principal mb-4">
 
-<!-- LISTA DE ESCUELAS -->
-<div class="lista" id="lista-escuelas">
-    {% for escuela in escuelas %}
-    <div class="lista-row" data-nombre="{{ escuela.nombre_escuela|lower }}">
-        <div class="lista-icon"><i class="bi bi-building"></i></div>
-        <div class="lista-main">
-            <div class="lista-title">
-                <a href="{% url 'escuelas:escuela_detail' generacion.id escuela.id %}" class="stretched-link text-reset">
-                    {{ escuela.nombre_escuela }}
-                </a>
-                <span class="nivel nivel-{{ escuela.nivel }}">
-                    {% if escuela.nivel == 'otro' %}Nivel sin definir{% else %}{{ escuela.get_nivel_display }}{% endif %}
-                </span>
-            </div>
-            <div class="lista-sub">
-                {{ escuela.num_grupos }} grupo{{ escuela.num_grupos|pluralize }} ·
-                {{ escuela.num_alumnos }} alumno{{ escuela.num_alumnos|pluralize }}
-                {% if escuela.telefono %} · <i class="bi bi-telephone"></i> {{ escuela.telefono }}{% endif %}
-                {% if escuela.direccion %} · <i class="bi bi-geo-alt"></i> {{ escuela.direccion }}{% endif %}
-            </div>
+    <div class="table-section-header">
+        <div>
+            <h4 class="section-title mb-1">Escuelas</h4>
+            <p class="section-subtitle mb-0">
+                {% if escuelas %}Abre una escuela para ver sus grupos.{% else %}Agrega las escuelas que participan en la generación {{ generacion.anio }}.{% endif %}
+            </p>
         </div>
-        <div class="lista-acciones">
-            <a href="{% url 'escuelas:escuela_update' generacion.id escuela.id %}"
-               class="btn btn-sm btn-volver" title="Editar datos de la escuela" aria-label="Editar {{ escuela.nombre_escuela }}">
-                <i class="bi bi-pencil"></i>
-            </a>
-            <span class="lista-cta">Abrir <i class="bi bi-chevron-right"></i></span>
+        {% if escuelas|length > 5 %}
+        <div class="input-group grupo-filtro">
+            <span class="input-group-text bg-white"><i class="bi bi-funnel"></i></span>
+            <input type="search" id="filtro-escuelas" class="form-control" placeholder="Filtrar escuelas…"
+                   aria-label="Filtrar escuelas de esta generación">
         </div>
+        {% endif %}
     </div>
-    {% empty %}
-    <div class="lista-vacia">
-        <i class="bi bi-building-add"></i>
-        <p class="mb-2">Esta generación todavía no tiene escuelas.</p>
-        <a href="{% url 'escuelas:escuela_create' generacion.id %}" class="btn btn-success btn-sm">
-            <i class="bi bi-plus-lg"></i> Agregar la primera escuela
-        </a>
+
+    <div class="table-responsive">
+        <table class="table align-middle modern-table grupo-tabla" id="lista-escuelas">
+            <thead>
+                <tr>
+                    <th>Escuela</th>
+                    <th>Grupos</th>
+                    <th>Alumnos</th>
+                    <th>Contacto</th>
+                    <th class="text-end">Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for escuela in escuelas %}
+                <tr class="escuela-fila" data-nombre="{{ escuela.nombre_escuela|lower }}">
+                    <td>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="table-product-icon"><i class="bi bi-building"></i></div>
+                            <div>
+                                <a href="{% url 'escuelas:escuela_detail' generacion.id escuela.id %}" class="table-product-title text-reset text-decoration-none">
+                                    {{ escuela.nombre_escuela }}
+                                </a>
+                                <div class="mt-1">
+                                    <span class="nivel nivel-{{ escuela.nivel }}">
+                                        {% if escuela.nivel == 'otro' %}Nivel sin definir{% else %}{{ escuela.get_nivel_display }}{% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="quantity-badge">{{ escuela.num_grupos }}</span></td>
+                    <td><span class="quantity-badge">{{ escuela.num_alumnos }}</span></td>
+                    <td>
+                        {% if escuela.telefono or escuela.direccion %}
+                            {% if escuela.telefono %}<div><i class="bi bi-telephone text-muted"></i> {{ escuela.telefono }}</div>{% endif %}
+                            {% if escuela.direccion %}<div class="table-product-subtitle"><i class="bi bi-geo-alt"></i> {{ escuela.direccion }}</div>{% endif %}
+                        {% else %}
+                            <span class="payment-empty">Sin datos</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="table-actions">
+                            <a href="{% url 'escuelas:escuela_update' generacion.id escuela.id %}" class="table-action-btn warning"
+                               title="Editar datos de la escuela" aria-label="Editar {{ escuela.nombre_escuela }}">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'escuelas:escuela_detail' generacion.id escuela.id %}" class="btn btn-dark btn-sm grupo-ver">
+                                Ver grupos <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5">
+                        <div class="empty-table-state">
+                            <div class="empty-table-icon"><i class="bi bi-building-add"></i></div>
+                            <h5>Esta generación todavía no tiene escuelas</h5>
+                            <p>Agrega la primera para empezar.</p>
+                            <a href="{% url 'escuelas:escuela_create' generacion.id %}" class="btn btn-success">
+                                <i class="bi bi-plus-lg"></i> Agregar la primera escuela
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+                <tr class="d-none" id="filtro-vacio">
+                    <td colspan="5" class="text-center text-muted py-4">Ninguna escuela coincide con el filtro.</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
-    {% endfor %}
-    <div class="lista-vacia d-none" id="filtro-vacio">Ninguna escuela coincide con el filtro.</div>
+
 </div>
 
 {% if escuelas|length > 5 %}
 <script>
 (function () {
     const input = document.getElementById("filtro-escuelas");
-    const filas = document.querySelectorAll("#lista-escuelas .lista-row");
+    const filas = document.querySelectorAll("#lista-escuelas .escuela-fila");
     const vacio = document.getElementById("filtro-vacio");
     input.addEventListener("input", () => {
         const q = input.value.trim().toLowerCase();

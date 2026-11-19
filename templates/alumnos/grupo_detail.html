@@ -1,117 +1,212 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Grupo {{ grupo.nombre_grupo }} · {{ grupo.escuela.nombre_escuela }} · SERIART{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pedido.css' %}?{% now 'U' %}">
+{% endblock %}
+
 {% block content %}
 
-<!-- ENCABEZADO -->
-<div class="page-head">
-    <div>
-        <nav class="page-migas" aria-label="Ruta">
-            <a href="{% url 'home' %}">Generaciones</a> ›
-            <a href="{% url 'escuelas:generacion_detail' grupo.generacion.id %}">{{ grupo.generacion.anio }}</a> ›
-            <a href="{% url 'escuelas:escuela_detail' grupo.generacion.id grupo.escuela.id %}">{{ grupo.escuela.nombre_escuela }}</a> ›
-            {{ grupo.nombre_grupo }}
-        </nav>
-        <h2 class="page-title">Grupo {{ grupo.nombre_grupo }}</h2>
-        <p class="page-sub">
-            {{ grupo.escuela.nombre_escuela }} ·
-            {{ total_alumnos }} alumno{{ total_alumnos|pluralize }} ·
-            {% if grupo.fecha_fotografia %}
-                <i class="bi bi-camera"></i> {{ grupo.fecha_fotografia|date:"D d/m/Y" }}{% if grupo.hora_fotografia %}, {{ grupo.hora_fotografia|time:"H:i" }}{% endif %}{% if grupo.lugar_fotografia %} · {{ grupo.lugar_fotografia }}{% endif %}
-            {% else %}
-                <span class="aviso-pendiente"><i class="bi bi-camera"></i> Sin fecha de fotografía</span>
-            {% endif %}
-        </p>
-    </div>
-    <div class="page-acciones">
-        <a href="{% url 'escuelas:escuela_detail' grupo.generacion.id grupo.escuela.id %}" class="btn btn-volver">
-            <i class="bi bi-arrow-left"></i> Volver
-        </a>
-        <a href="{% url 'escuelas:grupo_update' grupo.id %}" class="btn btn-volver">
-            <i class="bi bi-pencil"></i> Editar grupo
-        </a>
-        <a href="{% url 'alumnos:alumno_create' grupo.id %}" class="btn btn-success">
-            <i class="bi bi-person-plus"></i> Nuevo alumno
-        </a>
-    </div>
-</div>
+<!-- ========================================
+     ENCABEZADO DEL GRUPO (mismo estilo que el del pedido)
+======================================== -->
+<div class="pedido-header-card grupo-head mb-4">
 
-{% if alumnos %}
-<!-- ESTADOS: una línea discreta que también filtra -->
-<div class="estados-linea mb-2" role="group" aria-label="Filtrar alumnos por estado del pedido (tócalo otra vez para ver todos)">
-    {% for e in estados %}{% if e.n %}
-    <button type="button" class="estado-op{% if e.clave == 'devolucion' %} alerta{% endif %}" data-estado="{{ e.clave }}" aria-pressed="false"
-            title="Mostrar solo {{ e.nombre|lower }}">
-        <span class="punto text-bg-{{ e.color }}"></span>{{ e.nombre }} <b>{{ e.n }}</b>
-    </button>
-    {% endif %}{% endfor %}
-</div>
-
-{% if total_alumnos > 8 %}
-<div class="input-group lista-filtro mb-3">
-    <span class="input-group-text bg-white"><i class="bi bi-funnel"></i></span>
-    <input type="search" id="filtro-nombre" class="form-control" placeholder="Filtrar por nombre…"
-           aria-label="Filtrar alumnos por nombre">
-</div>
-{% endif %}
-{% endif %}
-
-<!-- LISTA DE ALUMNOS -->
-<div class="lista" id="lista-alumnos">
-    {% for alumno in alumnos %}
-    {% with pedido=alumno.pedido %}
-    <div class="lista-row" data-nombre="{{ alumno.nombre_alumno|lower }}" data-estado="{{ alumno.clave_estado }}">
-        <div class="lista-icon"><i class="bi bi-person"></i></div>
-        <div class="lista-main">
-            <div class="lista-title">
-                <a href="{% url 'ventas:alumno_pedido' alumno.id %}" class="stretched-link text-reset">
-                    {{ alumno.nombre_alumno }}
-                </a>
+    <div class="pedido-header-top">
+        <div>
+            <div class="breadcrumb-custom mb-3">
+                <a href="{% url 'home' %}">Generaciones</a>
+                <span>/</span>
+                <a href="{% url 'escuelas:generacion_detail' grupo.generacion.id %}">{{ grupo.generacion.anio }}</a>
+                <span>/</span>
+                <a href="{% url 'escuelas:escuela_detail' grupo.generacion.id grupo.escuela.id %}">{{ grupo.escuela.nombre_escuela }}</a>
+                <span>/</span>
+                <span>{{ grupo.nombre_grupo }}</span>
             </div>
-            <div class="lista-sub">
-                {% if alumno.telefono %}<i class="bi bi-telephone"></i> {{ alumno.telefono }}{% else %}Sin teléfono{% endif %}
-                {% if alumno.folio_fotos %} · Folio {{ alumno.folio_fotos }}{% endif %}
-            </div>
-        </div>
-        <div class="lista-dinero">
-            {% if pedido %}
-                {% include "ventas/partials/estado_badge.html" %}
-                <div class="lista-sub mt-1">
-                    ${{ pedido.total|floatformat:2 }}
-                    {% if pedido.total %}
-                        · {% if pedido.saldo %}<span class="aviso-pendiente">debe ${{ pedido.saldo|floatformat:2 }}</span>{% else %}<span class="text-success">pagado</span>{% endif %}
-                    {% endif %}
+
+            <div class="d-flex align-items-center gap-4 flex-wrap">
+                <div class="pedido-avatar"><i class="bi bi-people"></i></div>
+                <div>
+                    <h1 class="pedido-title">Grupo {{ grupo.nombre_grupo }}</h1>
+                    <div class="pedido-subtitle">{{ grupo.escuela.nombre_escuela }} · Generación {{ grupo.generacion.anio }}</div>
                 </div>
-            {% else %}
-                <span class="badge rounded-pill text-bg-light border">Sin pedido</span>
-            {% endif %}
+            </div>
         </div>
-        <div class="lista-acciones">
-            <a href="{% url 'alumnos:alumno_update' alumno.id %}" class="btn btn-sm btn-volver"
-               title="Editar datos del alumno" aria-label="Editar {{ alumno.nombre_alumno }}">
-                <i class="bi bi-pencil"></i>
+
+        <div class="pedido-header-actions">
+            <a href="{% url 'alumnos:alumno_create' grupo.id %}" class="btn btn-success custom-action-btn">
+                <i class="bi bi-person-plus"></i> Nuevo alumno
             </a>
-            <span class="lista-cta">{% if pedido %}Ver pedido{% else %}Crear pedido{% endif %} <i class="bi bi-chevron-right"></i></span>
+            <a href="{% url 'escuelas:grupo_update' grupo.id %}" class="btn btn-light custom-action-btn">
+                <i class="bi bi-pencil"></i> Editar grupo
+            </a>
+            <a href="{% url 'escuelas:escuela_detail' grupo.generacion.id grupo.escuela.id %}" class="btn btn-light custom-action-btn">
+                <i class="bi bi-arrow-left"></i> Volver
+            </a>
         </div>
     </div>
-    {% endwith %}
-    {% empty %}
-    <div class="lista-vacia">
-        <i class="bi bi-person-plus"></i>
-        <p class="mb-2">Este grupo todavía no tiene alumnos.</p>
-        <a href="{% url 'alumnos:alumno_create' grupo.id %}" class="btn btn-success btn-sm">
-            <i class="bi bi-plus-lg"></i> Agregar el primer alumno
-        </a>
+
+    <div class="pedido-info-grid">
+        <div class="pedido-meta-item">
+            <span class="pedido-meta-label">Alumnos:</span>
+            <span class="pedido-meta-value">{{ total_alumnos }}</span>
+        </div>
+        <div class="pedido-meta-item">
+            <span class="pedido-meta-label">Fotografía:</span>
+            <span class="pedido-meta-value">
+                {% if grupo.fecha_fotografia %}
+                    {{ grupo.fecha_fotografia|date:"D d/m/Y" }}{% if grupo.hora_fotografia %}, {{ grupo.hora_fotografia|time:"H:i" }}{% endif %}
+                {% else %}
+                    <span class="aviso-pendiente">Sin fecha</span>
+                {% endif %}
+            </span>
+        </div>
+        <div class="pedido-meta-item">
+            <span class="pedido-meta-label">Lugar:</span>
+            <span class="pedido-meta-value">{{ grupo.lugar_fotografia|default:"Sin lugar" }}</span>
+        </div>
+        <div class="pedido-meta-item">
+            <span class="pedido-meta-label">Escuela:</span>
+            <span class="pedido-meta-value">{{ grupo.escuela.nombre_escuela }}</span>
+        </div>
     </div>
-    {% endfor %}
-    <div class="lista-vacia d-none" id="filtro-vacio">Ningún alumno coincide con el filtro.</div>
+
+</div>
+
+<!-- ========================================
+     ALUMNOS
+======================================== -->
+<div class="table-section-card grupo-lista mb-4">
+
+    <div class="table-section-header">
+        <div>
+            <h4 class="section-title mb-1">Alumnos</h4>
+            <p class="section-subtitle mb-0">
+                {% if alumnos %}Toca un estado para ver solo esos alumnos; tócalo otra vez para ver a todos.{% else %}Agrega a los alumnos del grupo para capturar sus pedidos.{% endif %}
+            </p>
+        </div>
+        {% if total_alumnos > 8 %}
+        <div class="input-group grupo-filtro">
+            <span class="input-group-text bg-white"><i class="bi bi-funnel"></i></span>
+            <input type="search" id="filtro-nombre" class="form-control" placeholder="Filtrar por nombre…"
+                   aria-label="Filtrar alumnos por nombre">
+        </div>
+        {% endif %}
+    </div>
+
+    {% if alumnos %}
+    <!-- ESTADOS: una línea discreta que también filtra -->
+    <div class="estados-linea mb-3" role="group" aria-label="Filtrar alumnos por estado del pedido (tócalo otra vez para ver todos)">
+        {% for e in estados %}{% if e.n %}
+        <button type="button" class="estado-op{% if e.clave == 'devolucion' %} alerta{% endif %}" data-estado="{{ e.clave }}" aria-pressed="false"
+                title="Mostrar solo {{ e.nombre|lower }}">
+            <span class="punto text-bg-{{ e.color }}"></span>{{ e.nombre }} <b>{{ e.n }}</b>
+        </button>
+        {% endif %}{% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="table-responsive">
+        <table class="table align-middle modern-table grupo-tabla" id="lista-alumnos">
+            <thead>
+                <tr>
+                    <th>Alumno</th>
+                    <th>Folio</th>
+                    <th>Estado</th>
+                    <th class="text-end">Total</th>
+                    <th class="text-end">Saldo</th>
+                    <th class="text-end">Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for alumno in alumnos %}
+                {% with pedido=alumno.pedido %}
+                <tr class="alumno-fila" data-nombre="{{ alumno.nombre_alumno|lower }}" data-estado="{{ alumno.clave_estado }}">
+                    <td>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="table-product-icon alumno-icon">{{ alumno.nombre_alumno|slice:":1"|upper }}</div>
+                            <div>
+                                <a href="{% url 'ventas:alumno_pedido' alumno.id %}" class="table-product-title text-reset text-decoration-none">
+                                    {{ alumno.nombre_alumno }}
+                                </a>
+                                <div class="table-product-subtitle">
+                                    {% if alumno.telefono %}<i class="bi bi-telephone"></i> {{ alumno.telefono }}{% else %}Sin teléfono{% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        {% if alumno.folio_fotos %}{{ alumno.folio_fotos }}{% else %}<span class="payment-empty">Sin folio</span>{% endif %}
+                    </td>
+                    <td>
+                        {% if pedido %}
+                            {% include "ventas/partials/estado_badge.html" %}
+                        {% else %}
+                            <span class="badge rounded-pill text-bg-light border">Sin pedido</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end">
+                        {% if pedido %}<span class="money-value">${{ pedido.total|floatformat:2 }}</span>{% else %}<span class="payment-empty">—</span>{% endif %}
+                    </td>
+                    <td class="text-end">
+                        {% if pedido and pedido.total %}
+                            {% if pedido.saldo %}
+                                <span class="saldo-debe">${{ pedido.saldo|floatformat:2 }}</span>
+                            {% else %}
+                                <span class="saldo-ok"><i class="bi bi-check2-circle"></i> Pagado</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="payment-empty">—</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="table-actions">
+                            <a href="{% url 'alumnos:alumno_update' alumno.id %}" class="table-action-btn warning"
+                               title="Editar datos del alumno" aria-label="Editar {{ alumno.nombre_alumno }}">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            {% if pedido %}
+                            <a href="{% url 'ventas:alumno_pedido' alumno.id %}" class="btn btn-dark btn-sm grupo-ver">
+                                Ver pedido <i class="bi bi-chevron-right"></i>
+                            </a>
+                            {% else %}
+                            <a href="{% url 'ventas:alumno_pedido' alumno.id %}" class="btn btn-success btn-sm grupo-ver">
+                                <i class="bi bi-plus-lg"></i> Crear pedido
+                            </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endwith %}
+                {% empty %}
+                <tr>
+                    <td colspan="6">
+                        <div class="empty-table-state">
+                            <div class="empty-table-icon"><i class="bi bi-person-plus"></i></div>
+                            <h5>Este grupo todavía no tiene alumnos</h5>
+                            <p>Agrega el primero para empezar a capturar pedidos.</p>
+                            <a href="{% url 'alumnos:alumno_create' grupo.id %}" class="btn btn-success">
+                                <i class="bi bi-plus-lg"></i> Agregar el primer alumno
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+                <tr class="d-none" id="filtro-vacio">
+                    <td colspan="6" class="text-center text-muted py-4">Ningún alumno coincide con el filtro.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
 </div>
 
 {% if alumnos %}
 <script>
 (function () {
-    const filas = document.querySelectorAll("#lista-alumnos .lista-row");
+    const filas = document.querySelectorAll("#lista-alumnos .alumno-fila");
     const vacio = document.getElementById("filtro-vacio");
     const input = document.getElementById("filtro-nombre");
     const chips = document.querySelectorAll(".estados-linea .estado-op");

@@ -2,7 +2,7 @@
      PEDIDO HEADER
 ======================================== -->
 
-<div class="pedido-header-card mb-4">
+<div class="pedido-header-card grupo-head mb-4">
 
     <!-- TOP -->
     <div class="pedido-header-top">
@@ -82,7 +82,7 @@
             <a href="{% url 'ventas:pedido_cambiar_estado' pedido.id %}?next={{ request.get_full_path|urlencode }}"
                class="btn btn-dark custom-action-btn">
                 <i class="bi bi-signpost-split"></i>
-                Estado
+                Modificar estado
             </a>
             {% endif %}
             <a href="{% url 'alumnos:grupo_detail' pedido.alumno.grupo.id %}"

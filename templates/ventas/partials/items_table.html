@@ -1,0 +1,173 @@
+<!-- ========================================
+     ARTÍCULOS DEL PEDIDO
+     Bases, anillos y extras en una sola tabla.
+======================================== -->
+
+<div class="table-section-card panel-principal mb-4">
+
+    <!-- HEADER -->
+    <div class="table-section-header">
+        <div>
+            <h4 class="section-title mb-1">Artículos</h4>
+            <p class="section-subtitle mb-0">
+                {{ num_articulos }} artículo{{ num_articulos|pluralize }} en el pedido
+            </p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'ventas:pedido_captura' pedido.id %}" class="btn btn-primary custom-table-btn">
+                <i class="bi bi-plus-lg"></i> Captura rápida
+            </a>
+            <a href="{% url 'ventas:itemanillo_create' pedido.id %}" class="btn btn-outline-secondary custom-table-btn">
+                <i class="bi bi-gem"></i> Anillo
+            </a>
+            <a href="{% url 'ventas:itemextra_create' pedido.id %}" class="btn btn-outline-secondary custom-table-btn">
+                <i class="bi bi-plus-circle"></i> Extra
+            </a>
+        </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-responsive">
+        <table class="table align-middle modern-table items-tabla">
+            <thead>
+                <tr>
+                    <th>Artículo</th>
+                    <th>Detalle</th>
+                    <th class="text-end">Precio</th>
+                    <th class="text-end">Cant.</th>
+                    <th class="text-end">Subtotal</th>
+                    <th class="text-end">Acción</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% if not num_articulos %}
+                <tr>
+                    <td colspan="6">
+                        <div class="empty-table-state">
+                            <div class="empty-table-icon"><i class="bi bi-box-seam"></i></div>
+                            <h5>El pedido no tiene artículos</h5>
+                            <p>Usa la captura rápida para agregar las bases del paquete.</p>
+                            <a href="{% url 'ventas:pedido_captura' pedido.id %}" class="btn btn-primary">
+                                <i class="bi bi-plus-lg"></i> Captura rápida
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endif %}
+
+                <!-- BASES -->
+                {% if items_base %}
+                <tr class="items-grupo"><td colspan="6"><i class="bi bi-box-seam"></i> Bases <span>{{ items_base|length }}</span></td></tr>
+                {% endif %}
+                {% for item in items_base %}
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="table-product-icon"><i class="bi bi-box-seam"></i></div>
+                            <div>
+                                <div class="table-product-title">{{ item.producto.descripcion }}</div>
+                                <div class="table-product-subtitle">{{ item.producto.seccion }} · {{ item.producto.tamano }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="config-list">
+                            <div class="config-item"><span class="config-label">Placa:</span> <span class="config-value">{{ item.placa|default:"-" }}</span></div>
+                            <div class="config-item"><span class="config-label">Color:</span> <span class="config-value">{{ item.color_placa|default:"-" }}</span></div>
+                        </div>
+                        <span class="badge text-bg-light border mt-1">{{ item.get_concepto_display }}</span>
+                    </td>
+                    <td class="text-end"><span class="money-value">${{ item.precio_unitario }}</span></td>
+                    <td class="text-end"><span class="quantity-badge">{{ item.cantidad }}</span></td>
+                    <td class="text-end"><span class="subtotal-value">${{ item.subtotal }}</span></td>
+                    <td>
+                        <div class="table-actions">
+                            <a href="{% url 'ventas:itembase_update' item.id %}" class="table-action-btn warning" title="Editar"><i class="bi bi-pencil"></i></a>
+                            <a href="{% url 'ventas:itembase_delete' item.id %}" class="table-action-btn danger" title="Eliminar"><i class="bi bi-trash"></i></a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+
+                <!-- ANILLOS -->
+                {% if items_anillo %}
+                <tr class="items-grupo"><td colspan="6"><i class="bi bi-gem"></i> Anillos <span>{{ items_anillo|length }}</span></td></tr>
+                {% endif %}
+                {% for item in items_anillo %}
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="table-product-icon ring-icon"><i class="bi bi-gem"></i></div>
+                            <div>
+                                <div class="table-product-title">{{ item.anillo.modelo }}</div>
+                                <div class="table-product-subtitle">Anillo · {{ item.anillo.metal }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="config-list">
+                            <div class="config-item"><span class="config-label">Metal:</span> <span class="config-value">{{ item.anillo.metal }}</span></div>
+                            <div class="config-item"><span class="config-label">Tamaño:</span> <span class="config-value">{{ item.tamano_anillo }}</span></div>
+                        </div>
+                    </td>
+                    <td class="text-end"><span class="money-value">${{ item.precio_unitario }}</span></td>
+                    <td class="text-end"><span class="quantity-badge ring-badge">{{ item.cantidad }}</span></td>
+                    <td class="text-end"><span class="subtotal-value ring-subtotal">${{ item.subtotal }}</span></td>
+                    <td>
+                        <div class="table-actions">
+                            <a href="{% url 'ventas:itemanillo_update' item.id %}" class="table-action-btn warning" title="Editar"><i class="bi bi-pencil"></i></a>
+                            <a href="{% url 'ventas:itemanillo_delete' item.id %}" class="table-action-btn danger" title="Eliminar"><i class="bi bi-trash"></i></a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+
+                <!-- EXTRAS -->
+                {% if items_extra %}
+                <tr class="items-grupo"><td colspan="6"><i class="bi bi-stars"></i> Extras <span>{{ items_extra|length }}</span></td></tr>
+                {% endif %}
+                {% for item in items_extra %}
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="table-product-icon extra-icon"><i class="bi bi-stars"></i></div>
+                            <div>
+                                <div class="table-product-title">{{ item.nombre }}</div>
+                                <div class="table-product-subtitle">Extra</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        {% if item.descripcion %}
+                        <div class="extra-description">{{ item.descripcion }}</div>
+                        {% else %}
+                        <span class="payment-empty">Sin descripción</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end"><span class="money-value">${{ item.precio_unitario }}</span></td>
+                    <td class="text-end"><span class="quantity-badge extra-badge">{{ item.cantidad }}</span></td>
+                    <td class="text-end"><span class="subtotal-value extra-subtotal">${{ item.subtotal }}</span></td>
+                    <td>
+                        <div class="table-actions">
+                            <a href="{% url 'ventas:itemextra_update' item.id %}" class="table-action-btn warning" title="Editar"><i class="bi bi-pencil"></i></a>
+                            <a href="{% url 'ventas:itemextra_delete' item.id %}" class="table-action-btn danger" title="Eliminar"><i class="bi bi-trash"></i></a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+            {% if num_articulos %}
+            <tfoot>
+                <tr class="items-total">
+                    <td colspan="4" class="text-end">Suma de artículos</td>
+                    <td class="text-end">${{ subtotal|floatformat:2 }}</td>
+                    <td></td>
+                </tr>
+            </tfoot>
+            {% endif %}
+        </table>
+    </div>
+
+</div>

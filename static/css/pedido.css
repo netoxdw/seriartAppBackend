@@ -1452,3 +1452,268 @@
 
     color: #b45309;
 }
+
+/* ========================================
+   ACCIONES: "Registrar pago" protagonista, anillo sobrio
+======================================== */
+
+.pedido-action-btn.pago {
+    background: #16a34a;
+    border-color: #16a34a;
+    color: #fff;
+    padding: 0 24px;
+    font-weight: 700;
+    box-shadow: 0 8px 20px rgba(22, 163, 74, .30);
+}
+
+.pedido-action-btn.pago i { font-size: 17px; }
+
+.pedido-action-btn.pago:hover {
+    background: #15803d;
+    border-color: #15803d;
+    color: #fff;
+    box-shadow: 0 10px 24px rgba(22, 163, 74, .38);
+}
+
+.pedido-action-btn.neutral {
+    background: #f8fafc;
+    border-color: var(--border);
+    color: #475569;
+}
+
+.pedido-action-btn.neutral:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+}
+
+/* ========================================
+   RESUMEN DE PAGOS (pedido_stats)
+======================================== */
+
+.resumen-pagos {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 24px 26px;
+}
+
+.resumen-pagos-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.resumen-pagos-titulo {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.resumen-pagos-titulo i { color: var(--primary); margin-right: 4px; }
+
+.resumen-pagos-chip {
+    font-size: 13px;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 999px;
+}
+
+.resumen-pagos-chip.liquidado { background: #dcfce7; color: #15803d; }
+.resumen-pagos-chip.abonando  { background: #fef3c7; color: #b45309; }
+.resumen-pagos-chip.sin-pago  { background: #fee2e2; color: #dc2626; }
+
+.resumen-pagos-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.rp-dato {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 4px 16px 4px 0;
+}
+
+.rp-dato + .rp-dato { border-left: 1px solid #f1f5f9; padding-left: 20px; }
+.rp-dato .pedido-stat-label { margin-bottom: 2px; }
+.rp-nota { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+.rp-progreso { margin-top: 22px; }
+.rp-barra { background: linear-gradient(90deg, #16a34a, #22c55e); border-radius: 999px; }
+
+@media (max-width: 992px) {
+    .resumen-pagos-grid { grid-template-columns: 1fr; }
+    .rp-dato + .rp-dato { border-left: 0; border-top: 1px solid #f1f5f9; padding: 14px 0 0; }
+}
+
+/* ========================================
+   ARTÍCULOS (bases, anillos y extras juntos)
+======================================== */
+.items-tabla .items-grupo td {
+    background: #f8fafc;
+    color: #475569;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    padding: 8px 16px;
+}
+.items-tabla .items-grupo td span {
+    display: inline-block;
+    min-width: 20px;
+    margin-left: 4px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: #e2e8f0;
+    text-align: center;
+    font-size: 11px;
+}
+.items-tabla .items-total td {
+    font-weight: 700;
+    border-bottom: 0;
+    padding-top: 14px;
+}
+.items-tabla .items-total td:nth-child(2) { font-size: 17px; }
+
+/* ========================================
+   NOTAS DEL PEDIDO (antes de los artículos)
+======================================== */
+.obs-alerta {
+    border: 1px solid #fecaca;
+    border-left: 5px solid #dc2626;
+}
+.obs-alerta .section-title { color: #dc2626; }
+.obs-alerta .observacion-card,
+.obs-alerta .observacion-card:hover {
+    background: #fef2f2;
+    border-color: #fecaca;
+}
+.obs-alerta .observacion-dot { background: #dc2626; }
+.obs-alerta .observacion-text {
+    color: #b91c1c;
+    font-weight: 600;
+}
+.obs-etiqueta {
+    display: inline-block;
+    margin-right: 8px;
+    color: #dc2626;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+}
+
+/* ========================================
+   PANELES COMPACTOS (observaciones y descuentos)
+======================================== */
+.panel-compacto {
+    padding: 16px 20px;
+    border-radius: 18px;
+}
+.panel-compacto .section-title { font-size: 17px; }
+.panel-compacto .section-subtitle { font-size: 13px; }
+.panel-compacto .custom-table-btn {
+    padding: 6px 12px;
+    font-size: 14px;
+    border-radius: 10px;
+}
+.panel-compacto .modern-table { margin-bottom: 0; }
+.panel-compacto .modern-table th { padding: 8px 12px; font-size: 11px; }
+.panel-compacto .modern-table td { padding: 8px 12px; font-size: 14px; }
+.panel-compacto .table-product-icon {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    font-size: 15px;
+}
+.panel-compacto .table-product-title { font-size: 14px; }
+.panel-compacto .table-product-subtitle { font-size: 12px; }
+.panel-compacto .table-action-btn {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    font-size: 13px;
+}
+.panel-compacto .empty-table-state { padding: 18px 12px; }
+.panel-compacto .empty-table-icon {
+    width: 44px; height: 44px;
+    margin-bottom: 8px;
+    border-radius: 12px;
+    font-size: 18px;
+}
+.panel-compacto .empty-table-state h5 { font-size: 15px; margin-bottom: 4px; }
+.panel-compacto .empty-table-state p { font-size: 13px; margin-bottom: 10px; }
+.panel-compacto .empty-table-state .btn { padding: 5px 12px; font-size: 13px; }
+.panel-compacto .observaciones-list { margin-top: 4px; }
+.panel-compacto .observacion-item { gap: 12px; padding-bottom: 10px; }
+.panel-compacto .observacion-item:last-child { padding-bottom: 0; }
+.panel-compacto .observacion-card { padding: 10px 14px; border-radius: 12px; }
+.panel-compacto .observacion-top { margin-bottom: 4px; }
+.panel-compacto .observacion-date { font-size: 12px; }
+.panel-compacto .observacion-text { line-height: 1.5; font-size: 14px; }
+
+/* ========================================
+   GRUPO (grupo_detail con el estilo del pedido)
+======================================== */
+.pedido-avatar .bi { font-size: 30px; line-height: 1; }
+.grupo-filtro { max-width: 280px; }
+.grupo-filtro .form-control,
+.grupo-filtro .input-group-text { border-radius: 12px; }
+.grupo-filtro .input-group-text { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.grupo-filtro .form-control { border-top-left-radius: 0; border-bottom-left-radius: 0; }
+.alumno-icon {
+    background: #f1f5f9;
+    color: #334155;
+    font-weight: 700;
+    font-size: 18px;
+}
+.grupo-tabla .table-product-title:hover { color: #2563eb !important; }
+.grupo-tabla .saldo-debe { color: #dc2626; font-weight: 700; }
+.grupo-tabla .saldo-ok { color: #16a34a; font-weight: 600; font-size: 14px; }
+.grupo-tabla .table-actions { justify-content: flex-end; align-items: center; }
+.grupo-tabla .grupo-ver {
+    border-radius: 10px;
+    padding: 6px 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+@media (max-width: 768px) {
+    .grupo-filtro { max-width: none; width: 100%; }
+}
+
+/* Encabezado del grupo: secundario (fondo gris, sin sombra, más bajo) */
+.grupo-head {
+    background: #eef2f7;
+    border-color: #e2e8f0;
+    box-shadow: none;
+    padding: 18px 22px;
+}
+.grupo-head .pedido-avatar {
+    width: 56px; height: 56px;
+    border-radius: 16px;
+    box-shadow: none;
+}
+.grupo-head .pedido-avatar,
+.grupo-head .pedido-avatar .bi { font-size: 22px; }
+.grupo-head .pedido-title { font-size: 24px; margin-bottom: 2px; }
+.grupo-head .breadcrumb-custom { margin-bottom: 10px !important; }
+.grupo-head .pedido-info-grid { margin-top: 14px; }
+.grupo-head .pedido-meta-item { background: #fff; padding: 6px 12px; }
+.grupo-head .custom-action-btn.btn-light { background: #fff; border-color: #e2e8f0; }
+
+/* Lista de alumnos: protagonista (blanca, con sombra y franja azul arriba) */
+.grupo-lista {
+    background: #fff;
+    border-top: 4px solid #2563eb;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, .08);
+}
+.grupo-lista .section-title { font-size: 26px; }
+
+/* Pedido: Artículos y Pagos son los paneles principales */
+.panel-principal {
+    border-top: 4px solid #2563eb;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, .08);
+}
+.panel-principal.pagos { border-top-color: #16a34a; }
+.panel-principal .section-title { font-size: 24px; }

@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.views.generic import CreateView, DetailView, UpdateView, DeleteView, ListView, View
 from django.urls import reverse
 from django.shortcuts import redirect
@@ -46,80 +47,49 @@ class PedidoDetailView(LoginRequiredMixin, DetailView):
 
     context_object_name = "pedido"
 
+    def get_queryset(self):
+        return Pedido.objects.select_related(
+            "alumno__grupo__escuela", "alumno__grupo__generacion"
+        )
+
     def get_context_data(self, **kwargs):
 
         context = super().get_context_data(**kwargs)
 
         pedido = self.object
 
-        # ========================================
-        # ITEMS
-        # ========================================
-
-        items_base = pedido.items_base.select_related(
+        # Artículos
+        items_base = list(pedido.items_base.select_related(
             "producto__seccion", "producto__modelo", "producto__tamano",
             "producto__color", "producto__variante", "placa"
-        )
-
-        items_anillo = pedido.items_anillo.all()
-
-        items_extra = pedido.items_extra.all()
+        ))
+        items_anillo = list(pedido.items_anillo.select_related("anillo"))
+        items_extra = list(pedido.items_extra.all())
 
         context["items_base"] = items_base
         context["items_anillo"] = items_anillo
         context["items_extra"] = items_extra
+        context["num_articulos"] = len(items_base) + len(items_anillo) + len(items_extra)
 
-        # ========================================
-        # DESCUENTOS
-        # ========================================
+        # Pagos, descuentos y notas
+        pagos = list(pedido.pagos.order_by("-fecha_pago", "-id"))
+        descuentos = list(pedido.descuentos.all())
+        total_descuentos = sum((d.monto for d in descuentos), Decimal("0"))
+        total_pagado = sum((p.monto for p in pagos), Decimal("0"))
 
-        descuentos = pedido.descuentos.all()
-
-        total_descuentos = sum(
-            d.monto for d in descuentos
-        )
-
+        context["pagos"] = pagos
         context["descuentos"] = descuentos
-
+        context["observaciones"] = list(pedido.observaciones.all())
         context["total_descuentos"] = total_descuentos
 
-        # ========================================
-        # TOTALES
-        # ========================================
-
+        # Totales
         total = pedido.total
-
-        total_pagado = pedido.total_pagado
-
-        saldo_pendiente = total - total_pagado
-
-        subtotal = total + total_descuentos
-
-        context["subtotal"] = subtotal
-
+        context["subtotal"] = total + total_descuentos
         context["total"] = total
-
         context["total_pagado"] = total_pagado
-
-        context["saldo_pendiente"] = saldo_pendiente
-
-        # ========================================
-        # PORCENTAJE PAGADO
-        # ========================================
-
-        if total > 0:
-
-            porcentaje_pagado = (
-                total_pagado / total
-            ) * 100
-
-        else:
-
-            porcentaje_pagado = 0
-
-        context["porcentaje_pagado"] = round(
-            porcentaje_pagado,
-            2
+        context["saldo_pendiente"] = max(total - total_pagado, Decimal("0"))
+        context["porcentaje_pagado"] = (
+            min(round(total_pagado * 100 / total), 100) if total > 0 else 0
         )
 
         return context
@@ -599,11 +569,12 @@ class PedidoCambiarEstadoView(LoginRequiredMixin, View):
             return url
         return ""
 
-    def _render(self, request, pedido, forms_ctx):
+    def _render(self, request, pedido, forms_ctx, abierta=""):
         contexto = {
             "pedido": pedido,
             "historial": pedido.historial_estados.select_related("usuario"),
             "siguiente": self._siguiente(request),
+            "abierta": abierta,  # acción cuyo formulario se reabre (p. ej. con errores)
             **forms_ctx,
         }
         return render(request, self.template_name, contexto)
@@ -643,7 +614,7 @@ class PedidoCambiarEstadoView(LoginRequiredMixin, View):
         except ValidationError as exc:
             messages.error(request, " ".join(exc.messages))
 
-        return self._render(request, pedido, forms_ctx)
+        return self._render(request, pedido, forms_ctx, abierta=accion or "")
 
     def _ok(self, request, pedido, texto):
         messages.success(request, texto)
