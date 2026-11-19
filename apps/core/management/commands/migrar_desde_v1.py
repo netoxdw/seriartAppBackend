@@ -20,6 +20,8 @@ Qué hace:
   - Verifica conteos y que el total de cada pedido cuadre.
 
 Uso:
+  python manage.py migrar_desde_v1 --generaciones   # 1) antes de importar_catalogo
+  python manage.py importar_catalogo catalogo.xlsx  # 2)
   python manage.py migrar_desde_v1 --dry-run   # todo en una transacción que se revierte
   python manage.py migrar_desde_v1
 """
@@ -70,11 +72,41 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("--dry-run", action="store_true", help="Hace todo y al final lo revierte.")
+        parser.add_argument(
+            "--generaciones", action="store_true",
+            help="Solo copia las generaciones de v1 con sus IDs. Córrelo ANTES de importar_catalogo "
+                 "para que la generación del Excel no ocupe un ID de la v1.",
+        )
 
     # ------------------------------------------------------------------
+    def _solo_generaciones(self):
+        self.v1 = connections["v1"].cursor()
+        gens = self._filas("escuelas_generacion")
+        ya = {g.anio: g.id for g in Generacion.objects.all()}
+        ocupados = set(Generacion.objects.values_list("id", flat=True))
+        with transaction.atomic():
+            for g in gens:
+                if g["anio"] in ya:
+                    if ya[g["anio"]] != g["id"]:
+                        raise CommandError(f"La generación {g['anio']} ya existe con otro ID.")
+                    continue
+                if g["id"] in ocupados:
+                    raise CommandError(f"El ID {g['id']} ya lo usa otra generación.")
+                Generacion.objects.create(id=g["id"], nombre_generacion=g["nombre"], anio=g["anio"])
+                self.stdout.write(f"  Generación {g['anio']} (ID {g['id']})")
+        # MySQL/Postgres: que los IDs automáticos sigan después de los copiados
+        from django.core.management.color import no_style
+        from django.db import connection
+        with connection.cursor() as c:
+            for sql in connection.ops.sequence_reset_sql(no_style(), [Generacion]):
+                c.execute(sql)
+        self.stdout.write(self.style.SUCCESS("Generaciones de v1 copiadas."))
+
     def handle(self, *args, **opts):
         if "v1" not in connections.databases:
             raise CommandError("Falta la conexión 'v1': define DB_V1_NAME en el .env.")
+        if opts["generaciones"]:
+            return self._solo_generaciones()
         if Escuela.objects.exists() or Alumno.objects.exists() or Pedido.objects.exists():
             raise CommandError("La base nueva ya tiene escuelas, alumnos o pedidos: no se migra encima.")
         if not Producto.objects.exists():
